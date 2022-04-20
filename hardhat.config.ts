@@ -6,7 +6,6 @@ import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-ethers";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
-import "hardhat-abi-exporter";
 import "hardhat-contract-sizer";
 import "solidity-coverage";
 import { LOCAL_NETWORK, MAINNET_NETWORK } from "@gearbox-protocol/sdk";

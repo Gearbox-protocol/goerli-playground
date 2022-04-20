@@ -5,26 +5,31 @@ import * as dotenv from "dotenv";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
 import { providers } from "ethers";
 import { SupportedTokens, tokenDataByNetwork } from "@gearbox-protocol/sdk";
+import { ERC20, ERC20__factory, ERC20Kovan } from "../types";
+import { deploy } from "../utils/transaction";
+import { Logger } from "tslog";
 
-const tokensToDeploy : Array<SupportedTokens>= [
-  "1INCH",
-  "AAVE",
-  "COMP",
-  "CRV",
-  "DPI",
-  "FEI",
-  "SUSHI",
-  "UNI",
-  "USDT",
-  "WETH",
-  "YFI",
+const hre = require("hardhat");
 
-  /// UPDATE
-  "STETH",
-  "FTM",
-  "CVX",
-  "FRAX",
-  "FXS",
+const tokensToDeploy: Array<SupportedTokens> = [
+//   "1INCH",
+//   "AAVE",
+//   "COMP",
+//   "CRV",
+//   "DPI",
+//   "FEI",
+//   "SUSHI",
+//   "UNI",
+//   "USDT",
+//   "WETH",
+//   "YFI",
+
+//   /// UPDATE
+//   "STETH",
+//   "FTM",
+//   "CVX",
+//   "FRAX",
+//   "FXS",
   "LDO",
   "SPELL",
   "LUSD",
@@ -35,6 +40,8 @@ const tokensToDeploy : Array<SupportedTokens>= [
 
 async function deployTokens() {
   dotenv.config({ path: ".env.local" });
+  const log: Logger = new Logger();
+
   const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
   const deployer = accounts[0];
   const chainId = await deployer.getChainId();
@@ -46,11 +53,48 @@ async function deployTokens() {
 
   const mainnetProvider = new providers.JsonRpcProvider(mainnetRpc);
 
-  for(let t of tokensToDeploy) {
-      const mainnetAddress = tokenDataByNetwork.Mainnet[t];
-      console.log(t, mainnetAddress);
-  }   
+  let update = "{";
 
+  const addr = [];
+
+  for (let t of tokensToDeploy) {
+    const mainnetAddress = tokenDataByNetwork.Mainnet[t];
+
+    const mainnetToken = ERC20__factory.connect(
+      mainnetAddress,
+      mainnetProvider
+    );
+
+    const symbol = await mainnetToken.symbol();
+    const name = await mainnetToken.name();
+    const decimals = await mainnetToken.decimals();
+
+    console.log(t, mainnetAddress);
+    console.log(symbol);
+    console.log(name);
+    console.log(decimals);
+
+    const newToken = await deploy<ERC20Kovan>(
+      "ERC20Kovan",
+      log,
+      name,
+      symbol,
+      decimals
+    );
+
+    await newToken.deployTransaction.wait(10);
+
+    await hre.run("verify:verify", {
+      address: newToken.address,
+      constructorArguments: [name, symbol, decimals],
+    });
+
+    update += `"${symbol}": ${newToken.address}\n`;
+  }
+
+  update += "}";
+
+  console.log(update);
 }
 
 deployTokens()
