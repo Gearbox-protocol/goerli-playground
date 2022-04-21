@@ -4,10 +4,10 @@
 pragma solidity ^0.8.10;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "./interfaces/Interfaces.sol";
-import "../../Syncer.sol";
+import "../Syncer.sol";
 import {CVXKovan} from "./CVXMockK.sol";
 import {Booster} from "./ConvexBoosterMockK.sol";
 import {IConvexPoolFactory, ConvexPoolFactory} from "./ConvexPoolFactory.sol";

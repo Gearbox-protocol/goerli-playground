@@ -63,14 +63,22 @@ interface SyncerInterface extends ethers.utils.Interface {
 
   events: {
     "OwnershipTransferred(address,address)": EventFragment;
+    "SyncerAdded(address)": EventFragment;
+    "SyncerRemoved(address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SyncerAdded"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SyncerRemoved"): EventFragment;
 }
 
 export type OwnershipTransferredEvent = TypedEvent<
   [string, string] & { previousOwner: string; newOwner: string }
 >;
+
+export type SyncerAddedEvent = TypedEvent<[string] & { arg0: string }>;
+
+export type SyncerRemovedEvent = TypedEvent<[string] & { arg0: string }>;
 
 export class Syncer extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -196,6 +204,22 @@ export class Syncer extends BaseContract {
       [string, string],
       { previousOwner: string; newOwner: string }
     >;
+
+    "SyncerAdded(address)"(
+      undefined?: string | null
+    ): TypedEventFilter<[string], { arg0: string }>;
+
+    SyncerAdded(
+      undefined?: string | null
+    ): TypedEventFilter<[string], { arg0: string }>;
+
+    "SyncerRemoved(address)"(
+      undefined?: string | null
+    ): TypedEventFilter<[string], { arg0: string }>;
+
+    SyncerRemoved(
+      undefined?: string | null
+    ): TypedEventFilter<[string], { arg0: string }>;
   };
 
   estimateGas: {

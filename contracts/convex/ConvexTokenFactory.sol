@@ -4,7 +4,7 @@
 pragma solidity ^0.8.10;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "../../ERC20Mock.sol";
+import "../ERC20Mock.sol";
 
 
 interface IConvexTokenFactory {

@@ -575,17 +575,10 @@
     "@ethersproject/properties" "^5.6.0"
     "@ethersproject/strings" "^5.6.0"
 
-<<<<<<< HEAD
-"@gearbox-protocol/sdk@^0.0.10":
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/@gearbox-protocol/sdk/-/sdk-0.0.10.tgz#97c80c75b20f3ac15003a654c466aaf25206f8c0"
-  integrity sha512-cu4omesjBndYhiL+NSYLMdo3wEymLJHG2f/CcWO7WPLMtlaggcaBzmJ0husTMwRnLsdJnXy8FjhTZXjPGx2ssw==
-=======
-"@gearbox-protocol/sdk@^0.0.14":
-  version "0.0.14"
-  resolved "https://registry.yarnpkg.com/@gearbox-protocol/sdk/-/sdk-0.0.14.tgz#b12d14cbc9fa1fe74fc131672201f8c12f93af55"
-  integrity sha512-TfvD4haNV1PhWG4ZjSMtsegu8hQ3zO2oL0SoIiz4FyAow66XV4plQJVWoKuJF5ojExgprc6ooJgmzwvQKZTBCg==
->>>>>>> 8bc57fe96e989923b118056e2dcca71cd1e81bf6
+"@gearbox-protocol/sdk@^0.0.19":
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/@gearbox-protocol/sdk/-/sdk-0.0.19.tgz#a6996d55bf9b4b0a58f2fd39de5664db5f423eec"
+  integrity sha512-KPTGwyN0QmD5BH0bWLdgj3OkzdbHxavIgqRmGnN4bKxl+HFwXMK1wX01wTX1AiNIrROwkQUJa6lq63J2/N9vJw==
   dependencies:
     decimal.js-light "^2.5.1"
     moment "^2.29.1"

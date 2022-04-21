@@ -4,27 +4,42 @@ import * as dotenv from "dotenv";
 // @ts-ignore
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
 import { providers } from "ethers";
-import { priceFeedsByNetwork, SupportedTokens, tokenDataByNetwork } from "@gearbox-protocol/sdk";
+import {
+  OracleType,
+  priceFeedsByNetwork,
+  SupportedTokens,
+  tokenDataByNetwork,
+} from "@gearbox-protocol/sdk";
 import { deploy } from "../utils/transaction";
 import { Logger } from "tslog";
-import { ChainlinkPriceFeed__factory } from "../types";
+import { ChainlinkPriceFeed, ChainlinkPriceFeed__factory } from "../types";
 
 const hre = require("hardhat");
+const log: Logger = new Logger();
+const syncer = "0xC6493381d29e813D56063A1AffBbbC534fdCd70b";
 
 async function deployPF(provider: providers.JsonRpcProvider, addr: string) {
-  const mainnetPF = ChainlinkPriceFeed__factory.connect(
-    addr,
-    provider
-  );
+  const mainnetPF = ChainlinkPriceFeed__factory.connect(addr, provider);
 
   const decimals = await mainnetPF.decimals();
+  const newToken = await deploy<ChainlinkPriceFeed>(
+    "ChainlinkPriceFeed",
+    log,
+    syncer,
+    decimals,
+    addr
+  );
 
-  
+  await newToken.deployTransaction.wait(10);
+
+  await hre.run("verify:verify", {
+    address: newToken.address,
+    constructorArguments: [syncer, decimals, addr],
+  });
 }
 
 async function deployPriceFeeds() {
   dotenv.config({ path: ".env.local" });
-  const log: Logger = new Logger();
 
   const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
   const deployer = accounts[0];
@@ -37,52 +52,64 @@ async function deployPriceFeeds() {
 
   const mainnetProvider = new providers.JsonRpcProvider(mainnetRpc);
 
-  let update = "{";
-
   const addr = [];
 
-  for (let pf of Object.values(priceFeedsByNetwork)) {
-
-    if (pf.priceFeedETH) {
-
+  for (let [sym, pf] of Object.entries(priceFeedsByNetwork)) {
+    if (
+      pf.priceFeedETH &&
+      pf.priceFeedETH.type === OracleType.CHAINLINK_ORACLE &&
+      !pf.priceFeedETH.kovan
+    ) {
+      const pfAddr = pf.priceFeedETH.address;
+      log.info(`Deploying pricefeed ${sym}/ETH for oracle: ${pfAddr}`);
+      await deployPF(mainnetProvider, pfAddr);
+      addr.push(pfAddr);
+      log.debug(`Deplyed at: ${pfAddr}`);
     }
 
- 
+    if (
+      pf.priceFeedETH &&
+      pf.priceFeedETH.type === OracleType.CHAINLINK_ORACLE &&
+      pf.priceFeedETH.kovan
+    ) {
+      const pfAddr = pf.priceFeedETH.kovan;
+      const pfeed = ChainlinkPriceFeed__factory.connect(pfAddr, deployer);
+      try {
+        await pfeed.mainnetOracle();
+        addr.push(pfAddr);
+      } catch (e) {}
+    }
 
-    const symbol = await mainnetToken.symbol();
-    const name = await mainnetToken.name();
-    const decimals = await mainnetToken.decimals();
+    if (
+      pf.priceFeedUSD &&
+      pf.priceFeedUSD.type === OracleType.CHAINLINK_ORACLE &&
+      !pf.priceFeedUSD.kovan
+    ) {
+      const pfAddr = pf.priceFeedUSD.address;
+      log.info(`Deploying pricefeed ${sym}/USD for oracle: ${pfAddr}`);
+      await deployPF(mainnetProvider, pfAddr);
+      addr.push(pfAddr);
+      log.debug(`Deplyed at: ${pfAddr}`);
+    }
 
-    console.log(t, mainnetAddress);
-    console.log(symbol);
-    console.log(name);
-    console.log(decimals);
 
-    const newToken = await deploy<ERC20Kovan>(
-      "ERC20Kovan",
-      log,
-      name,
-      symbol,
-      decimals
-    );
+    if (
+      pf.priceFeedUSD &&
+      pf.priceFeedUSD.type === OracleType.CHAINLINK_ORACLE &&
+      pf.priceFeedUSD.kovan
+    ) {
+      const pfAddr = pf.priceFeedUSD.kovan;
+      const pfeed = ChainlinkPriceFeed__factory.connect(pfAddr, deployer);
+      try {
+        await pfeed.mainnetOracle();
+        addr.push(pfAddr);
+      } catch (e) {}
+    }
 
-    await newToken.deployTransaction.wait(10);
-
-    await hre.run("verify:verify", {
-      address: newToken.address,
-      constructorArguments: [name, symbol, decimals],
-    });
-
-    update += `"${symbol}": ${newToken.address}\n`;
   }
 
-  update += "}";
-
-  console.log(update);
+  console.log(addr);
 }
-
-
-
 
 deployPriceFeeds()
   .then(() => console.log("Ok"))

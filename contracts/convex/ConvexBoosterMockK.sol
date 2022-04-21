@@ -3,13 +3,13 @@
 // (c) Gearbox Holdings, 2021
 pragma solidity 0.8.10;
 
-import "../../ERC20Mock.sol";
+import "../ERC20Mock.sol";
 import "./interfaces/Interfaces.sol";
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import '@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol';
-import '@openzeppelin/contracts/utils/Address.sol';
-import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {IConvexPoolFactory} from "./ConvexPoolFactory.sol";
 import {IConvexTokenFactory} from "./ConvexTokenFactory.sol";
