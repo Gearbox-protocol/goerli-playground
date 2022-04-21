@@ -57,7 +57,7 @@ const config: HardhatUserConfig = {
     },
 
     kovan: {
-      url: `https://kovan.infura.io/v3/${INFURA_API_KEY}`,
+      url: `${process.env.ETH_KOVAN_PROVIDER}`,
       accounts: [KOVAN_PRIVATE_KEY, KOVAN2_PRIVATE_KEY],
       gasPrice: 2e9,
       minGasPrice: 1e9,
