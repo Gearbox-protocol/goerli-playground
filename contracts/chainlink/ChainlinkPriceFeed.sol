@@ -25,15 +25,17 @@ contract ChainlinkPriceFeed is AggregatorV3Interface {
     uint80 internal _answeredInRound;
 
     uint16 public constant phaseId = 1;
+    address public immutable mainnetOracle;
 
     modifier syncerOnly() {
         require(syncer.isSyncer(msg.sender), "Caller is not syncer");
         _;
     }
 
-    constructor(address _syncer, uint8 _decimals) {
+    constructor(address _syncer, uint8 _decimals, address _mainnetOracle) {
         syncer = Syncer(_syncer);
         decimals = _decimals;
+        mainnetOracle = _mainnetOracle;
     }
 
     function description() external pure override returns (string memory) {
