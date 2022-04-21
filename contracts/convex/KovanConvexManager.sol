@@ -27,7 +27,7 @@ interface ISyncablePool {
     ) external;
 }
 
-contract ConvexManager is Ownable {
+contract KovanConvexManager is Ownable {
     address public cvx;
     address public crv;
 
@@ -36,15 +36,14 @@ contract ConvexManager is Ownable {
     address public poolFactory;
     address public tokenFactory;
 
+    address[] public deployedPools;
+
     modifier syncerOnly() {
         require(Syncer(syncer).isSyncer(msg.sender), "Caller is not syncer");
         _;
     }
 
-    constructor(
-        address syncer_,
-        address crv_
-    ) {
+    constructor(address syncer_, address crv_) {
         syncer = syncer_;
         crv = crv_;
 
@@ -57,16 +56,31 @@ contract ConvexManager is Ownable {
         Booster(booster).setFactories(poolFactory, tokenFactory);
         CVXKovan(cvx).setOperator(booster);
     }
+
     // dev: This function assumes that RAY=1e27 of CRV is allowed to this contract per pool
-    function addBasePool(address _curveLpToken) external onlyOwner returns (address) {
+    function addBasePool(address _curveLpToken)
+        external
+        onlyOwner
+        returns (address)
+    {
         address newPool = Booster(booster).addPool(_curveLpToken);
         IERC20(crv).transferFrom(msg.sender, newPool, RAY);
+        deployedPools.push(newPool);
         return newPool;
     }
 
     // dev: This function assumes that RAY=1e27 of _rewardToken is allowed to this contract per pool
-    function addExtraPool(address _rewardToken, address _basePool) external onlyOwner returns (address) {
-        address newPool = IConvexPoolFactory(poolFactory).deployExtraPool(_basePool, _rewardToken, booster, address(this));
+    function addExtraPool(address _rewardToken, address _basePool)
+        external
+        onlyOwner
+        returns (address)
+    {
+        address newPool = IConvexPoolFactory(poolFactory).deployExtraPool(
+            _basePool,
+            _rewardToken,
+            booster,
+            address(this)
+        );
         IRewards(_basePool).addExtraReward(newPool);
         IERC20(_rewardToken).transferFrom(msg.sender, newPool, RAY);
         return newPool;
@@ -81,10 +95,7 @@ contract ConvexManager is Ownable {
         uint256 _queuedRewards,
         uint256 _currentRewards,
         uint256 _historicalRewards
-    )
-    external
-    syncerOnly
-    {
+    ) external syncerOnly {
         ISyncablePool(pool).sync(
             _periodFinish,
             _rewardRate,
@@ -103,4 +114,7 @@ contract ConvexManager is Ownable {
         }
     }
 
+    function deployedPoolsLength() external view returns (uint256) {
+        return deployedPools.length;
+    }
 }

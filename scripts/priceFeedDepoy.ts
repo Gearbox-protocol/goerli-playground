@@ -13,10 +13,11 @@ import {
 import { deploy } from "../utils/transaction";
 import { Logger } from "tslog";
 import { ChainlinkPriceFeed, ChainlinkPriceFeed__factory } from "../types";
+import { SYNCER } from "./constants";
 
 const hre = require("hardhat");
 const log: Logger = new Logger();
-const syncer = "0xC6493381d29e813D56063A1AffBbbC534fdCd70b";
+
 
 async function deployPF(provider: providers.JsonRpcProvider, addr: string) {
   const mainnetPF = ChainlinkPriceFeed__factory.connect(addr, provider);
@@ -25,7 +26,7 @@ async function deployPF(provider: providers.JsonRpcProvider, addr: string) {
   const newToken = await deploy<ChainlinkPriceFeed>(
     "ChainlinkPriceFeed",
     log,
-    syncer,
+    SYNCER,
     decimals,
     addr
   );
@@ -34,7 +35,7 @@ async function deployPF(provider: providers.JsonRpcProvider, addr: string) {
 
   await hre.run("verify:verify", {
     address: newToken.address,
-    constructorArguments: [syncer, decimals, addr],
+    constructorArguments: [SYNCER, decimals, addr],
   });
 }
 

@@ -19,13 +19,15 @@ import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
-interface ConvexManagerInterface extends ethers.utils.Interface {
+interface KovanConvexManagerInterface extends ethers.utils.Interface {
   functions: {
     "addBasePool(address)": FunctionFragment;
     "addExtraPool(address,address)": FunctionFragment;
     "booster()": FunctionFragment;
     "crv()": FunctionFragment;
     "cvx()": FunctionFragment;
+    "deployedPools(uint256)": FunctionFragment;
+    "deployedPoolsLength()": FunctionFragment;
     "owner()": FunctionFragment;
     "poolFactory()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
@@ -44,6 +46,14 @@ interface ConvexManagerInterface extends ethers.utils.Interface {
   encodeFunctionData(functionFragment: "booster", values?: undefined): string;
   encodeFunctionData(functionFragment: "crv", values?: undefined): string;
   encodeFunctionData(functionFragment: "cvx", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "deployedPools",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "deployedPoolsLength",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "poolFactory",
@@ -91,6 +101,14 @@ interface ConvexManagerInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "booster", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "crv", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "cvx", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "deployedPools",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "deployedPoolsLength",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "poolFactory",
@@ -126,7 +144,7 @@ export type OwnershipTransferredEvent = TypedEvent<
   [string, string] & { previousOwner: string; newOwner: string }
 >;
 
-export class ConvexManager extends BaseContract {
+export class KovanConvexManager extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -167,7 +185,7 @@ export class ConvexManager extends BaseContract {
     toBlock?: string | number | undefined
   ): Promise<Array<TypedEvent<EventArgsArray & EventArgsObject>>>;
 
-  interface: ConvexManagerInterface;
+  interface: KovanConvexManagerInterface;
 
   functions: {
     addBasePool(
@@ -186,6 +204,13 @@ export class ConvexManager extends BaseContract {
     crv(overrides?: CallOverrides): Promise<[string]>;
 
     cvx(overrides?: CallOverrides): Promise<[string]>;
+
+    deployedPools(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    deployedPoolsLength(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
@@ -239,6 +264,10 @@ export class ConvexManager extends BaseContract {
 
   cvx(overrides?: CallOverrides): Promise<string>;
 
+  deployedPools(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+  deployedPoolsLength(overrides?: CallOverrides): Promise<BigNumber>;
+
   owner(overrides?: CallOverrides): Promise<string>;
 
   poolFactory(overrides?: CallOverrides): Promise<string>;
@@ -290,6 +319,13 @@ export class ConvexManager extends BaseContract {
     crv(overrides?: CallOverrides): Promise<string>;
 
     cvx(overrides?: CallOverrides): Promise<string>;
+
+    deployedPools(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    deployedPoolsLength(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
@@ -360,6 +396,13 @@ export class ConvexManager extends BaseContract {
 
     cvx(overrides?: CallOverrides): Promise<BigNumber>;
 
+    deployedPools(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    deployedPoolsLength(overrides?: CallOverrides): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     poolFactory(overrides?: CallOverrides): Promise<BigNumber>;
@@ -412,6 +455,15 @@ export class ConvexManager extends BaseContract {
     crv(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     cvx(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    deployedPools(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    deployedPoolsLength(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

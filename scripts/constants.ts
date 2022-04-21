@@ -1,0 +1,1 @@
+export const SYNCER = "0xC6493381d29e813D56063A1AffBbbC534fdCd70b";

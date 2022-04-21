@@ -145,13 +145,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IWalletChecker__factory>;
     getContractFactory(
-      name: "ConvexManager",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ConvexManager__factory>;
-    getContractFactory(
       name: "ISyncablePool",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ISyncablePool__factory>;
+    getContractFactory(
+      name: "KovanConvexManager",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.KovanConvexManager__factory>;
     getContractFactory(
       name: "ERC20Kovan",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -172,10 +172,6 @@ declare module "hardhat/types/runtime" {
       name: "IUniswapV2Router02",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IUniswapV2Router02__factory>;
-    getContractFactory(
-      name: "IUniswapV2Pair",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IUniswapV2Pair__factory>;
     getContractFactory(
       name: "Syncer",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -347,15 +343,15 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IWalletChecker>;
     getContractAt(
-      name: "ConvexManager",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.ConvexManager>;
-    getContractAt(
       name: "ISyncablePool",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.ISyncablePool>;
+    getContractAt(
+      name: "KovanConvexManager",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.KovanConvexManager>;
     getContractAt(
       name: "ERC20Kovan",
       address: string,
@@ -381,11 +377,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IUniswapV2Router02>;
-    getContractAt(
-      name: "IUniswapV2Pair",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IUniswapV2Pair>;
     getContractAt(
       name: "Syncer",
       address: string,
