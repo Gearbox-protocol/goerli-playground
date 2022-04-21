@@ -157,6 +157,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ERC20Kovan__factory>;
     getContractFactory(
+      name: "IUniswapV2Factory",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IUniswapV2Factory__factory>;
+    getContractFactory(
+      name: "IUniswapV2Pair",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IUniswapV2Pair__factory>;
+    getContractFactory(
       name: "IUniswapV2Router01",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IUniswapV2Router01__factory>;
@@ -164,6 +172,10 @@ declare module "hardhat/types/runtime" {
       name: "IUniswapV2Router02",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IUniswapV2Router02__factory>;
+    getContractFactory(
+      name: "IUniswapV2Pair",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IUniswapV2Pair__factory>;
     getContractFactory(
       name: "Syncer",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -350,6 +362,16 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.ERC20Kovan>;
     getContractAt(
+      name: "IUniswapV2Factory",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IUniswapV2Factory>;
+    getContractAt(
+      name: "IUniswapV2Pair",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IUniswapV2Pair>;
+    getContractAt(
       name: "IUniswapV2Router01",
       address: string,
       signer?: ethers.Signer
@@ -359,6 +381,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IUniswapV2Router02>;
+    getContractAt(
+      name: "IUniswapV2Pair",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IUniswapV2Pair>;
     getContractAt(
       name: "Syncer",
       address: string,

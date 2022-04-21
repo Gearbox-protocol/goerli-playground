@@ -12,18 +12,20 @@ export function formatBN(
   }
 
   if (BigNumber.from(num).gt(BigNumber.from(10).pow(21))) {
-    precision=2;
+    precision = 2;
   }
 
   if (BigNumber.from(num).gt(BigNumber.from(10).pow(24))) {
-    precision=0;
+    precision = 0;
   }
 
-  return (
-    BigNumber.from(num)
-      .div(BigNumber.from(10).pow((decimals || 18) - 4))
-      .toNumber() / 10000
-  ).toFixed(precision);
+  return !decimals || decimals >= 4
+    ? (
+        BigNumber.from(num)
+          .div(BigNumber.from(10).pow((decimals || 18) - 4))
+          .toNumber() / 10000
+      ).toFixed(precision)
+    : (BigNumber.from(num).toNumber() / (10 ^ decimals)).toFixed(precision);
 }
 
 export function toBN(num: number, decimals?: number): BigNumber {
@@ -32,12 +34,9 @@ export function toBN(num: number, decimals?: number): BigNumber {
   );
 }
 
-
-
 export const formatRate = (rate: BigNumberish | undefined) =>
   rate
-    ? (BigNumber.from(rate)
-      .div(BigNumber.from(10).pow(14))
-      .toNumber() / 100)
-      .toFixed(2)+ "%"
+    ? (
+        BigNumber.from(rate).div(BigNumber.from(10).pow(14)).toNumber() / 100
+      ).toFixed(2) + "%"
     : "0.00%";
