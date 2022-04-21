@@ -20,7 +20,7 @@ const tokensToDeploy: Array<SupportedTokens> = [
 //   "FEI",
 //   "SUSHI",
 //   "UNI",
-//   "USDT",
+  "LQTY",
 //   "WETH",
 //   "YFI",
 
@@ -30,12 +30,12 @@ const tokensToDeploy: Array<SupportedTokens> = [
 //   "CVX",
 //   "FRAX",
 //   "FXS",
-  "LDO",
-  "SPELL",
-  "LUSD",
-  "SUSD",
-  "GUSD",
-  "LUNA",
+  // "LDO",
+  // "SPELL",
+  // "LUSD",
+  // "SUSD",
+  // "GUSD",
+  // "LUNA",
 ];
 
 async function deployTokens() {
