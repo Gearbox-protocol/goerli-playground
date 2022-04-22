@@ -21,8 +21,10 @@ contract TradingBot is SyncerTrait {
         external
         syncerOnly
     {
-        IERC20(token).safeApprove(targetContract, 0);
-        IERC20(token).safeApprove(targetContract, type(uint256).max);
+        try IERC20(token).approve(targetContract, type(uint256).max) {} catch {
+            IERC20(token).approve(targetContract, 0);
+            IERC20(token).approve(targetContract, type(uint256).max);
+        }
     }
 
     /// @dev Transfers tokens from credit account to provided address. Restricted for current credit manager only
