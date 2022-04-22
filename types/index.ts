@@ -41,7 +41,11 @@ export type { IUniswapV2Factory } from "./IUniswapV2Factory";
 export type { IUniswapV2Pair } from "./IUniswapV2Pair";
 export type { IUniswapV2Router01 } from "./IUniswapV2Router01";
 export type { IUniswapV2Router02 } from "./IUniswapV2Router02";
+export type { IYVault } from "./IYVault";
 export type { Syncer } from "./Syncer";
+export type { SyncerTrait } from "./SyncerTrait";
+export type { TradingBot } from "./TradingBot";
+export type { YearnMock } from "./YearnMock";
 
 export { AggregatorV3Interface__factory } from "./factories/AggregatorV3Interface__factory";
 export { Ownable__factory } from "./factories/Ownable__factory";
@@ -83,4 +87,8 @@ export { IUniswapV2Factory__factory } from "./factories/IUniswapV2Factory__facto
 export { IUniswapV2Pair__factory } from "./factories/IUniswapV2Pair__factory";
 export { IUniswapV2Router01__factory } from "./factories/IUniswapV2Router01__factory";
 export { IUniswapV2Router02__factory } from "./factories/IUniswapV2Router02__factory";
+export { IYVault__factory } from "./factories/IYVault__factory";
 export { Syncer__factory } from "./factories/Syncer__factory";
+export { SyncerTrait__factory } from "./factories/SyncerTrait__factory";
+export { TradingBot__factory } from "./factories/TradingBot__factory";
+export { YearnMock__factory } from "./factories/YearnMock__factory";

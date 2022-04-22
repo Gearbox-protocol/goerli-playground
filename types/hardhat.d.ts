@@ -173,9 +173,25 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IUniswapV2Router02__factory>;
     getContractFactory(
+      name: "IYVault",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IYVault__factory>;
+    getContractFactory(
       name: "Syncer",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Syncer__factory>;
+    getContractFactory(
+      name: "SyncerTrait",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SyncerTrait__factory>;
+    getContractFactory(
+      name: "TradingBot",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.TradingBot__factory>;
+    getContractFactory(
+      name: "YearnMock",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.YearnMock__factory>;
 
     getContractAt(
       name: "AggregatorV3Interface",
@@ -378,10 +394,30 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IUniswapV2Router02>;
     getContractAt(
+      name: "IYVault",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IYVault>;
+    getContractAt(
       name: "Syncer",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Syncer>;
+    getContractAt(
+      name: "SyncerTrait",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SyncerTrait>;
+    getContractAt(
+      name: "TradingBot",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.TradingBot>;
+    getContractAt(
+      name: "YearnMock",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.YearnMock>;
 
     // default types
     getContractFactory(

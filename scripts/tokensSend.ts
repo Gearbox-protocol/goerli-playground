@@ -61,9 +61,11 @@ async function deployTokens() {
     const decimals = await token.decimals();
 
     log.info(`Sending ${t}`);
-    await waitForTransaction(
-      token.mint(addressToSend, BigNumber.from(10).pow(decimals + 8))
-    );
+
+    console.log(decimals)
+    // await waitForTransaction(
+    //   token.mint(addressToSend, BigNumber.from(10).pow(decimals + 8))
+    // );
   }
 }
 
