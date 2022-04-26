@@ -2,7 +2,6 @@
 import { ethers } from "hardhat";
 // @ts-ignore
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
-import { providers } from "ethers";
 
 import { Logger } from "tslog";
 import { deploy } from "../utils/transaction";
@@ -13,7 +12,7 @@ const hre = require("hardhat");
 const log: Logger = new Logger();
 
 
-async function deployTradingBot(provider: providers.JsonRpcProvider, addr: string) {
+async function deployTradingBot() {
   const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
   const deployer = accounts[0];
   const chainId = await deployer.getChainId();

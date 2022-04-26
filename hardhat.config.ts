@@ -45,6 +45,7 @@ const config: HardhatUserConfig = {
     },
     localhost: {
       timeout: 0,
+      accounts: [KOVAN_PRIVATE_KEY, KOVAN2_PRIVATE_KEY],
     },
     mainnet: {
       url: process.env.ETH_MAINNET_PROVIDER || "",

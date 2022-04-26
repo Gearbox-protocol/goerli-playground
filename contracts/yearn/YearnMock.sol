@@ -14,8 +14,9 @@ import {IYVault} from "../interfaces/IYVault.sol";
 /// @title Chainlink price feed sync mock
 contract YearnMock is SyncerTrait, IYVault, ERC20, Ownable {
     using SafeERC20 for IERC20;
-    address public override token;
+    address public immutable override token;
     uint256 public override pricePerShare;
+    uint8 public _decimals;
 
     mapping(address => bool) public updaters;
     uint256 public decimalsMul;
@@ -30,6 +31,7 @@ contract YearnMock is SyncerTrait, IYVault, ERC20, Ownable {
         token = _token;
         decimalsMul = 10**ERC20.decimals();
         pricePerShare = decimalsMul;
+        _decimals = ERC20(_token).decimals();
     }
 
     function deposit() public override returns (uint256) {
@@ -46,7 +48,7 @@ contract YearnMock is SyncerTrait, IYVault, ERC20, Ownable {
         returns (uint256 shares)
     {
         IERC20(token).safeTransferFrom(msg.sender, address(this), _amount);
-        shares = _amount * decimalsMul / pricePerShare;
+        shares = (_amount * decimalsMul) / pricePerShare;
         _mint(recipient, shares);
     }
 
@@ -72,12 +74,11 @@ contract YearnMock is SyncerTrait, IYVault, ERC20, Ownable {
         uint256 // maxLoss
     ) public override returns (uint256 amount) {
         _burn(msg.sender, maxShares);
-        amount = maxShares * pricePerShare / decimalsMul;
+        amount = (maxShares * pricePerShare) / decimalsMul;
         IERC20(token).safeTransfer(msg.sender, amount);
     }
 
     function setPricePerShare(uint256 newPrice) external syncerOnly {
-        require(updaters[msg.sender], "for updaters only");
         pricePerShare = newPrice;
     }
 
@@ -100,6 +101,6 @@ contract YearnMock is SyncerTrait, IYVault, ERC20, Ownable {
     }
 
     function decimals() public view override(IYVault, ERC20) returns (uint8) {
-        return ERC20.decimals();
+        return _decimals;
     }
 }
