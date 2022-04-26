@@ -7,7 +7,6 @@ import { BigNumber } from "ethers";
 import {
   ADDRESS_0x0,
   IUniswapV2Router02__factory,
-  KOVAN_NETWORK,
   MAX_INT,
   OracleType,
   priceFeedsByNetwork,

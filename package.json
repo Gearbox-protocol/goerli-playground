@@ -43,6 +43,7 @@
     "build": "yarn clean && yarn compile",
     "clean": "npx hardhat clean",
     "compile": "npx hardhat compile",
-    "test": "npx hardhat test"
+    "test": "npx hardhat test",
+    "fork": "scripts/fork.sh"
   }
 }

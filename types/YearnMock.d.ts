@@ -21,6 +21,7 @@ import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
 interface YearnMockInterface extends ethers.utils.Interface {
   functions: {
+    "_decimals()": FunctionFragment;
     "allowance(address,address)": FunctionFragment;
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
@@ -45,6 +46,7 @@ interface YearnMockInterface extends ethers.utils.Interface {
     "withdraw(uint256,address)": FunctionFragment;
   };
 
+  encodeFunctionData(functionFragment: "_decimals", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "allowance",
     values: [string, string]
@@ -110,6 +112,7 @@ interface YearnMockInterface extends ethers.utils.Interface {
     values: [BigNumberish, string]
   ): string;
 
+  decodeFunctionResult(functionFragment: "_decimals", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "allowance", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
@@ -231,6 +234,8 @@ export class YearnMock extends BaseContract {
   interface: YearnMockInterface;
 
   functions: {
+    _decimals(overrides?: CallOverrides): Promise<[number]>;
+
     allowance(
       owner: string,
       spender: string,
@@ -341,6 +346,8 @@ export class YearnMock extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
   };
+
+  _decimals(overrides?: CallOverrides): Promise<number>;
 
   allowance(
     owner: string,
@@ -453,6 +460,8 @@ export class YearnMock extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    _decimals(overrides?: CallOverrides): Promise<number>;
+
     allowance(
       owner: string,
       spender: string,
@@ -613,6 +622,8 @@ export class YearnMock extends BaseContract {
   };
 
   estimateGas: {
+    _decimals(overrides?: CallOverrides): Promise<BigNumber>;
+
     allowance(
       owner: string,
       spender: string,
@@ -725,6 +736,8 @@ export class YearnMock extends BaseContract {
   };
 
   populateTransaction: {
+    _decimals(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     allowance(
       owner: string,
       spender: string,

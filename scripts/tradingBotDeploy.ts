@@ -2,7 +2,6 @@
 import { ethers } from "hardhat";
 // @ts-ignore
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
-import { providers } from "ethers";
 
 import { Logger } from "tslog";
 import { deploy } from "../utils/transaction";

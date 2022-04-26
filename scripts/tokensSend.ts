@@ -13,36 +13,37 @@ const hre = require("hardhat");
 const log: Logger = new Logger();
 
 const tokensToDeploy: Array<SupportedTokens> = [
-  //   "1INCH",
-  //   "AAVE",
-  //   "COMP",
-  //   "CRV",
-  //   "DPI",
-  //   "FEI",
-  //   "SUSHI",
-  //   "UNI",
-  // "LQTY",
-  //   "WETH",
-  //   "YFI",
-
-  //   /// UPDATE
-  //   "STETH",
-  //   "FTM",
-  //   "CVX",
-  //   "FRAX",
-  //   "FXS",
+  // "1INCH",
+  // "AAVE",
+  // "COMP",
+  // "CRV",
+  // "DAI",
+  // "DPI",
+  // "FEI",
+  // "LINK",
+  // "SNX",
+  // "SUSHI",
+  // "UNI",
+  "USDC",
+  // "USDT",
+  // "WBTC",
+  // // "WETH",
+  // "YFI",
+  // "STETH",
+  // "FTM",
+  // "CVX",
+  // "FRAX",
+  // "FXS",
   // "LDO",
   // "SPELL",
   // "LUSD",
-  "sUSD",
-  "USDC",
-  "USDT",
-  "DAI",
+  // "sUSD",
   // "GUSD",
   // "LUNA",
+  // "LQTY",
 ];
 
-const addressToSend = "0x53829d517D8fA7D59d3D40E20251e519C079985F";
+const addressToSend = "0x8002e5D8cA10e2b0e7d1bd98C367fE08FA555A71";
 
 async function deployTokens() {
   dotenv.config({ path: ".env.local" });
@@ -60,12 +61,13 @@ async function deployTokens() {
     const token = ERC20Kovan__factory.connect(tokenAddr, deployer);
     const decimals = await token.decimals();
 
-    log.info(`Sending ${t}`);
+    log.info(`Sending ${t} to ${addressToSend}`);
 
-    console.log(decimals)
-    // await waitForTransaction(
-    //   token.mint(addressToSend, BigNumber.from(10).pow(decimals + 8))
-    // );
+    const tx = await waitForTransaction(
+      token.mint(addressToSend, BigNumber.from(10).pow(decimals).mul(100000))
+    );
+
+    console.log(`https://kovan.etherscan.io/tx/${tx.transactionHash}`)
   }
 }
 
