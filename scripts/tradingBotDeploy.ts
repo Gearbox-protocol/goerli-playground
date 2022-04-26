@@ -13,7 +13,7 @@ const hre = require("hardhat");
 const log: Logger = new Logger();
 
 
-async function deployTradingBot(provider: providers.JsonRpcProvider, addr: string) {
+async function deployTradingBot() {
   const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
   const deployer = accounts[0];
   const chainId = await deployer.getChainId();

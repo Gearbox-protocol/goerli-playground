@@ -145,6 +145,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IWalletChecker__factory>;
     getContractFactory(
+      name: "ConvexManager",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ConvexManager__factory>;
+    getContractFactory(
       name: "ISyncablePool",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ISyncablePool__factory>;
@@ -176,6 +180,14 @@ declare module "hardhat/types/runtime" {
       name: "IYVault",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IYVault__factory>;
+    getContractFactory(
+      name: "Lido",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Lido__factory>;
+    getContractFactory(
+      name: "StETH",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.StETH__factory>;
     getContractFactory(
       name: "Syncer",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -359,6 +371,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IWalletChecker>;
     getContractAt(
+      name: "ConvexManager",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ConvexManager>;
+    getContractAt(
       name: "ISyncablePool",
       address: string,
       signer?: ethers.Signer
@@ -398,6 +415,16 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IYVault>;
+    getContractAt(
+      name: "Lido",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Lido>;
+    getContractAt(
+      name: "StETH",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.StETH>;
     getContractAt(
       name: "Syncer",
       address: string,
