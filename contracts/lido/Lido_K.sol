@@ -22,6 +22,10 @@ contract Lido is StETH, SyncerTrait, Ownable {
         return _submit(_referral);
     }
 
+    function withdrawEth(address to, uint256 amount) external onlyOwner {
+        payable(to).transfer(amount);
+    }
+
     function burnShares(address _account, uint256 _sharesAmount)
         external
         onlyOwner
