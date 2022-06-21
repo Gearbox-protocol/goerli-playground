@@ -29,9 +29,20 @@ contract Lido is StETH, SyncerTrait, Ownable {
     function burnShares(address _account, uint256 _sharesAmount)
         external
         onlyOwner
-        returns (uint256 newTotalShares)
     {
-        return _burnShares(_account, _sharesAmount);
+        _burnShares(_account, _sharesAmount);
+    }
+
+    function mint(address _account, uint256 _amount)
+        external
+        onlyOwner
+    {
+        uint256 sharesAmount = getSharesByPooledEth(_amount);
+        if (sharesAmount == 0) {
+            sharesAmount = _amount;
+        }
+        _mintShares(_account, sharesAmount);
+        _emitTransferAfterMintingShares(_account, sharesAmount);
     }
 
     /**

@@ -4,6 +4,7 @@ import { HardhatUserConfig } from "hardhat/types";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-ethers";
+import "@nomiclabs/hardhat-vyper";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "hardhat-contract-sizer";
@@ -36,6 +37,9 @@ const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   solidity: {
     compilers: [{ version: "0.8.10", settings: {} }],
+  },
+  vyper: {
+    compilers: [{ version: "0.3.0"}, { version: "0.2.4"}, { version: "0.2.8"}, { version: "0.2.5"}]
   },
   networks: {
     hardhat: {
