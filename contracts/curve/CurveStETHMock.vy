@@ -123,6 +123,7 @@ is_killed: bool
 kill_deadline: uint256
 KILL_DEADLINE_DT: constant(uint256) = 2 * 30 * 86400
 
+last_mainnet_virtual_price: uint256
 
 @external
 def __init__(
@@ -234,6 +235,14 @@ def get_D(xp: uint256[N_COINS], amp: uint256) -> uint256:
     # if it does happen the pool is borked and LPs can withdraw via `remove_liquidity`
     raise
 
+@view
+@internal
+def get_virtual_price_internal() -> uint256:
+    D: uint256 = self.get_D(self._balances(), self._A())
+    # D is in the units similar to DAI (e.g. converted to precision 1e18)
+    # When balanced, D = n * x_u - total virtual value of the portfolio
+    token_supply: uint256 = ERC20(self.lp_token).totalSupply()
+    return D * PRECISION / token_supply
 
 @view
 @external
@@ -243,11 +252,7 @@ def get_virtual_price() -> uint256:
     @dev Useful for calculating profits
     @return LP token virtual price normalized to 1e18
     """
-    D: uint256 = self.get_D(self._balances(), self._A())
-    # D is in the units similar to DAI (e.g. converted to precision 1e18)
-    # When balanced, D = n * x_u - total virtual value of the portfolio
-    token_supply: uint256 = ERC20(self.lp_token).totalSupply()
-    return D * PRECISION / token_supply
+    return self.get_virtual_price_internal()
 
 
 @view
@@ -327,11 +332,13 @@ def add_liquidity(amounts: uint256[N_COINS], min_mint_amount: uint256) -> uint25
             fees[i] = fee * difference / FEE_DENOMINATOR
             if admin_fee != 0:
                 self.admin_balances[i] += fees[i] * admin_fee / FEE_DENOMINATOR
+            self.balances_internal[i] = new_balances[i] - (fees[i] * admin_fee / FEE_DENOMINATOR)
             new_balances[i] -= fees[i]
         D2 = self.get_D(new_balances, amp)
         mint_amount = token_supply * (D2 - D0) / D0
     else:
-        mint_amount = D1  # Take the dust if there was any
+        self.balances_internal = new_balances
+        mint_amount = D1 * PRECISION / self.last_mainnet_virtual_price
 
     assert mint_amount >= min_mint_amount, "Slippage screwed you"
 
@@ -440,10 +447,15 @@ def exchange(i: int128, j: int128, dx: uint256, min_dy: uint256) -> uint256:
     assert dy >= min_dy, "Exchange resulted in fewer coins than expected"
 
     admin_fee: uint256 = self.admin_fee
+    dy_admin_fee: uint256 = dy_fee * admin_fee / FEE_DENOMINATOR
     if admin_fee != 0:
-        dy_admin_fee: uint256 = dy_fee * admin_fee / FEE_DENOMINATOR
         if dy_admin_fee != 0:
             self.admin_balances[j] += dy_admin_fee
+
+    # Change balances exactly in same way as we change actual ERC20 coin amounts
+    self.balances_internal[i] = xp[i] + dx
+    # When rounding errors happen, we undercharge admin fee in favor of LP
+    self.balances_internal[j] = xp[j] - dy - dy_admin_fee
 
     coin: address = self.coins[1]
     if i == 0:
@@ -480,6 +492,7 @@ def remove_liquidity(
     for i in range(N_COINS):
         value: uint256 = amounts[i] * _amount / total_supply
         assert value >= _min_amounts[i], "Withdrawal resulted in fewer coins than expected"
+        self.balances_internal[i] -= value
 
         amounts[i] = value
         if i == 0:
@@ -528,6 +541,7 @@ def remove_liquidity_imbalance(
         fees[i] = fee * difference / FEE_DENOMINATOR
         if admin_fee != 0:
             self.admin_balances[i] += fees[i] * admin_fee / FEE_DENOMINATOR
+        self.balances_internal[i] = new_balances[i] - (fees[i] * admin_fee / FEE_DENOMINATOR)
         new_balances[i] -= fees[i]
     D2: uint256 = self.get_D(new_balances, amp)
 
@@ -662,6 +676,7 @@ def remove_liquidity_one_coin(
     assert dy >= _min_amount, "Not enough coins removed"
 
     self.admin_balances[i] += dy_fee * self.admin_fee / FEE_DENOMINATOR
+    self.balances_internal[i] -= (dy + dy_fee * self.admin_fee / FEE_DENOMINATOR)
 
     CurveToken(self.lp_token).burnFrom(msg.sender, _token_amount)  # dev: insufficient funds
 
@@ -824,9 +839,18 @@ def unkill_me():
     self.is_killed = False
 
 @external
-def sync_pool(_balances: uint256[N_COINS], _a: uint256):
+def sync_pool(new_mainnet_virtual_price: uint256, _a: uint256):
     assert msg.sender == self.syncer
-    self.balances_internal = _balances
+
+    token_supply: uint256 = ERC20(self.lp_token).totalSupply()
+
+    if token_supply > 0:
+        old_virtual_price: uint256 = self.get_virtual_price_internal()
+        for i in range(N_COINS):
+            self.balances_internal[i] = self.balances_internal[i] * new_mainnet_virtual_price / old_virtual_price
+
+    self.last_mainnet_virtual_price = new_mainnet_virtual_price
+
     self.initial_A = _a
     self.future_A = _a
 

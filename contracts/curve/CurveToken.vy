@@ -39,19 +39,15 @@ balanceOf: public(HashMap[address, uint256])
 allowances: HashMap[address, HashMap[address, uint256]]
 total_supply: uint256
 minter: public(address)
-syncer: public(address)
 
 
 @external
-def __init__(_syncer: address, _name: String[64], _symbol: String[32], _decimals: uint256, _starting_balance: uint256):
+def __init__(_name: String[64], _symbol: String[32], _decimals: uint256):
     self.name = _name
     self.symbol = _symbol
     self.decimals = _decimals
-    self.balanceOf[msg.sender] = _starting_balance
-    self.total_supply = 0 # This will be updated by the syncer after deployment
+    self.total_supply = 0
     self.minter = msg.sender
-    self.syncer = _syncer
-    log Transfer(ZERO_ADDRESS, msg.sender, _starting_balance)
 
 @external
 def set_minter(_minter: address):
@@ -153,6 +149,7 @@ def mint(_to: address, _value: uint256) -> bool:
     assert msg.sender == self.minter
     assert _to != ZERO_ADDRESS
 
+    self.total_supply += _value
     self.balanceOf[_to] += _value
     log Transfer(ZERO_ADDRESS, _to, _value)
     return True
@@ -168,12 +165,8 @@ def burnFrom(_to: address, _value: uint256) -> bool:
     assert msg.sender == self.minter
     assert _to != ZERO_ADDRESS
 
+    self.total_supply -= _value
     self.balanceOf[_to] -= _value
     log Transfer(_to, ZERO_ADDRESS, _value)
 
     return True
-
-@external
-def sync_total_supply(_supply: uint256):
-    assert msg.sender == self.syncer
-    self.total_supply = _supply

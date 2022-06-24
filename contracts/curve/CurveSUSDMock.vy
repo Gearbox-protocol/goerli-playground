@@ -154,6 +154,7 @@ kill_deadline: uint256
 kill_deadline_dt: constant(uint256) = 2 * 30 * 86400
 is_killed: bool
 
+last_mainnet_virtual_price: uint256
 
 @external
 def __init__(_syncer: address, _coins: address[N_COINS], _underlying_coins: address[N_COINS],
@@ -277,6 +278,15 @@ def coins(i: int128) -> address:
 def underlying_coins(i: int128) -> address:
     return self.underlying_coins_internal[convert(i, uint256)]
 
+@internal
+@view
+def get_virtual_price_internal() -> uint256:
+    D: uint256 = self.get_D(self._xp(self._stored_rates()))
+    # D is in the units similar to DAI (e.g. converted to precision 1e18)
+    # When balanced, D = n * x_u - total virtual value of the portfolio
+    token_supply: uint256 = self.token.totalSupply()
+    return D * PRECISION / token_supply
+
 @external
 @view
 def get_virtual_price() -> uint256:
@@ -284,11 +294,7 @@ def get_virtual_price() -> uint256:
     Returns portfolio virtual price (for calculating profit)
     scaled up by 1e18
     """
-    D: uint256 = self.get_D(self._xp(self._stored_rates()))
-    # D is in the units similar to DAI (e.g. converted to precision 1e18)
-    # When balanced, D = n * x_u - total virtual value of the portfolio
-    token_supply: uint256 = self.token.totalSupply()
-    return D * PRECISION / token_supply
+    return self.get_virtual_price_internal()
 
 
 @external
@@ -362,13 +368,16 @@ def add_liquidity(amounts: uint256[N_COINS], min_mint_amount: uint256):
             else:
                 difference = new_balances[i] - ideal_balance
             fees[i] = _fee * difference / FEE_DENOMINATOR
+            self.balances_internal[i] = new_balances[i] - (fees[i] * _admin_fee / FEE_DENOMINATOR)
             new_balances[i] -= fees[i]
         D2 = self.get_D_mem(rates, new_balances)
+    else:
+        self.balances_internal = new_balances
 
     # Calculate, how much pool tokens to mint
     mint_amount: uint256 = 0
     if token_supply == 0:
-        mint_amount = D1  # Take the dust if there was any
+        mint_amount = D1 * PRECISION / self.last_mainnet_virtual_price
     else:
         mint_amount = token_supply * (D2 - D0) / D0
 
@@ -467,6 +476,8 @@ def _exchange(i: int128, j: int128, dx: uint256, rates: uint256[N_COINS]) -> uin
     dy: uint256 = xp[j] - y
     dy_fee: uint256 = dy * self.fee / FEE_DENOMINATOR
     dy_admin_fee: uint256 = dy_fee * self.admin_fee / FEE_DENOMINATOR
+    self.balances_internal[i] = x * PRECISION / rates[i]
+    self.balances_internal[j] = (y + (dy_fee - dy_admin_fee)) * PRECISION / rates[j]
 
     _dy: uint256 = (dy - dy_fee) * PRECISION / rates[j]
 
@@ -544,6 +555,7 @@ def remove_liquidity(_amount: uint256, min_amounts: uint256[N_COINS]):
     for i in range(N_COINS):
         value: uint256 = self.balances_internal[i] * _amount / total_supply
         assert value >= min_amounts[i], "Withdrawal resulted in fewer coins than expected"
+        self.balances_internal[i] -= value
         amounts[i] = value
         if tethered[i] and not use_lending[i]:
             USDT(self.coins_internal[i]).transfer(msg.sender, value)
@@ -583,6 +595,7 @@ def remove_liquidity_imbalance(amounts: uint256[N_COINS], max_burn_amount: uint2
         else:
             difference = new_balances[i] - ideal_balance
         fees[i] = _fee * difference / FEE_DENOMINATOR
+        self.balances_internal[i] = new_balances[i] - (fees[i] * _admin_fee / FEE_DENOMINATOR)
         new_balances[i] -= fees[i]
     D2: uint256 = self.get_D_mem(rates, new_balances)
 
@@ -706,7 +719,15 @@ def unkill_me():
     self.is_killed = False
 
 @external
-def sync_pool(_balances: uint256[N_COINS], _a: uint256):
+def sync_pool(new_mainnet_virtual_price: uint256, _a: uint256):
     assert msg.sender == self.syncer
-    self.balances_internal = _balances
+
+    token_supply: uint256 = self.token.totalSupply()
+
+    if token_supply > 0:
+        old_virtual_price: uint256 = self.get_virtual_price_internal()
+        for i in range(N_COINS):
+            self.balances_internal[i] = self.balances_internal[i] * new_mainnet_virtual_price / old_virtual_price
+
+    self.last_mainnet_virtual_price = new_mainnet_virtual_price
     self.A = _a

@@ -10,41 +10,15 @@ import {
     CurveMetapoolMock,
     CurveStETHMock,
     CurveSUSDMock,
-    CurveToken,
-    ERC20Kovan__factory,
-    CurveStETHMock__factory,
-    CurveToken__factory
+    CurveToken
 } from "../types";
 import { Verifier, deploy } from "@gearbox-protocol/devops";
 import { SYNCER } from "./constants";
 import {
-  ERC20__factory,
-  RAY,
-  tokenDataByNetwork,
-  WAD,
+  tokenDataByNetwork
 } from "@gearbox-protocol/sdk";
 
 const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-
-const seedCoins = async function(coins: string[], poolAddress: string, signer: SignerWithAddress) {
-    for (let coin of coins) {
-        if (coin == ETH_ADDRESS) {
-            let pool = CurveStETHMock__factory.connect(poolAddress, signer)
-            await pool.donate_eth({value: WAD.mul(100)})
-        } else {
-            let token = ERC20Kovan__factory.connect(coin, signer);
-            await token.mint(poolAddress, RAY)
-        }
-    }
-}
-
-const seedCoinsMetapool = async function(coin0_addr: string, _3crv_addr: string, poolAddress: string, signer: SignerWithAddress) {
-    let token = ERC20Kovan__factory.connect(coin0_addr, signer);
-    await token.mint(poolAddress, RAY);
-
-    let _3crv = CurveToken__factory.connect(_3crv_addr, signer);
-    await _3crv.mint(poolAddress, RAY);
-}
 
 async function deployCurve() {
   dotenv.config({ path: ".env.local" });
@@ -71,11 +45,9 @@ async function deployCurve() {
   ]
 
   let tokenConstructorArgs = [
-      SYNCER,
       "Curve DAI/USDC/USDT LP Token",
       "3Crv",
-      18,
-      RAY
+      18
   ]
 
   const _3pool_token = await deploy<CurveToken>(
@@ -110,7 +82,7 @@ async function deployCurve() {
       constructorArguments: poolConstructorArgs
   })
 
-  //await seedCoins(coins, _3pool.address, deployer);
+  await _3pool_token.set_minter(_3pool.address)
 
   log.info(`3pool token mock was deployed at at ${_3pool_token.address}`);
   log.info(`3pool mock was deployed at at ${_3pool.address}`);
@@ -125,11 +97,9 @@ async function deployCurve() {
   ]
 
   tokenConstructorArgs = [
-      SYNCER,
       "Curve STETH/ETH LP Token",
       "steCRV",
-      18,
-      RAY
+      18
   ]
 
   const steCRV_token = await deploy<CurveToken>(
@@ -164,8 +134,6 @@ async function deployCurve() {
       constructorArguments: poolConstructorArgs
   })
 
-  //await seedCoins(coins, steCRV.address, deployer);
-
   await steCRV_token.set_minter(steCRV.address);
 
   log.info(`steCRV token mock was deployed at at ${steCRV_token.address}`);
@@ -183,11 +151,9 @@ async function deployCurve() {
   ]
 
   tokenConstructorArgs = [
-      SYNCER,
       "Curve DAI/USDC/USDC/SUSD LP Token",
       "sCRV",
-      18,
-      RAY
+      18
   ]
 
   const sCRV_token = await deploy<CurveToken>(
@@ -221,8 +187,6 @@ async function deployCurve() {
       constructorArguments: poolConstructorArgs
   })
 
-  //await seedCoins(coins, sCRV.address, deployer)
-
   await sCRV_token.set_minter(sCRV.address);
 
   log.info(`Curve SUSD token mock was deployed at at ${sCRV_token.address}`);
@@ -238,11 +202,9 @@ async function deployCurve() {
   ]
 
   tokenConstructorArgs = [
-      SYNCER,
       "gusd3CRV Token",
       "gusd3CRV",
-      18,
-      RAY
+      18
   ]
 
   const gusd_token = await deploy<CurveToken>(
@@ -277,8 +239,6 @@ async function deployCurve() {
       address: gusd.address,
       constructorArguments: poolConstructorArgs
   })
-
-  //await seedCoinsMetapool(coins[0], coins[1], gusd.address, deployer);
 
   await gusd_token.set_minter(gusd.address);
 
@@ -318,8 +278,6 @@ async function deployCurve() {
       constructorArguments: poolConstructorArgs
   })
 
-  //await seedCoinsMetapool(coins[0], coins[1], frax3crv.address, deployer);
-
   log.info(`Curve FRAX3CRV mock (implements ERC20) was deployed at at ${frax3crv.address}`);
 
   ///
@@ -355,11 +313,7 @@ async function deployCurve() {
       constructorArguments: poolConstructorArgs
   })
 
-  //await seedCoinsMetapool(coins[0], coins[1], lusd3crv.address, deployer);
-
   log.info(`Curve LUSD3CRV mock (implements ERC20) was deployed at at ${lusd3crv.address}`);
-
-  await _3pool_token.set_minter(_3pool.address)
 
 }
 

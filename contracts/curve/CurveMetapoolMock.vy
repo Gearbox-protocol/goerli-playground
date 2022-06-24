@@ -147,6 +147,8 @@ balanceOf: public(HashMap[address, uint256])
 allowance: public(HashMap[address, HashMap[address, uint256]])
 totalSupply: public(uint256)
 
+last_mainnet_virtual_price: uint256
+
 
 @external
 def __init__(
@@ -401,13 +403,8 @@ def get_D_mem(_rates: uint256[N_COINS], _balances: uint256[N_COINS], _amp: uint2
 
 
 @view
-@external
-def get_virtual_price() -> uint256:
-    """
-    @notice The current virtual price of the pool LP token
-    @dev Useful for calculating profits
-    @return LP token virtual price normalized to 1e18
-    """
+@internal
+def get_virtual_price_internal() -> uint256:
     amp: uint256 = self._A()
     rates: uint256[N_COINS] = [self.rate_multiplier, Curve(self.BASE_POOL).get_virtual_price()]
     xp: uint256[N_COINS] = self._xp_mem(rates, self.balances)
@@ -415,6 +412,16 @@ def get_virtual_price() -> uint256:
     # D is in the units similar to DAI (e.g. converted to precision 1e18)
     # When balanced, D = n * x_u - total virtual value of the portfolio
     return D * PRECISION / self.totalSupply
+
+@view
+@external
+def get_virtual_price() -> uint256:
+    """
+    @notice The current virtual price of the pool LP token
+    @dev Useful for calculating profits
+    @return LP token virtual price normalized to 1e18
+    """
+    return self.get_virtual_price_internal()
 
 
 @view
@@ -501,11 +508,13 @@ def add_liquidity(
             else:
                 difference = new_balance - ideal_balance
             fees[i] = base_fee * difference / FEE_DENOMINATOR
+            self.balances[i] = new_balances[i] - (fees[i] * ADMIN_FEE / FEE_DENOMINATOR)
             new_balances[i] -= fees[i]
         D2: uint256 = self.get_D_mem(rates, new_balances, amp)
         mint_amount = total_supply * (D2 - D0) / D0
     else:
-        mint_amount = D1  # Take the dust if there was any
+        self.balances = new_balances
+        mint_amount = D1 * PRECISION / self.last_mainnet_virtual_price
 
     assert mint_amount >= _min_mint_amount
 
@@ -703,6 +712,11 @@ def exchange(
     dy_admin_fee: uint256 = dy_fee * ADMIN_FEE / FEE_DENOMINATOR
     dy_admin_fee = dy_admin_fee * PRECISION / rates[j]
 
+    # Change balances exactly in same way as we change actual ERC20 coin amounts
+    self.balances[i] = old_balances[i] + dx
+    # When rounding errors happen, we undercharge admin fee in favor of LP
+    self.balances[j] = old_balances[j] - dy - dy_admin_fee
+
     ERC20(self.coins[i]).transferFrom(msg.sender, self, dx)
     ERC20(self.coins[j]).transfer(_receiver, dy)
 
@@ -803,6 +817,11 @@ def exchange_underlying(
         dy_admin_fee: uint256 = dy_fee * ADMIN_FEE / FEE_DENOMINATOR
         dy_admin_fee = dy_admin_fee * PRECISION / rates[meta_j]
 
+        # Change balances exactly in same way as we change actual ERC20 coin amounts
+        self.balances[meta_i] = old_balances[meta_i] + dx_w_fee
+        # When rounding errors happen, we undercharge admin fee in favor of LP
+        self.balances[meta_j] = old_balances[meta_j] - dy - dy_admin_fee
+
         # Withdraw from the base pool if needed
         if j > 0:
             out_amount: uint256 = ERC20(output_coin).balanceOf(self)
@@ -847,6 +866,7 @@ def remove_liquidity(
         old_balance: uint256 = self.balances[i]
         value: uint256 = old_balance * _burn_amount / total_supply
         assert value >= _min_amounts[i]
+        self.balances[i] = old_balance - value
         amounts[i] = value
         ERC20(self.coins[i]).transfer(_receiver, value)
 
@@ -897,6 +917,7 @@ def remove_liquidity_imbalance(
         else:
             difference = new_balance - ideal_balance
         fees[i] = base_fee * difference / FEE_DENOMINATOR
+        self.balances[i] = new_balances[i] - (fees[i] * ADMIN_FEE / FEE_DENOMINATOR)
         new_balances[i] -= fees[i]
     D2: uint256 = self.get_D_mem(rates, new_balances, amp)
 
@@ -1041,6 +1062,8 @@ def remove_liquidity_one_coin(
     dy, dy_fee = self._calc_withdraw_one_coin(_burn_amount, i, self.balances)
     assert dy >= _min_received
 
+    self.balances[i] -= (dy + dy_fee * ADMIN_FEE / FEE_DENOMINATOR)
+
     total_supply: uint256 = self.totalSupply - _burn_amount
     self.totalSupply = total_supply
     self.balanceOf[msg.sender] -= _burn_amount
@@ -1115,8 +1138,17 @@ def withdraw_admin_fees():
         ERC20(coin).transfer(receiver, amount)
 
 @external
-def sync_pool(_balances: uint256[N_COINS], _a: uint256):
+def sync_pool(new_mainnet_virtual_price: uint256, _a: uint256):
     assert msg.sender == self.syncer
-    self.balances = _balances
+
+    token_supply: uint256 = self.totalSupply
+
+    if token_supply > 0:
+        old_virtual_price: uint256 = self.get_virtual_price_internal()
+        for i in range(N_COINS):
+            self.balances[i] = self.balances[i] * new_mainnet_virtual_price / old_virtual_price
+
+    self.last_mainnet_virtual_price = new_mainnet_virtual_price
+
     self.initial_A = _a
     self.future_A = _a

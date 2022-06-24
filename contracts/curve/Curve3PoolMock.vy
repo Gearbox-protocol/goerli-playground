@@ -114,6 +114,7 @@ is_killed: bool
 kill_deadline: uint256
 KILL_DEADLINE_DT: constant(uint256) = 2 * 30 * 86400
 
+last_mainnet_virtual_price: uint256
 
 @external
 def __init__(
@@ -228,17 +229,22 @@ def get_D_mem(_balances: uint256[N_COINS], amp: uint256) -> uint256:
 
 
 @view
+@internal
+def get_virtual_price_internal() -> uint256:
+    D: uint256 = self.get_D(self._xp(), self._A())
+    # D is in the units similar to DAI (e.g. converted to precision 1e18)
+    # When balanced, D = n * x_u - total virtual value of the portfolio
+    token_supply: uint256 = self.token.totalSupply()
+    return D * PRECISION / token_supply
+
+@view
 @external
 def get_virtual_price() -> uint256:
     """
     Returns portfolio virtual price (for calculating profit)
     scaled up by 1e18
     """
-    D: uint256 = self.get_D(self._xp(), self._A())
-    # D is in the units similar to DAI (e.g. converted to precision 1e18)
-    # When balanced, D = n * x_u - total virtual value of the portfolio
-    token_supply: uint256 = self.token.totalSupply()
-    return D * PRECISION / token_supply
+    return self.get_virtual_price_internal()
 
 
 @view
@@ -333,13 +339,18 @@ def add_liquidity(amounts: uint256[N_COINS], min_mint_amount: uint256):
             else:
                 difference = new_balances[i] - ideal_balance
             fees[i] = _fee * difference / FEE_DENOMINATOR
+            self.balances[i] = new_balances[i] - (fees[i] * _admin_fee / FEE_DENOMINATOR)
             new_balances[i] -= fees[i]
         D2 = self.get_D_mem(new_balances, amp)
+    else:
+        self.balances = new_balances
 
     # Calculate, how much pool tokens to mint
     mint_amount: uint256 = 0
     if token_supply == 0:
-        mint_amount = D1  # Take the dust if there was any
+        # When depositing for the first time, need to divide by mainnet virtual price
+        # to ensure that mock and mainnet virtual prices are aligned
+        mint_amount = D1 * PRECISION / self.last_mainnet_virtual_price
     else:
         mint_amount = token_supply * (D2 - D0) / D0
 
@@ -472,6 +483,11 @@ def exchange(i: int128, j: int128, dx: uint256, min_dy: uint256):
     dy_admin_fee: uint256 = dy_fee * self.admin_fee / FEE_DENOMINATOR
     dy_admin_fee = dy_admin_fee * PRECISION / rates[j]
 
+    # Change balances exactly in same way as we change actual ERC20 coin amounts
+    self.balances[i] = old_balances[i] + dx_w_fee
+    # When rounding errors happen, we undercharge admin fee in favor of LP
+    self.balances[j] = old_balances[j] - dy - dy_admin_fee
+
     # "safeTransfer" which works for ERC20s which return bool or not
     _response = raw_call(
         self.coins[j],
@@ -498,6 +514,7 @@ def remove_liquidity(_amount: uint256, min_amounts: uint256[N_COINS]):
     for i in range(N_COINS):
         value: uint256 = self.balances[i] * _amount / total_supply
         assert value >= min_amounts[i], "Withdrawal resulted in fewer coins than expected"
+        self.balances[i] -= value
         amounts[i] = value
 
         # "safeTransfer" which works for ERC20s which return bool or not
@@ -511,7 +528,7 @@ def remove_liquidity(_amount: uint256, min_amounts: uint256[N_COINS]):
             max_outsize=32,
         )  # dev: failed transfer
         if len(_response) > 0:
-            assert convert(_response, bool)  # dev: failed transfer
+            assert convert(_response, bool), "Failed transfer"  # dev: failed transfer
 
     self.token.burnFrom(msg.sender, _amount)  # dev: insufficient funds
 
@@ -544,6 +561,7 @@ def remove_liquidity_imbalance(amounts: uint256[N_COINS], max_burn_amount: uint2
         else:
             difference = new_balances[i] - ideal_balance
         fees[i] = _fee * difference / FEE_DENOMINATOR
+        self.balances[i] = new_balances[i] - (fees[i] * _admin_fee / FEE_DENOMINATOR)
         new_balances[i] -= fees[i]
     D2: uint256 = self.get_D_mem(new_balances, amp)
 
@@ -671,6 +689,7 @@ def remove_liquidity_one_coin(_token_amount: uint256, i: int128, min_amount: uin
     dy, dy_fee = self._calc_withdraw_one_coin(_token_amount, i)
     assert dy >= min_amount, "Not enough coins removed"
 
+    self.balances[i] -= (dy + dy_fee * self.admin_fee / FEE_DENOMINATOR)
     self.token.burnFrom(msg.sender, _token_amount)  # dev: insufficient funds
 
     # "safeTransfer" which works for ERC20s which return bool or not
@@ -839,8 +858,17 @@ def unkill_me():
     self.is_killed = False
 
 @external
-def sync_pool(_balances: uint256[N_COINS], _a: uint256):
+def sync_pool(new_mainnet_virtual_price: uint256, _a: uint256):
     assert msg.sender == self.syncer
-    self.balances = _balances
+
+    token_supply: uint256 = self.token.totalSupply()
+
+    if token_supply > 0:
+        old_virtual_price: uint256 = self.get_virtual_price_internal()
+        for i in range(N_COINS):
+            self.balances[i] = self.balances[i] * new_mainnet_virtual_price / old_virtual_price
+
+    self.last_mainnet_virtual_price = new_mainnet_virtual_price
+
     self.initial_A = _a
     self.future_A = _a
