@@ -27,6 +27,8 @@ interface Factory:
     def convert_fees() -> bool: nonpayable
     def fee_receiver(_base_pool: address) -> address: view
 
+interface Syncer:
+    def isSyncer(addr: address) -> bool: view
 
 event Transfer:
     sender: indexed(address)
@@ -1139,7 +1141,7 @@ def withdraw_admin_fees():
 
 @external
 def sync_pool(new_mainnet_virtual_price: uint256, _a: uint256):
-    assert msg.sender == self.syncer
+    assert Syncer(self.syncer).isSyncer(msg.sender)
 
     token_supply: uint256 = self.totalSupply
 
@@ -1152,3 +1154,8 @@ def sync_pool(new_mainnet_virtual_price: uint256, _a: uint256):
 
     self.initial_A = _a
     self.future_A = _a
+
+@external
+def change_syncer(syncer_address: address):
+    assert msg.sender == self.admin
+    self.syncer = syncer_address
