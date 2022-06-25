@@ -582,10 +582,10 @@
   dependencies:
     axios "^0.27.2"
 
-"@gearbox-protocol/sdk@^0.0.62":
-  version "0.0.62"
-  resolved "https://registry.yarnpkg.com/@gearbox-protocol/sdk/-/sdk-0.0.62.tgz#0b9415c03fc5aa88b30f4c671769e955645428b4"
-  integrity sha512-aa9YqwvKvQkGfZyq1BNWfd2VYWuKorj/w0jpcKcFjLoRxdmRMKdbg2ewFEbvjkkJ4LlsRXEZUHJ55ljzdztUrg==
+"@gearbox-protocol/sdk@^0.0.67":
+  version "0.0.67"
+  resolved "https://registry.yarnpkg.com/@gearbox-protocol/sdk/-/sdk-0.0.67.tgz#7ed6ed52fa773fb2957144d9959011ed40dc281f"
+  integrity sha512-4/1YI1N5bvfkZT1xeQtMiQCmUtsRMZTuLQnL5B+LG1b97dUx/idxgyMK1OChTG9ZFh+9JgF5SzqbTFcZ3RJbCw==
   dependencies:
     decimal.js-light "^2.5.1"
     moment "^2.29.1"

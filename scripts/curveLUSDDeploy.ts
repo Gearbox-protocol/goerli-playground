@@ -4,15 +4,10 @@ import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
 import * as dotenv from "dotenv";
 import { Logger } from "tslog";
-import {
-    CurveMetapoolMock
-} from "../types";
+import { CurveMetapoolMock } from "../types";
 import { deploy, waitForTransaction } from "@gearbox-protocol/devops";
 import { SYNCER } from "./constants";
-import {
-  tokenDataByNetwork,
-  contractsByNetwork
-} from "@gearbox-protocol/sdk";
+import { tokenDataByNetwork, contractsByNetwork } from "@gearbox-protocol/sdk";
 
 async function deployCurve() {
   dotenv.config({ path: ".env.local" });
@@ -31,32 +26,30 @@ async function deployCurve() {
   /// CURVE LUSD3CRV DEPLOYMENT
   ///
 
-  let coins = [
-      tokenDataByNetwork.Kovan.LUSD,
-      tokenDataByNetwork.Kovan["3Crv"]
-  ]
+  let coins = [tokenDataByNetwork.Kovan.LUSD, tokenDataByNetwork.Kovan["3Crv"]];
 
   let poolConstructorArgs = [
-      SYNCER,
-      "LUSD",
-      "LUSD",
-      coins[0],
-      18,
-      1500,
-      4000000,
-      deployer.address,
-      contractsByNetwork.Kovan.CONVEX_3CRV_POOL,
-      coins[1]
-  ]
+    SYNCER,
+    "LUSD",
+    "LUSD",
+    coins[0],
+    18,
+    1500,
+    4000000,
+    deployer.address,
+    contractsByNetwork.Kovan.CURVE_3CRV_POOL,
+    coins[1],
+  ];
 
   const lusd3crv = await deploy<CurveMetapoolMock>(
-      "CurveMetapoolMock",
-      log,
-      ...poolConstructorArgs
+    "CurveMetapoolMock",
+    log,
+    ...poolConstructorArgs
   );
 
-  log.info(`Curve LUSD3CRV mock (implements ERC20) was deployed at at ${lusd3crv.address}`);
-
+  log.info(
+    `Curve LUSD3CRV mock (implements ERC20) was deployed at at ${lusd3crv.address}`
+  );
 }
 
 deployCurve()
