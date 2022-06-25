@@ -1152,3 +1152,8 @@ def sync_pool(new_mainnet_virtual_price: uint256, _a: uint256):
 
     self.initial_A = _a
     self.future_A = _a
+
+@external
+def change_syncer(syncer_address: address):
+    assert msg.sender == self.admin
+    self.syncer = syncer_address
