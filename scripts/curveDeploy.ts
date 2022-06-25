@@ -10,6 +10,7 @@ import {
     CurveMetapoolMock,
     CurveStETHMock,
     CurveSUSDMock,
+    CurveSUSDDeposit,
     CurveToken
 } from "../types";
 import { Verifier, deploy, waitForTransaction } from "@gearbox-protocol/devops";
@@ -177,6 +178,20 @@ async function deployCurve() {
       ...poolConstructorArgs
   );
 
+  let depositConstructorArgs = [
+      coins,
+      coins,
+      sCRV.address,
+      sCRV_token.address
+  ]
+
+  const sCRV_deposit = await deploy<CurveSUSDDeposit>(
+      "CurveSUSDDeposit",
+      log,
+      ...depositConstructorArgs
+  )
+
+
   verifier.addContract({
       address: sCRV_token.address,
       constructorArguments: tokenConstructorArgs
@@ -185,6 +200,11 @@ async function deployCurve() {
   verifier.addContract({
       address: sCRV.address,
       constructorArguments: poolConstructorArgs
+  })
+
+  verifier.addContract({
+      address: sCRV_deposit.address,
+      constructorArguments: depositConstructorArgs
   })
 
   await waitForTransaction(sCRV_token.set_minter(sCRV.address));
