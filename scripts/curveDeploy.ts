@@ -311,8 +311,8 @@ async function deployCurve() {
 
   poolConstructorArgs = [
       SYNCER,
-      "Frax",
-      "FRAX",
+      "LUSD",
+      "",
       coins[0],
       18,
       1500,
