@@ -50,6 +50,8 @@ interface USDT:
     def transfer(_to: address, _value: uint256): nonpayable
     def transferFrom(_from: address, _to: address, _value: uint256): nonpayable
 
+interface Syncer:
+    def isSyncer(addr: address) -> bool: view
 
 # This can (and needs to) be changed at compile time
 N_COINS: constant(int128) = 4  # <- change
@@ -720,7 +722,7 @@ def unkill_me():
 
 @external
 def sync_pool(new_mainnet_virtual_price: uint256, _a: uint256):
-    assert msg.sender == self.syncer
+    assert Syncer(self.syncer).isSyncer(msg.sender)
 
     token_supply: uint256 = self.token.totalSupply()
 

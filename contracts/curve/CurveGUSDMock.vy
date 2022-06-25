@@ -25,6 +25,8 @@ interface Curve:
     def add_liquidity(amounts: uint256[BASE_N_COINS], min_mint_amount: uint256): nonpayable
     def remove_liquidity_one_coin(_token_amount: uint256, i: int128, min_amount: uint256): nonpayable
 
+interface Syncer:
+    def isSyncer(addr: address) -> bool: view
 
 # Events
 event TokenExchange:
@@ -1026,7 +1028,7 @@ def withdraw_admin_fees():
 
 @external
 def sync_pool(new_mainnet_virtual_price: uint256, _a: uint256):
-    assert msg.sender == self.syncer
+    assert Syncer(self.syncer).isSyncer(msg.sender)
 
     token_supply: uint256 = self.token.totalSupply()
 
@@ -1039,7 +1041,7 @@ def sync_pool(new_mainnet_virtual_price: uint256, _a: uint256):
 
     self.initial_A = _a
     self.future_A = _a
-    
+
 @external
 def change_syncer(syncer_address: address):
     assert msg.sender == self.owner

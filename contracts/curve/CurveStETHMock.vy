@@ -12,6 +12,8 @@ interface CurveToken:
     def mint(_to: address, _value: uint256) -> bool: nonpayable
     def burnFrom(_to: address, _value: uint256) -> bool: nonpayable
 
+interface Syncer:
+    def isSyncer(addr: address) -> bool: view
 
 # Events
 event TokenExchange:
@@ -840,7 +842,7 @@ def unkill_me():
 
 @external
 def sync_pool(new_mainnet_virtual_price: uint256, _a: uint256):
-    assert msg.sender == self.syncer
+    assert Syncer(self.syncer).isSyncer(msg.sender)
 
     token_supply: uint256 = ERC20(self.lp_token).totalSupply()
 
@@ -863,7 +865,7 @@ def donate_eth():
 def retrieve_eth():
     assert msg.sender == self.owner
     raw_call(msg.sender, b"", value=self.balance)
-    
+
 @external
 def change_syncer(syncer_address: address):
     assert msg.sender == self.owner

@@ -45,7 +45,7 @@ async function deployCurve() {
       1500,
       4000000,
       deployer.address,
-      contractsByNetwork.Kovan.CONVEX_3CRV_POOL,
+      contractsByNetwork.Kovan.CURVE_3CRV_POOL,
       coins[1]
   ]
 
