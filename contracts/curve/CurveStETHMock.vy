@@ -858,3 +858,8 @@ def sync_pool(new_mainnet_virtual_price: uint256, _a: uint256):
 @external
 def donate_eth():
     assert msg.value > 0
+
+@external
+def retrieve_eth():
+    assert msg.sender == self.owner
+    raw_call(msg.sender, b"", value=self.balance)
