@@ -863,3 +863,8 @@ def donate_eth():
 def retrieve_eth():
     assert msg.sender == self.owner
     raw_call(msg.sender, b"", value=self.balance)
+    
+@external
+def change_syncer(syncer_address: address):
+    assert msg.sender == self.owner
+    self.syncer = syncer_address
