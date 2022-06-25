@@ -12,7 +12,7 @@ import {
     CurveSUSDMock,
     CurveToken
 } from "../types";
-import { Verifier, deploy } from "@gearbox-protocol/devops";
+import { Verifier, deploy, waitForTransaction } from "@gearbox-protocol/devops";
 import { SYNCER } from "./constants";
 import {
   tokenDataByNetwork
@@ -82,7 +82,7 @@ async function deployCurve() {
       constructorArguments: poolConstructorArgs
   })
 
-  await _3pool_token.set_minter(_3pool.address)
+  await waitForTransaction(_3pool_token.set_minter(_3pool.address))
 
   log.info(`3pool token mock was deployed at at ${_3pool_token.address}`);
   log.info(`3pool mock was deployed at at ${_3pool.address}`);
@@ -134,7 +134,7 @@ async function deployCurve() {
       constructorArguments: poolConstructorArgs
   })
 
-  await steCRV_token.set_minter(steCRV.address);
+  await waitForTransaction(steCRV_token.set_minter(steCRV.address));
 
   log.info(`steCRV token mock was deployed at at ${steCRV_token.address}`);
   log.info(`steCRV mock was deployed at at ${steCRV.address}`);
@@ -187,7 +187,7 @@ async function deployCurve() {
       constructorArguments: poolConstructorArgs
   })
 
-  await sCRV_token.set_minter(sCRV.address);
+  await waitForTransaction(sCRV_token.set_minter(sCRV.address));
 
   log.info(`Curve SUSD token mock was deployed at at ${sCRV_token.address}`);
   log.info(`Curve SUSD mock was deployed at at ${sCRV.address}`);
@@ -240,7 +240,7 @@ async function deployCurve() {
       constructorArguments: poolConstructorArgs
   })
 
-  await gusd_token.set_minter(gusd.address);
+  await waitForTransaction(gusd_token.set_minter(gusd.address));
 
   log.info(`Curve gusd3CRV token mock was deployed at at ${gusd_token.address}`);
   log.info(`Curve gusd3CRV mock was deployed at at ${gusd.address}`);

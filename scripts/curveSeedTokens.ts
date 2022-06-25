@@ -93,13 +93,13 @@ async function seedCurveTokens() {
 
   const _3poolAddress = contractsByNetwork.Kovan.CURVE_3CRV_POOL
 
-  waitForTransaction(dai.mint(_3poolAddress, WAD.mul(10 ** 9)))
-  waitForTransaction(usdc.mint(_3poolAddress, USDC_UNIT.mul(10 ** 9)))
-  waitForTransaction(usdt.mint(_3poolAddress, USDC_UNIT.mul(10 ** 9)))
+  await waitForTransaction(dai.mint(_3poolAddress, WAD.mul(10 ** 9)))
+  await waitForTransaction(usdc.mint(_3poolAddress, USDC_UNIT.mul(10 ** 9)))
+  await waitForTransaction(usdt.mint(_3poolAddress, USDC_UNIT.mul(10 ** 9)))
 
-  waitForTransaction(dai.mint(deployer.address, WAD.mul(10 ** 7)))
-  waitForTransaction(usdc.mint(deployer.address, USDC_UNIT.mul(10 ** 7)))
-  waitForTransaction(usdt.mint(deployer.address, USDC_UNIT.mul(10 ** 7)))
+  await waitForTransaction(dai.mint(deployer.address, WAD.mul(10 ** 7)))
+  await waitForTransaction(usdc.mint(deployer.address, USDC_UNIT.mul(10 ** 7)))
+  await waitForTransaction(usdt.mint(deployer.address, USDC_UNIT.mul(10 ** 7)))
 
   const _3pool = Curve3PoolMock__factory.connect(
       _3poolAddress,
@@ -108,11 +108,11 @@ async function seedCurveTokens() {
 
   // Adding initial liquidity to 3Pool in order to seed metapools
 
-  waitForTransaction(dai.approve(_3poolAddress, MAX_INT))
-  waitForTransaction(usdc.approve(_3poolAddress, MAX_INT))
-  waitForTransaction(usdt.approve(_3poolAddress, MAX_INT))
+  await waitForTransaction(dai.approve(_3poolAddress, MAX_INT))
+  await waitForTransaction(usdc.approve(_3poolAddress, MAX_INT))
+  await waitForTransaction(usdt.approve(_3poolAddress, MAX_INT))
 
-  waitForTransaction(_3pool.add_liquidity(
+  await waitForTransaction(_3pool.add_liquidity(
       [WAD.mul(10 ** 7), USDC_UNIT.mul(10 ** 7), USDC_UNIT.mul(10 ** 7)],
       0
   ));
@@ -124,10 +124,10 @@ async function seedCurveTokens() {
   const sCRV_address = contractsByNetwork.Kovan.CURVE_SUSD_POOL
 
   // No transactions are dependent on those mints, so we can fire them into mempool async
-  await dai.mint(sCRV_address, WAD.mul(10 ** 9))
-  await usdc.mint(sCRV_address, USDC_UNIT.mul(10 ** 9))
-  await usdt.mint(sCRV_address, USDC_UNIT.mul(10 ** 9))
-  await susd.mint(sCRV_address, USDC_UNIT.mul(10 ** 9))
+  await waitForTransaction(dai.mint(sCRV_address, WAD.mul(10 ** 9)))
+  await waitForTransaction(usdc.mint(sCRV_address, USDC_UNIT.mul(10 ** 9)))
+  await waitForTransaction(usdt.mint(sCRV_address, USDC_UNIT.mul(10 ** 9)))
+  await waitForTransaction(susd.mint(sCRV_address, USDC_UNIT.mul(10 ** 9)))
 
   //
   // Seeding steCRV
@@ -143,8 +143,8 @@ async function seedCurveTokens() {
 
   const steCRV = CurveStETHMock__factory.connect(steCRV_address, deployer)
 
-  await steth.mint(steCRV_address, WAD.mul(1500))
-  await steCRV.donate_eth({value: WAD.mul(1500)})
+  await waitForTransaction(steth.mint(steCRV_address, WAD.mul(1500)))
+  await waitForTransaction(steCRV.donate_eth({value: WAD.mul(1500)}))
 
   //
   // Seeding gusd3CRV
@@ -152,8 +152,8 @@ async function seedCurveTokens() {
 
   const gusd3CRVAddress = contractsByNetwork.Kovan.CURVE_GUSD_POOL
 
-  await gusd.mint(gusd3CRVAddress, GUSD_UNIT.mul(10 ** 6))
-  await _3crv.transfer(gusd3CRVAddress, WAD.mul(10 ** 6))
+  await waitForTransaction(gusd.mint(gusd3CRVAddress, GUSD_UNIT.mul(10 ** 6)))
+  await waitForTransaction(_3crv.transfer(gusd3CRVAddress, WAD.mul(10 ** 6)))
 
   //
   // Seeding frax3CRV
@@ -161,8 +161,8 @@ async function seedCurveTokens() {
 
   const frax3CRVAddress = contractsByNetwork.Kovan.CURVE_FRAX_POOL
 
-  await frax.mint(frax3CRVAddress, WAD.mul(10 ** 6))
-  await _3crv.transfer(frax3CRVAddress, WAD.mul(10 ** 6))
+  await waitForTransaction(frax.mint(frax3CRVAddress, WAD.mul(10 ** 6)))
+  await waitForTransaction(_3crv.transfer(frax3CRVAddress, WAD.mul(10 ** 6)))
 
   //
   // Seeding gusd3CRV
@@ -170,8 +170,8 @@ async function seedCurveTokens() {
 
   const lusd3CRVAddress = contractsByNetwork.Kovan.CURVE_LUSD_POOL
 
-  await lusd.mint(lusd3CRVAddress, WAD.mul(10 ** 6))
-  await _3crv.transfer(lusd3CRVAddress, WAD.mul(10 ** 6))
+  await waitForTransaction(lusd.mint(lusd3CRVAddress, WAD.mul(10 ** 6)))
+  await waitForTransaction(_3crv.transfer(lusd3CRVAddress, WAD.mul(10 ** 6)))
 }
 
 seedCurveTokens()
