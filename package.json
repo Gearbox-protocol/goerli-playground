@@ -36,7 +36,7 @@
   "dependencies": {
     "@chainlink/contracts": "^0.4.0",
     "@gearbox-protocol/devops": "^0.0.16",
-    "@gearbox-protocol/sdk": "^0.0.58",
+    "@gearbox-protocol/sdk": "^0.0.62",
     "@openzeppelin/contracts": "^4.5.0",
     "hardhat-contract-sizer": "^2.5.1",
     "tslog": "^3.3.3"
@@ -48,6 +48,7 @@
     "test": "npx hardhat test",
     "fork": "scripts/fork.sh",
     "typegen": "npx typechain --target=ethers-v5 './artifacts/!(build-info)/**/+([a-zA-Z0-9_]).json' --out-dir types",
-    "abifix": "npx ts-node scripts/abifix.ts"
+    "abifix": "npx ts-node scripts/abifix.ts",
+    "verify": "npx hardhat run node_modules/@gearbox-protocol/devops/lib/verifier/verify.js"
   }
 }
