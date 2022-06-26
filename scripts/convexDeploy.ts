@@ -14,18 +14,19 @@ import {
   tokenDataByNetwork,
   WAD,
   ConvexLPToken,
-  TokenType
+  TokenType,
+  convexTokens,
 } from "@gearbox-protocol/sdk";
 
 const hre = require("hardhat");
 
 const tokenList: ConvexLPToken[] = [
-    "cvx3Crv",
-    "cvxsteCRV",
-    "cvxcrvPlain3andSUSD",
-    "cvxFRAX3CRV",
-    "cvxgusd3CRV"
-]
+  "cvx3Crv",
+  "cvxsteCRV",
+  "cvxcrvPlain3andSUSD",
+  "cvxFRAX3CRV",
+  "cvxgusd3CRV",
+];
 
 async function deployConvex() {
   dotenv.config({ path: ".env.local" });
@@ -54,14 +55,13 @@ async function deployConvex() {
   );
 
   for (let poolToken of tokenList) {
-
-    const convexData = supportedTokens[poolToken]
+    const convexData = convexTokens[poolToken];
 
     if (convexData.type != TokenType.CONVEX_LP_TOKEN) {
-        throw("Incorrect convex data")
+      throw "Incorrect convex data";
     }
 
-    const crvTknAddress = tokenDataByNetwork.Kovan[convexData.underlying]
+    const crvTknAddress = tokenDataByNetwork.Kovan[convexData.underlying];
 
     const crvTkn = ERC20Kovan__factory.connect(crvTknAddress, deployer);
 
@@ -70,12 +70,14 @@ async function deployConvex() {
     await waitForTransaction(crvTkn.approve(convexManager.address, RAY));
     await waitForTransaction(crvToken.approve(convexManager.address, 0));
     await waitForTransaction(crvToken.approve(convexManager.address, RAY));
-    await waitForTransaction(convexManager.addBasePool(poolToken, convexData.pid));
+    await waitForTransaction(
+      convexManager.addBasePool(poolToken, convexData.pid)
+    );
   }
 
   const totalPools = (await convexManager.deployedPoolsLength()).toNumber();
 
- await hre.run("verify:verify", {
+  await hre.run("verify:verify", {
     address: convexManager.address,
     constructorArguments: [SYNCER, tokenDataByNetwork.Kovan.CRV],
   });
@@ -84,8 +86,6 @@ async function deployConvex() {
     const tkn = tokenList[i];
     log.debug(`Pool #${i} for ${tkn}: ${await convexManager.deployedPools(i)}`);
   }
-
-
 }
 
 deployConvex()
