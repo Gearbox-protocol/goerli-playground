@@ -58,12 +58,12 @@ contract KovanConvexManager is Ownable {
     }
 
     // dev: This function assumes that RAY=1e27 of CRV is allowed to this contract per pool
-    function addBasePool(address _curveLpToken)
+    function addBasePool(address _curveLpToken, uint256 _pid)
         external
         onlyOwner
         returns (address)
     {
-        address newPool = Booster(booster).addPool(_curveLpToken);
+        address newPool = Booster(booster).addPool(_curveLpToken, _pid);
         IERC20(crv).transferFrom(msg.sender, newPool, RAY);
         deployedPools.push(newPool);
         return newPool;

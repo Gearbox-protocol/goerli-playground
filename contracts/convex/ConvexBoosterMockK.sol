@@ -62,7 +62,7 @@ contract Booster{
     }
 
     //index(pid) -> pool
-    PoolInfo[] public poolInfo;
+    mapping(uint256 => PoolInfo) public poolInfo;
     mapping(address => bool) public gaugeMap;
 
     event Deposited(address indexed user, uint256 indexed poolid, uint256 amount);
@@ -109,15 +109,15 @@ contract Booster{
     /// END SETTER SECTION ///
 
     function poolLength() external view returns (uint256) {
-        return poolInfo.length;
+        revert("Not implemented");
     }
 
     //create a new pool
-    function addPool(address _lpToken) external returns(address){
+    function addPool(address _lpToken, uint256 _pid) external returns(address){
         require(msg.sender==poolManager, "!add");
 
         //the next pool's pid
-        uint256 pid = poolInfo.length;
+        uint256 pid = _pid;
 
         string memory name = string(abi.encodePacked("Convex ", IERC20Metadata(_lpToken).name()));
         string memory symbol = string(abi.encodePacked("cvx", IERC20Metadata(_lpToken).symbol()));
@@ -126,17 +126,14 @@ contract Booster{
 
         address pool = IConvexPoolFactory(rewardFactory).deployBasePool(pid, token, crv, address(this), owner);
 
-        //add the new pool
-        poolInfo.push(
-            PoolInfo({
-                lptoken: _lpToken,
-                token: token,
-                gauge: address(0),
-                crvRewards: pool,
-                stash: address(0),
-                shutdown: false
-            })
-        );
+        poolInfo[pid] = PoolInfo({
+            lptoken: _lpToken,
+            token: token,
+            gauge: address(0),
+            crvRewards: pool,
+            stash: address(0),
+            shutdown: false
+        });
 
         return pool;
     }
@@ -159,21 +156,7 @@ contract Booster{
     //  unstake and pull all lp tokens to this address
     //  only allow withdrawals
     function shutdownSystem() external{
-        require(msg.sender == owner, "!auth");
-        isShutdown = true;
-
-        for(uint i=0; i < poolInfo.length; i++){
-            PoolInfo storage pool = poolInfo[i];
-            if (pool.shutdown) continue;
-
-            address token = pool.lptoken;
-            address gauge = pool.gauge;
-
-            //withdraw from gauge
-            try IStaker(staker).withdrawAll(token,gauge){
-                pool.shutdown = true;
-            }catch{}
-        }
+        revert("Not implemented");
     }
 
 
