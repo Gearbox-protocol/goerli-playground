@@ -71,7 +71,7 @@ async function deployConvex() {
     await waitForTransaction(crvToken.approve(convexManager.address, 0));
     await waitForTransaction(crvToken.approve(convexManager.address, RAY));
     await waitForTransaction(
-      convexManager.addBasePool(poolToken, convexData.pid)
+      convexManager.addBasePool(crvTkn.address, convexData.pid)
     );
   }
 
