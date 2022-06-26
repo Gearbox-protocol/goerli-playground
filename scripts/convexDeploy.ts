@@ -10,17 +10,22 @@ import { SYNCER } from "./constants";
 import {
   ERC20__factory,
   RAY,
+  supportedTokens,
   tokenDataByNetwork,
   WAD,
+  ConvexLPToken,
+  TokenType
 } from "@gearbox-protocol/sdk";
 
 const hre = require("hardhat");
 
-const crvList = [
-  tokenDataByNetwork.Kovan["3Crv"],
-  tokenDataByNetwork.Kovan.steCRV,
-  // tokenDataByNetwork.Kovan.crvPlain3andSUSD,
-];
+const tokenList: ConvexLPToken[] = [
+    "cvx3Crv",
+    "cvxsteCRV",
+    "cvxcrvPlain3andSUSD",
+    "cvxFRAX3CRV",
+    "cvxgusd3CRV"
+]
 
 async function deployConvex() {
   dotenv.config({ path: ".env.local" });
@@ -48,15 +53,24 @@ async function deployConvex() {
     deployer
   );
 
-  for (let poolToken of crvList) {
-    const crvTkn = ERC20Kovan__factory.connect(poolToken, deployer);
+  for (let poolToken of tokenList) {
+
+    const convexData = supportedTokens[poolToken]
+
+    if (convexData.type != TokenType.CONVEX_LP_TOKEN) {
+        throw("Incorrect convex data")
+    }
+
+    const crvTknAddress = tokenDataByNetwork.Kovan[convexData.underlying]
+
+    const crvTkn = ERC20Kovan__factory.connect(crvTknAddress, deployer);
 
     await waitForTransaction(crvToken.mint(deployer.address, RAY));
     await waitForTransaction(crvTkn.approve(convexManager.address, 0));
     await waitForTransaction(crvTkn.approve(convexManager.address, RAY));
     await waitForTransaction(crvToken.approve(convexManager.address, 0));
     await waitForTransaction(crvToken.approve(convexManager.address, RAY));
-    await waitForTransaction(convexManager.addBasePool(poolToken));
+    await waitForTransaction(convexManager.addBasePool(poolToken, convexData.pid));
   }
 
   const totalPools = (await convexManager.deployedPoolsLength()).toNumber();
@@ -67,11 +81,11 @@ async function deployConvex() {
   });
 
   for (let i = 0; i < totalPools; i++) {
-    const tkn = crvList[i];
-    log.debug(`Pool #${i}: ${await convexManager.deployedPools(i)}`);
+    const tkn = tokenList[i];
+    log.debug(`Pool #${i} for ${tkn}: ${await convexManager.deployedPools(i)}`);
   }
 
- 
+
 }
 
 deployConvex()
