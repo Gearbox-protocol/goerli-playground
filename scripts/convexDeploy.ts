@@ -70,7 +70,7 @@ async function deployConvex() {
     await waitForTransaction(crvTkn.approve(convexManager.address, RAY));
     await waitForTransaction(crvToken.approve(convexManager.address, 0));
     await waitForTransaction(crvToken.approve(convexManager.address, RAY));
-    await waitForTransaction(convexManager.addBasePool(poolToken, convexData.pid));
+    await waitForTransaction(convexManager.addBasePool(crvTkn.address, convexData.pid));
   }
 
   const totalPools = (await convexManager.deployedPoolsLength()).toNumber();
