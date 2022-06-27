@@ -12,7 +12,7 @@ import {
 
 import * as dotenv from "dotenv";
 import { Logger } from "tslog";
-import { ERC20Kovan__factory, KovanConvexManager, BaseRewardPool__factory } from "../types";
+import { ERC20Kovan__factory, KovanConvexManager, BaseRewardPool__factory, ClaimZap } from "../types";
 import { deploy, waitForTransaction } from "../utils/transaction";
 import { SYNCER } from "./constants";
 import { Verifier } from "@gearbox-protocol/devops";
@@ -126,6 +126,20 @@ async function deployConvex() {
     log.info(`Pool for ${poolToken} deployed at: ${poolAddress}`)
     log.info(`${poolToken} token deployed at: ${stakingToken}`)
   }
+
+  const claimZap = await deploy<ClaimZap>(
+      "ClaimZap",
+      log,
+      tokenDataByNetwork.Kovan.CRV,
+      cvxAddr
+  )
+
+  verifier.addContract({
+    address: claimZap.address,
+    constructorArguments: [tokenDataByNetwork.Kovan.CRV, cvxAddr],
+  });
+
+  log.info(`ClaimZap was deployed at ${claimZap.address}`);
 
 }
 
