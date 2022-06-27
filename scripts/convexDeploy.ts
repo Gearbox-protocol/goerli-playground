@@ -12,12 +12,10 @@ import {
 
 import * as dotenv from "dotenv";
 import { Logger } from "tslog";
-import { ERC20Kovan__factory, KovanConvexManager } from "../types";
+import { ERC20Kovan__factory, KovanConvexManager, BaseRewardPool__factory } from "../types";
 import { deploy, waitForTransaction } from "../utils/transaction";
 import { SYNCER } from "./constants";
 import { Verifier } from "@gearbox-protocol/devops";
-
-const hre = require("hardhat");
 
 const tokenList: ConvexLPToken[] = [
   "cvx3Crv",
@@ -88,10 +86,26 @@ async function deployConvex() {
     log.debug("Approving: [2/2]");
     await waitForTransaction(crvToken.approve(convexManager.address, RAY));
 
-    log.debug("Adding base pool with bid:", convexData.pid);
+    log.debug("Adding base pool with pid:", convexData.pid);
     await waitForTransaction(
       convexManager.addBasePool(crvTkn.address, convexData.pid)
     );
+
+    const numPools = await convexManager.deployedPoolsLength()
+    const poolAddress = await convexManager.deployedPools(numPools.sub(1))
+
+    const basePool = BaseRewardPool__factory.connect(poolAddress, deployer)
+
+    const pid = convexData.pid
+    const stakingToken = await basePool.stakingToken()
+    const rewardToken = crvToken.address
+    const operator = await convexManager.booster()
+    const manager = convexManager.address
+
+    verifier.addContract({
+      address: poolAddress,
+      constructorArguments: [pid, stakingToken, rewardToken, operator, manager],
+    });
   }
 
   const totalPools = (await convexManager.deployedPoolsLength()).toNumber();
