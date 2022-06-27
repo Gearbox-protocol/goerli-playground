@@ -53,6 +53,22 @@ async function deployConvex() {
 
   log.info(`KovanConvexManager was deployed at ${convexManager.address}`);
 
+  const boosterAddr = await convexManager.booster();
+  const cvxAddr = await convexManager.cvx();
+
+  verifier.addContract({
+      address: boosterAddr,
+      constructorArguments: [cvxAddr, tokenDataByNetwork.Kovan.CRV]
+  });
+
+  verifier.addContract({
+      address: cvxAddr,
+      constructorArguments: []
+  });
+
+  log.info(`Convex Booster mock was deployed at ${boosterAddr}`);
+  log.info(`CVX token mock was deployed at ${cvxAddr}`);
+
   log.info("Adding pools");
   const crvToken = ERC20Kovan__factory.connect(
     tokenDataByNetwork.Kovan.CRV,
@@ -91,29 +107,26 @@ async function deployConvex() {
       convexManager.addBasePool(crvTkn.address, convexData.pid)
     );
 
-    const numPools = await convexManager.deployedPoolsLength()
-    const poolAddress = await convexManager.deployedPools(numPools.sub(1))
+    const numPools = await convexManager.deployedPoolsLength();
+    const poolAddress = await convexManager.deployedPools(numPools.sub(1));
 
-    const basePool = BaseRewardPool__factory.connect(poolAddress, deployer)
+    const basePool = BaseRewardPool__factory.connect(poolAddress, deployer);
 
-    const pid = convexData.pid
-    const stakingToken = await basePool.stakingToken()
-    const rewardToken = crvToken.address
-    const operator = await convexManager.booster()
-    const manager = convexManager.address
+    const pid = convexData.pid;
+    const stakingToken = await basePool.stakingToken();
+    const rewardToken = crvToken.address;
+    const operator = await convexManager.booster();
+    const manager = convexManager.address;
 
     verifier.addContract({
       address: poolAddress,
       constructorArguments: [pid, stakingToken, rewardToken, operator, manager],
     });
+
+    log.info(`Pool for ${poolToken} deployed at: ${poolAddress}`)
+    log.info(`${poolToken} token deployed at: ${stakingToken}`)
   }
 
-  const totalPools = (await convexManager.deployedPoolsLength()).toNumber();
-
-  for (let i = 0; i < totalPools; i++) {
-    const tkn = tokenList[i];
-    log.debug(`Pool #${i} for ${tkn}: ${await convexManager.deployedPools(i)}`);
-  }
 }
 
 deployConvex()
