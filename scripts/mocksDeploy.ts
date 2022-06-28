@@ -38,7 +38,6 @@ import {
   ConvexLPToken,
   ConvexLPTokenData,
   ConvexPoolContract,
-  ConvexStakedPhantomToken,
   YearnLPToken,
   convexTokens,
   yearnTokens,
@@ -46,10 +45,7 @@ import {
   RAY,
   MAX_INT,
   ICurvePool__factory,
-  IYVault__factory,
-  ConvexStakedPositionToken,
-  LidoV1Gateway,
-  CurveV1StETHPoolGateway
+  IYVault__factory
 } from "@gearbox-protocol/sdk";
 import { providers, BigNumber } from "ethers";
 import fs from 'fs';
@@ -112,22 +108,6 @@ async function deployLido(
     waitForTransaction(lido.syncExchangeRate(totalPooledEther, totalShares));
 
     log.info(`Lido mock synced - totalPooledEther: ${totalPooledEther}, totalShares: ${totalShares}`);
-
-    const lidoGateway = await deploy<LidoV1Gateway>(
-        "LidoV1Gateway",
-        log,
-        tokenDataByNetwork.Kovan.WETH,
-        lido.address
-    )
-
-    log.info(`Lido gateway deployed at: ${lidoGateway.address}`);
-
-    verifier.addContract({
-        address: lidoGateway.address,
-        constructorArguments: [tokenDataByNetwork.Kovan.WETH, lido.address]
-    })
-
-    contractAddresses["LIDO_STETH_GATEWAY"] = lidoGateway.address;
 }
 
 async function deployCurve(
@@ -259,27 +239,6 @@ async function deployCurve(
     waitForTransaction(steCRV.sync_pool(virtualPrice, a));
 
     log.info(`steCRV pool synced with params - virtualPrice: ${virtualPrice}, A: ${a}`)
-
-    const steCRVGateway = await deploy<CurveV1StETHPoolGateway>(
-        "CurveV1StETHPoolGateway",
-        log,
-        tokenDataByNetwork.Kovan.WETH,
-        contractAddresses["STETH"] as string,
-        steCRV.address
-    );
-
-    verifier.addContract({
-        address: steCRVGateway.address,
-        constructorArguments: [
-            tokenDataByNetwork.Kovan.WETH,
-            contractAddresses["STETH"] as string,
-            steCRV.address
-        ]
-    })
-
-    log.info(`steCRV gateway was deployed at ${steCRVGateway.address}`);
-
-    contractAddresses["CURVE_STETH_GATEWAY"] = steCRVGateway.address;
 
     ///
     /// CURVE SUSD DEPLOYMENT
@@ -802,27 +761,6 @@ async function deployConvex(
       ))
 
       log.info(`Synced Convex pool for ${poolToken} - rewardPerTokenStored: ${mainnetRewardStored}`)
-
-      // DEPLOY STAKED PHANTOM TOKEN
-
-      // TODO: CHECK WHETHER THIS ACTUALLY WORKS
-      const phantomToken = await deploy<ConvexStakedPositionToken>(
-        "ConvexStakedPositionToken",
-        log,
-        poolAddress,
-        stakingToken
-      );
-
-      log.info(`Staked phantom token for ${poolToken} deployed at: ${phantomToken.address}`)
-
-      verifier.addContract({
-        address: phantomToken.address,
-        constructorArguments: [poolAddress, stakingToken]
-      })
-
-      const phantomTokenSymbol = (await phantomToken.symbol()) as ConvexStakedPhantomToken;
-
-      contractAddresses[phantomTokenSymbol] = phantomToken.address;
 
       // DEPLOY AND SYNC EXTRA REWARDS
 
