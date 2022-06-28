@@ -39,7 +39,12 @@ const config: HardhatUserConfig = {
     compilers: [{ version: "0.8.10", settings: {} }],
   },
   vyper: {
-    compilers: [{ version: "0.3.0"}, { version: "0.2.4"}, { version: "0.2.8"}, { version: "0.2.5"}]
+    compilers: [
+      { version: "0.3.0" },
+      { version: "0.2.4" },
+      { version: "0.2.8" },
+      { version: "0.2.5" },
+    ],
   },
   networks: {
     hardhat: {
@@ -65,6 +70,7 @@ const config: HardhatUserConfig = {
       url: `${process.env.ETH_KOVAN_PROVIDER}`,
       accounts: [KOVAN_PRIVATE_KEY, KOVAN2_PRIVATE_KEY],
       gasPrice: 2e9,
+      gasMultiplier: 1.5,
       minGasPrice: 1e9,
       timeout: 0,
       allowUnlimitedContractSize: false,
