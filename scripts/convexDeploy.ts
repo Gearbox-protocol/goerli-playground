@@ -12,7 +12,12 @@ import {
 
 import * as dotenv from "dotenv";
 import { Logger } from "tslog";
-import { ERC20Kovan__factory, KovanConvexManager, BaseRewardPool__factory, ClaimZap } from "../types";
+import {
+  ERC20Kovan__factory,
+  KovanConvexManager,
+  BaseRewardPool__factory,
+  ClaimZap,
+} from "../types";
 import { deploy, waitForTransaction } from "../utils/transaction";
 import { SYNCER } from "./constants";
 import { Verifier } from "@gearbox-protocol/devops";
@@ -57,13 +62,13 @@ async function deployConvex() {
   const cvxAddr = await convexManager.cvx();
 
   verifier.addContract({
-      address: boosterAddr,
-      constructorArguments: [cvxAddr, tokenDataByNetwork.Kovan.CRV]
+    address: boosterAddr,
+    constructorArguments: [cvxAddr, tokenDataByNetwork.Kovan.CRV],
   });
 
   verifier.addContract({
-      address: cvxAddr,
-      constructorArguments: []
+    address: cvxAddr,
+    constructorArguments: [],
   });
 
   log.info(`Convex Booster mock was deployed at ${boosterAddr}`);
@@ -110,6 +115,8 @@ async function deployConvex() {
     const numPools = await convexManager.deployedPoolsLength();
     const poolAddress = await convexManager.deployedPools(numPools.sub(1));
 
+    console.log(poolAddress);
+
     const basePool = BaseRewardPool__factory.connect(poolAddress, deployer);
 
     const pid = convexData.pid;
@@ -123,16 +130,16 @@ async function deployConvex() {
       constructorArguments: [pid, stakingToken, rewardToken, operator, manager],
     });
 
-    log.info(`Pool for ${poolToken} deployed at: ${poolAddress}`)
-    log.info(`${poolToken} token deployed at: ${stakingToken}`)
+    log.info(`Pool for ${poolToken} deployed at: ${poolAddress}`);
+    log.info(`${poolToken} token deployed at: ${stakingToken}`);
   }
 
   const claimZap = await deploy<ClaimZap>(
-      "ClaimZap",
-      log,
-      tokenDataByNetwork.Kovan.CRV,
-      cvxAddr
-  )
+    "ClaimZap",
+    log,
+    tokenDataByNetwork.Kovan.CRV,
+    cvxAddr
+  );
 
   verifier.addContract({
     address: claimZap.address,
@@ -140,7 +147,6 @@ async function deployConvex() {
   });
 
   log.info(`ClaimZap was deployed at ${claimZap.address}`);
-
 }
 
 deployConvex()
