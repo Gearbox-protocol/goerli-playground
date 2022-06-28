@@ -1,8 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
-pragma abicoder v1;
-
-
 
 interface ICurveGauge {
     function deposit(uint256) external;
@@ -28,7 +25,7 @@ interface IWalletChecker {
 
 interface IVoting{
     function vote(uint256, bool, bool) external; //voteId, support, executeIfDecided
-    function getVote(uint256) external view returns(bool,bool,uint64,uint64,uint64,uint64,uint256,uint256,uint256,bytes memory); 
+    function getVote(uint256) external view returns(bool,bool,uint64,uint64,uint64,uint64,uint256,uint256,uint256,bytes memory);
     function vote_for_gauge_weights(address,uint256) external;
 }
 
@@ -143,5 +140,3 @@ interface IPools{
 interface IVestedEscrow{
     function fund(address[] calldata _recipient, uint256[] calldata _amount) external returns(bool);
 }
-
-

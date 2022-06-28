@@ -21,11 +21,11 @@ contract YearnMock is SyncerTrait, IYVault, ERC20, Ownable {
     mapping(address => bool) public updaters;
     uint256 public decimalsMul;
 
-    constructor(address _syncer, address _token)
+    constructor(address _syncer, address _token, string memory symbol)
         SyncerTrait(_syncer)
         ERC20(
             string(abi.encodePacked("yearn ", ERC20(_token).name())),
-            string(abi.encodePacked("yv", ERC20(_token).symbol()))
+            symbol
         )
     {
         token = _token;
