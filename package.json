@@ -36,7 +36,7 @@
   "dependencies": {
     "@chainlink/contracts": "^0.4.0",
     "@gearbox-protocol/devops": "^0.0.16",
-    "@gearbox-protocol/sdk": "^0.0.76",
+    "@gearbox-protocol/sdk": "^0.0.78",
     "@openzeppelin/contracts": "^4.5.0",
     "hardhat-contract-sizer": "^2.5.1",
     "tslog": "^3.3.3"
