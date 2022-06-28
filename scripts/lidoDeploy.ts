@@ -1,42 +1,71 @@
 // @ts-ignore
-import { ethers } from "hardhat";
 // @ts-ignore
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
-import * as dotenv from "dotenv";
-import { Logger } from "tslog";
-import {
-    Lido
-} from "../types";
-import { Verifier, deploy } from "@gearbox-protocol/devops";
+import { deploy, waitForTransaction } from "@gearbox-protocol/devops";
+import { tokenDataByNetwork } from "@gearbox-protocol/sdk";
+import { Lido, Lido__factory } from "../types";
+import { AbstractDeployer } from "./abstractDeployer";
 import { SYNCER } from "./constants";
 
-async function deployLido() {
-  dotenv.config({ path: ".env.local" });
-  const log: Logger = new Logger();
-  const verifier: Verifier = new Verifier();
+export class LidoDeployer extends AbstractDeployer {
+  async deploy() {
+    if (this.isDeployNeeded("STETH")) {
+      const lido = await deploy<Lido>("Lido", this.log, SYNCER);
 
-  const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
-  const deployer = accounts[0];
-  const chainId = await deployer.getChainId();
+      this.log.info(`Lido mock deployed at: ${lido.address}`);
 
-  log.info(`Deployer: ${deployer.address}`);
+      this.verifier.addContract({
+        address: lido.address,
+        constructorArguments: [SYNCER],
+      });
 
-  if (chainId !== 42 && chainId !== 1337)
-    throw new Error("Switch to Kovan network");
+      const mainnetLido = Lido__factory.connect(
+        tokenDataByNetwork.Mainnet.STETH,
+        this.mainnetProvider
+      );
 
-  const lido = await deploy<Lido>(
-      "Lido",
-      log,
-      SYNCER
-  )
+      const totalPooledEther = await mainnetLido.getTotalPooledEther();
+      const totalShares = await mainnetLido.getTotalShares();
 
-  verifier.addContract({
-      address: lido.address,
-      constructorArguments: [SYNCER]
-  })
+      await waitForTransaction(
+        lido.syncExchangeRate(totalPooledEther, totalShares)
+      );
 
+      this.saveProgress("STETH", lido.address);
+
+      this.log.info(
+        `Lido mock synced - totalPooledEther: ${totalPooledEther}, totalShares: ${totalShares}`
+      );
+    }
+  }
 }
 
-deployLido()
-  .then(() => console.log("Ok"))
-  .catch((e) => console.log(e));
+// async function deployLido() {
+//   dotenv.config({ path: ".env.local" });
+//   const log: Logger = new Logger();
+//   const verifier: Verifier = new Verifier();
+
+//   const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
+//   const deployer = accounts[0];
+//   const chainId = await deployer.getChainId();
+
+//   log.info(`Deployer: ${deployer.address}`);
+
+//   if (chainId !== 42 && chainId !== 1337)
+//     throw new Error("Switch to Kovan network");
+
+//   const lido = await deploy<Lido>(
+//       "Lido",
+//       log,
+//       SYNCER
+//   )
+
+//   verifier.addContract({
+//       address: lido.address,
+//       constructorArguments: [SYNCER]
+//   })
+
+// }
+
+// deployLido()
+//   .then(() => console.log("Ok"))
+//   .catch((e) => console.log(e));
