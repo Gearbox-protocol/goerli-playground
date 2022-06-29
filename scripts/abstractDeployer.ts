@@ -67,6 +67,7 @@ export abstract class AbstractDeployer {
     );
 
     const decimals = await contract.decimals();
+
     await waitForTransaction(
       contract.mint(to, BigNumber.from(10).pow(decimals).mul(amount))
     );

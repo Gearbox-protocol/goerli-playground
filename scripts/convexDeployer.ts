@@ -6,6 +6,7 @@ import {
   ConvexPoolContract,
   convexTokens,
   MultiCallContract,
+  NormalToken,
   RAY,
   SupportedToken,
   tokenDataByNetwork,
@@ -24,7 +25,7 @@ import { SYNCER } from "./constants";
 
 const convexExtraRewardTokens: Record<
   ConvexPoolContract,
-  Array<SupportedToken>
+  Array<NormalToken>
 > = {
   CONVEX_3CRV_POOL: [],
   CONVEX_GUSD_POOL: [],
@@ -103,7 +104,6 @@ export class ConvexDeployer extends AbstractDeployer {
   }
 
   async deployPools() {
-
     for (let poolToken of tokenList) {
       // DEPLOY BASE POOL
       if (this.isDeployNeeded(poolToken)) {
@@ -130,16 +130,8 @@ export class ConvexDeployer extends AbstractDeployer {
       this.deployer
     );
 
-    this.log.debug("Minting");
-    await waitForTransaction(crvToken.mint(this.deployer.address, RAY));
-
-    this.log.debug("Approving: [1/2]");
-    await waitForTransaction(
-      curveUnderlyingToken.approve(this.convexManager.address, RAY)
-    );
-
-    this.log.debug("Approving: [2/2]");
-    await waitForTransaction(crvToken.approve(this.convexManager.address, RAY));
+    await this.mintToken("CRV", this.deployer.address, 10 ** 9);
+    await this.approve("CRV", this.convexManager.address);
 
     this.log.debug("Adding base pool with pid:", convexData.pid);
     await waitForTransaction(
@@ -163,24 +155,8 @@ export class ConvexDeployer extends AbstractDeployer {
     const operator = await this.convexManager.booster();
     const manager = this.convexManager.address;
 
-    this.verifier.addContract({
-      address: poolAddress,
-      constructorArguments: [pid, stakingToken, rewardToken, operator, manager],
-    });
-
     const stakingTokenName = `Convex ${await curveUnderlyingToken.name()}`;
     const stakingTokenSymbol = poolToken;
-
-    this.verifier.addContract({
-      address: stakingToken,
-      constructorArguments: [stakingTokenName, stakingTokenSymbol, 18],
-    });
-
-    this.log.info(`Pool for ${poolToken} deployed at: ${poolAddress}`);
-    this.log.info(`${poolToken} token deployed at: ${stakingToken}`);
-
-    this.saveProgress(poolToken, stakingToken);
-    this.saveProgress(convexData.pool, poolAddress);
 
     // SYNC BASE POOL
 
@@ -200,6 +176,11 @@ export class ConvexDeployer extends AbstractDeployer {
 
     for (let extraRewardToken of convexExtraRewardTokens[convexData.pool]) {
       const rewardTokenAddr = tokenDataByNetwork.Kovan[extraRewardToken];
+
+      await this.mintToken(extraRewardToken, this.deployer.address, 10 ** 9);
+      await this.approve(extraRewardToken, this.convexManager.address);
+
+      this.log.debug(`Adding extra pool ${rewardTokenAddr}`);
       await waitForTransaction(
         this.convexManager.addExtraPool(rewardTokenAddr, basePool.address)
       );
@@ -214,16 +195,6 @@ export class ConvexDeployer extends AbstractDeployer {
       );
 
       const boosterAddr = await this.convexManager.booster();
-
-      this.verifier.addContract({
-        address: extraPoolAddr,
-        constructorArguments: [
-          basePool.address,
-          rewardTokenAddr,
-          boosterAddr,
-          this.convexManager.address,
-        ],
-      });
 
       const mainnetExtraPoolAddr = await mainnetPool.extraRewards(
         numRewards.sub(1)
@@ -249,11 +220,37 @@ export class ConvexDeployer extends AbstractDeployer {
 
       await this.syncPool(
         extraPoolAddr,
-        mainnetExtraRewardAddr,
+        mainnetExtraPoolAddr,
         extraRewardToken,
         true
       );
+
+      this.verifier.addContract({
+        address: extraPoolAddr,
+        constructorArguments: [
+          basePool.address,
+          rewardTokenAddr,
+          boosterAddr,
+          this.convexManager.address,
+        ],
+      });
     }
+
+    this.verifier.addContract({
+      address: poolAddress,
+      constructorArguments: [pid, stakingToken, rewardToken, operator, manager],
+    });
+
+    this.verifier.addContract({
+      address: stakingToken,
+      constructorArguments: [stakingTokenName, stakingTokenSymbol, 18],
+    });
+
+    this.saveProgress(poolToken, stakingToken);
+    this.saveProgress(convexData.pool, poolAddress);
+
+    this.log.info(`Pool for ${poolToken} deployed at: ${poolAddress}`);
+    this.log.info(`${poolToken} token deployed at: ${stakingToken}`);
   }
 
   async syncPool(

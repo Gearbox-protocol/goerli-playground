@@ -213,7 +213,7 @@ export class CurveDeployer extends AbstractDeployer {
       ];
 
       const seedFn = async (pool: string) => {
-        const _3crv = IERC20__factory.connect(this._3CrvPool!, this.deployer);
+        const _3crv = IERC20__factory.connect(this._3CrvToken!, this.deployer);
 
         await this.mintToken("GUSD", pool, 10 ** 6);
         await waitForTransaction(_3crv.transfer(pool, WAD.mul(10 ** 6)));
@@ -315,10 +315,10 @@ export class CurveDeployer extends AbstractDeployer {
 
     const poolConstructorArgs = [
       SYNCER,
-      mainnetToken.name(),
+      await mainnetToken.name(),
       token,
       coins[0],
-      mainnetToken.decimals(),
+      await mainnetToken.decimals(),
       A,
       fee,
       this.deployer.address,
@@ -351,7 +351,7 @@ export class CurveDeployer extends AbstractDeployer {
 
     await this.mintToken(token, pool.address, 10 ** 6);
 
-    const _3crv = IERC20__factory.connect(this._3CrvPool!, this.deployer);
+    const _3crv = IERC20__factory.connect(this._3CrvToken!, this.deployer);
     await waitForTransaction(_3crv.transfer(pool.address, WAD.mul(10 ** 6)));
 
     this.saveProgress(lpTokenSymbol, pool.address);
