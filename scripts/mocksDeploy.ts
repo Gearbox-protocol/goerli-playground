@@ -35,6 +35,7 @@ import { SYNCER } from "./constants";
 import { LidoDeployer } from "./lidoDeploy";
 import { CurveDeployer } from "./curveDeployer";
 import { ConvexDeployer } from "./convexDeployer";
+import { YearnDeployer }  from "./yearnDeployer";
 
 dotenv.config({ path: ".env.local" });
 
@@ -128,51 +129,18 @@ class KovanPlaygroundDeployer implements ProgressGetter {
       this
     );
     await convexDeployer.deploy();
-    await this.deployYearn();
+
+    const yearnDeployer = new YearnDeployer(
+        this.log,
+        this.verifier,
+        this.deployer,
+        this.mainnetProvider,
+        this
+    )
+
+    await yearnDeployer.deploy();
 
     this.log.info(this.contractAddresses);
-  }
-
-  async deployYearn() {
-    for (let yearnToken of yearnTokenList) {
-      const underlying = yearnTokens[yearnToken].underlying;
-      const underlyingAddress = this.contractAddresses[underlying]
-        ? this.contractAddresses[underlying]
-        : tokenDataByNetwork.Kovan[underlying];
-
-      const symbol = yearnTokens[yearnToken].name;
-      const vault = await deploy<YearnMock>(
-        "YearnMock",
-        this.log,
-        SYNCER,
-        underlyingAddress,
-        symbol
-      );
-
-      this.log.info(
-        `Yearn vault for ${underlying} deployed at: ${vault.address}`
-      );
-
-      this.verifier.addContract({
-        address: vault.address,
-        constructorArguments: [SYNCER, underlyingAddress, symbol],
-      });
-
-      this.contractAddresses[yearnToken] = vault.address;
-
-      const mainnetVault = IYVault__factory.connect(
-        tokenDataByNetwork.Mainnet[yearnToken],
-        this.mainnetProvider
-      );
-
-      const mainnetPPS = await mainnetVault.pricePerShare();
-
-      await waitForTransaction(vault.setPricePerShare(mainnetPPS));
-
-      this.log.info(
-        `Yearn vault for ${underlying} synced - pricePerShare: ${mainnetPPS}`
-      );
-    }
   }
 
   saveProgress(entity: SupportedEntity, address: string) {

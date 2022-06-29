@@ -56,6 +56,8 @@ export class ConvexDeployer extends AbstractDeployer {
 
     this.log.info("Adding pools");
 
+    await this.deployPools();
+
     await this.deployClaimZap();
   }
 
@@ -101,10 +103,6 @@ export class ConvexDeployer extends AbstractDeployer {
   }
 
   async deployPools() {
-    const crvToken = ERC20Kovan__factory.connect(
-      tokenDataByNetwork.Kovan.CRV,
-      this.deployer
-    );
 
     for (let poolToken of tokenList) {
       // DEPLOY BASE POOL
@@ -120,7 +118,7 @@ export class ConvexDeployer extends AbstractDeployer {
 
     const curveUnderlyingTokenAddress = this.getProgressOrThrow(
       convexData.underlying
-    ) as string;
+    );
 
     const crvToken = ERC20Kovan__factory.connect(
       tokenDataByNetwork.Kovan.CRV,

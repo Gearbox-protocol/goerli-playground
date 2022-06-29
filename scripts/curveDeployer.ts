@@ -104,8 +104,8 @@ export class CurveDeployer extends AbstractDeployer {
       );
     }
 
-    this._3CrvToken = this.getProgressOrThrow("STETH");
-    this._3CrvPool = this.getProgressOrThrow("STETH");
+    this._3CrvToken = this.getProgressOrThrow("3Crv");
+    this._3CrvPool = this.getProgressOrThrow("CURVE_3CRV_POOL");
 
     ///
     /// STECRV DEPLOYMENT
