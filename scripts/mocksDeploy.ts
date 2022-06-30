@@ -2,20 +2,12 @@
 import { ethers, SignerOrProvider } from "hardhat";
 // @ts-ignore
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
-import { deploy, Verifier, waitForTransaction } from "@gearbox-protocol/devops";
+import { Verifier } from "@gearbox-protocol/devops";
 import {
-  contractsByNetwork,
-  ConvexLPToken,
-  ConvexLPTokenData,
-  ConvexPoolContract,
-  convexTokens,
-  IYVault__factory,
-  RAY,
   SupportedContract,
   SupportedToken,
-  tokenDataByNetwork,
+  supportedTokens,
   YearnLPToken,
-  yearnTokens,
 } from "@gearbox-protocol/sdk";
 import { PartialRecord } from "@gearbox-protocol/sdk/lib/utils/types";
 
@@ -23,19 +15,10 @@ import * as dotenv from "dotenv";
 import { providers } from "ethers";
 import fs from "fs";
 import { Logger } from "tslog";
-import {
-  BaseRewardPool__factory,
-  ClaimZap,
-  ERC20Kovan__factory,
-  KovanConvexManager,
-  VirtualBalanceRewardPool__factory,
-  YearnMock,
-} from "../types";
-import { SYNCER } from "./constants";
-import { LidoDeployer } from "./lidoDeploy";
-import { CurveDeployer } from "./curveDeployer";
 import { ConvexDeployer } from "./convexDeployer";
-import { YearnDeployer }  from "./yearnDeployer";
+import { CurveDeployer } from "./curveDeployer";
+import { LidoDeployer } from "./lidoDeploy";
+import { YearnDeployer } from "./yearnDeployer";
 
 dotenv.config({ path: ".env.local" });
 
@@ -45,7 +28,8 @@ export type SupportedEntity =
   | SupportedToken
   | SupportedContract
   | "CURVE_STECRV_POOL"
-  | "KOVAN_CONVEX_MANAGER";
+  | "KOVAN_CONVEX_MANAGER"
+  | "LIDO_ORACLE";
 
 export interface ProgressGetter {
   saveProgress(entity: SupportedEntity, address: string): void;
@@ -131,16 +115,16 @@ class KovanPlaygroundDeployer implements ProgressGetter {
     await convexDeployer.deploy();
 
     const yearnDeployer = new YearnDeployer(
-        this.log,
-        this.verifier,
-        this.deployer,
-        this.mainnetProvider,
-        this
-    )
+      this.log,
+      this.verifier,
+      this.deployer,
+      this.mainnetProvider,
+      this
+    );
 
     await yearnDeployer.deploy();
 
-    this.log.info(this.contractAddresses);
+    this.printProgress();
   }
 
   saveProgress(entity: SupportedEntity, address: string) {
@@ -153,6 +137,22 @@ class KovanPlaygroundDeployer implements ProgressGetter {
 
   getProgress(entity: SupportedEntity): string | undefined {
     return this.contractAddresses[entity];
+  }
+
+  printProgress() {
+    const tokens = Object.keys(supportedTokens);
+
+    const tokensToPrint = Object.entries(this.contractAddresses)
+      .filter(([entity]) => tokens.includes(entity))
+      .reduce((state, [entity, addr]) => ({ ...state, [entity]: addr }), {});
+
+    this.log.info("TOKENS: \n", tokensToPrint);
+
+    const contractsToPrint = Object.entries(this.contractAddresses)
+      .filter(([entity]) => !tokens.includes(entity))
+      .reduce((state, [entity, addr]) => ({ ...state, [entity]: addr }), {});
+
+    this.log.info("CONTRACTS: \n", contractsToPrint);
   }
 }
 

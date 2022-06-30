@@ -60,11 +60,17 @@ export abstract class AbstractDeployer {
 
   protected async mintToken(token: NormalToken, to: string, amount: number) {
     this.log.debug(`Minting ${token}`);
+    await this.mintTokenByAddress(tokenDataByNetwork.Kovan[token], to, amount);
+  }
 
-    const contract = ERC20Kovan__factory.connect(
-      tokenDataByNetwork.Kovan[token],
-      this.deployer
-    );
+  protected async mintTokenByAddress(
+    address: string,
+    to: string,
+    amount: number
+  ) {
+    this.log.debug(`Minting ${address}`);
+
+    const contract = ERC20Kovan__factory.connect(address, this.deployer);
 
     const decimals = await contract.decimals();
 

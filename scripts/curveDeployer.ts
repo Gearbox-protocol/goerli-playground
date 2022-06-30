@@ -128,7 +128,7 @@ export class CurveDeployer extends AbstractDeployer {
       const seedFn = async (pool: string) => {
         const steCRV = CurveStETHMock__factory.connect(pool, this.deployer);
 
-        await this.mintToken("STETH", pool, 10 ** 9);
+        await this.mintTokenByAddress(stETH, pool, 10 ** 9);
         await waitForTransaction(steCRV.donate_eth({ value: WAD.mul(1500) }));
       };
 

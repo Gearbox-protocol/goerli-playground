@@ -1,14 +1,11 @@
 import { deploy, waitForTransaction } from "@gearbox-protocol/devops";
 import {
-  YearnLPToken,
   IYVault__factory,
-  yearnTokens,
   tokenDataByNetwork,
+  YearnLPToken,
+  yearnTokens,
 } from "@gearbox-protocol/sdk";
-import {
-  YearnMock,
-  YearnMock__factory
-} from "../types";
+import { YearnMock } from "../types";
 import { AbstractDeployer } from "./abstractDeployer";
 import { SYNCER } from "./constants";
 
@@ -22,79 +19,65 @@ const yearnTokenList: Array<YearnLPToken> = [
 ];
 
 const yearnDependency: Record<YearnLPToken, boolean> = {
-    yvDAI: false,
-    yvUSDC: false,
-    yvWETH: false,
-    yvWBTC: false,
-    yvCurve_FRAX: true,
-    yvCurve_stETH: true
-}
+  yvDAI: false,
+  yvUSDC: false,
+  yvWETH: false,
+  yvWBTC: false,
+  yvCurve_FRAX: true,
+  yvCurve_stETH: true,
+};
 
 export class YearnDeployer extends AbstractDeployer {
-
   async deploy() {
-      for (let yearnToken of yearnTokenList) {
-
-        if (this.isDeployNeeded(yearnToken)) {
-            await this.deployVault(yearnToken);
-        }
-
-        await this.syncVault(yearnToken);
+    for (let yearnToken of yearnTokenList) {
+      if (this.isDeployNeeded(yearnToken)) {
+        await this.deployVault(yearnToken);
       }
+    }
   }
 
   async deployVault(yearnToken: YearnLPToken) {
+    this.log.debug(`Deploying the Yearn vault mock for ${yearnToken}`);
 
-      this.log.debug(`Deploying the Yearn vault mock for ${yearnToken}`);
+    const underlying = yearnTokens[yearnToken].underlying;
 
-      const underlying = yearnTokens[yearnToken].underlying;
+    const underlyingAddress = yearnDependency[yearnToken]
+      ? this.getProgressOrThrow(underlying)
+      : tokenDataByNetwork.Kovan[underlying];
 
-      const underlyingAddress = yearnDependency[yearnToken]
-        ? this.getProgressOrThrow(underlying)
-        : tokenDataByNetwork.Kovan[underlying];
+    const symbol = yearnTokens[yearnToken].name;
+    const vault = await deploy<YearnMock>(
+      "YearnMock",
+      this.log,
+      SYNCER,
+      underlyingAddress,
+      symbol
+    );
 
-      const symbol = yearnTokens[yearnToken].name;
-      const vault = await deploy<YearnMock>(
-        "YearnMock",
-        this.log,
-        SYNCER,
-        underlyingAddress,
-        symbol
-      );
+    this.log.info(
+      `Yearn vault for ${underlying} deployed at: ${vault.address}`
+    );
 
-      this.log.info(
-        `Yearn vault for ${underlying} deployed at: ${vault.address}`
-      );
+    this.log.debug(`Syncing the Yearn vault mock for ${yearnToken}`);
 
-      this.verifier.addContract({
-        address: vault.address,
-        constructorArguments: [SYNCER, underlyingAddress, symbol],
-      });
+    const mainnetVault = IYVault__factory.connect(
+      tokenDataByNetwork.Mainnet[yearnToken],
+      this.mainnetProvider
+    );
 
-      this.saveProgress(yearnToken, vault.address);
+    const mainnetPPS = await mainnetVault.pricePerShare();
 
-  }
+    await waitForTransaction(vault.setPricePerShare(mainnetPPS));
 
-  async syncVault(yearnToken: YearnLPToken) {
+    this.log.info(
+      `Yearn vault for ${yearnToken} synced - pricePerShare: ${mainnetPPS}`
+    );
 
-      this.log.debug(`Syncing the Yearn vault mock for ${yearnToken}`);
+    this.verifier.addContract({
+      address: vault.address,
+      constructorArguments: [SYNCER, underlyingAddress, symbol],
+    });
 
-      const vault = YearnMock__factory.connect(
-          this.getProgressOrThrow(yearnToken),
-          this.deployer
-      )
-
-      const mainnetVault = IYVault__factory.connect(
-        tokenDataByNetwork.Mainnet[yearnToken],
-        this.mainnetProvider
-      );
-
-      const mainnetPPS = await mainnetVault.pricePerShare();
-
-      await waitForTransaction(vault.setPricePerShare(mainnetPPS));
-
-      this.log.info(
-        `Yearn vault for ${yearnToken} synced - pricePerShare: ${mainnetPPS}`
-      );
+    this.saveProgress(yearnToken, vault.address);
   }
 }
