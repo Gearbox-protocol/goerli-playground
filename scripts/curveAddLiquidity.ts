@@ -27,8 +27,7 @@ import { BigNumber } from "ethers";
 
 const hre = require("hardhat");
 
-const USDC_UNIT = BigNumber.from(10 ** 6);
-const GUSD_UNIT = BigNumber.from(10 ** 2);
+const KOVAN_ROOT = "0x19301B8e700925E850C945a28256b6A6FDe5904C";
 
 async function seedCurveTokens() {
   dotenv.config({ path: ".env.local" });
@@ -46,12 +45,10 @@ async function seedCurveTokens() {
   if (chainId === 1337) {
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: ["0x19301B8e700925E850C945a28256b6A6FDe5904C"],
+      params: [KOVAN_ROOT],
     });
 
-    deployer = await ethers.getSigner(
-      "0x19301B8e700925E850C945a28256b6A6FDe5904C"
-    );
+    deployer = await ethers.getSigner(KOVAN_ROOT);
   }
   //
   // Define tokens
