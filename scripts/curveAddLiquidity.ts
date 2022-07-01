@@ -43,12 +43,12 @@ async function seedCurveTokens() {
   if (chainId !== 42 && chainId !== 1337)
     throw new Error("Switch to Kovan network");
 
-  //   await hre.network.provider.request({
-  //   method: "hardhat_impersonateAccount",
-  //   params: ["0x19301B8e700925E850C945a28256b6A6FDe5904C"],
-  // });
-  //
-  // deployer = await ethers.getSigner("0x19301B8e700925E850C945a28256b6A6FDe5904C")
+  await hre.network.provider.request({
+    method: "hardhat_impersonateAccount",
+    params: ["0x19301B8e700925E850C945a28256b6A6FDe5904C"],
+  });
+
+  deployer = await ethers.getSigner("0x19301B8e700925E850C945a28256b6A6FDe5904C")
 
   //
   // Define tokens
@@ -147,7 +147,7 @@ async function seedCurveTokens() {
       deployer
   );
 
-  await sCRV.add_liquidity([WAD, 10 ** 6, 10 ** 6, WAD], 0)
+  await waitForTransaction(sCRV.add_liquidity([WAD, 10 ** 6, 10 ** 6, WAD], 0))
 
   log.info(
   `DAI balance: ${await sCRV.balances(0)},
@@ -175,7 +175,7 @@ async function seedCurveTokens() {
       deployer
   );
 
-  await gusd_pool.add_liquidity([10 ** 2, WAD], 0)
+  await waitForTransaction(gusd_pool.add_liquidity([10 ** 2, WAD], 0))
 
   log.info(
   `GUSD balance: ${await gusd_pool.balances(0)},
@@ -201,7 +201,7 @@ async function seedCurveTokens() {
       deployer
   );
 
-  await frax3crv["add_liquidity(uint256[2],uint256)"]([WAD, WAD], 0)
+  await waitForTransaction(frax3crv["add_liquidity(uint256[2],uint256)"]([WAD, WAD], 0))
 
   log.info(
   `FRAX balance: ${await frax3crv.balances(0)},
@@ -227,7 +227,7 @@ async function seedCurveTokens() {
       deployer
   );
 
-  await lusd3crv["add_liquidity(uint256[2],uint256)"]([WAD, WAD], 0)
+  await waitForTransaction(lusd3crv["add_liquidity(uint256[2],uint256)"]([WAD, WAD], 0))
 
   log.info(
   `LUSD balance: ${await frax3crv.balances(0)},
