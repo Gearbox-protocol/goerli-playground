@@ -32,6 +32,7 @@ const convexExtraRewardTokens: Record<
   CONVEX_SUSD_POOL: ["SNX"],
   CONVEX_STECRV_POOL: ["LDO"],
   CONVEX_FRAX3CRV_POOL: ["FXS"],
+  CONVEX_LUSD3CRV_POOL: ["LQTY"]
 };
 
 const tokenList: ConvexLPToken[] = [
@@ -39,6 +40,7 @@ const tokenList: ConvexLPToken[] = [
   "cvxsteCRV",
   "cvxcrvPlain3andSUSD",
   "cvxFRAX3CRV",
+  "cvxLUSD3CRV",
   "cvxgusd3CRV",
 ];
 
