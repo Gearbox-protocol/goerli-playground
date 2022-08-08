@@ -6,21 +6,25 @@ import {
   supportedTokens,
   tokenDataByNetwork,
 } from "@gearbox-protocol/sdk";
-import { ethers, providers } from "ethers";
+import { providers } from "ethers";
 import { Logger } from "tslog";
 import { ERC20__factory } from "../types";
 import { ERC20Interface } from "../types/ERC20";
 
+// checkTokens compares tokens on different networks
+// it uses list of supportedTokens from @gearbox-protocol/sdk
+// for each token it verifies that its symbol and decimals are the same on all networks
 async function checkTokens() {
   dotenv.config({ path: ".env" });
   const log: Logger = new Logger();
 
   const providersByNetwork: Record<NetworkType, providers.JsonRpcProvider> = {
     Mainnet: new providers.JsonRpcProvider(process.env.ETH_MAINNET_PROVIDER),
-    Kovan: new providers.JsonRpcProvider(process.env.ETH_KOVAN_PROVIDER),
+    Kovan: new providers.JsonRpcProvider(process.env.ETH_TESTNET_PROVIDER),
+    Goerli: new providers.JsonRpcProvider(process.env.ETH_TESTNET_PROVIDER),
   };
 
-  for (let t of Object.keys(supportedTokens)) {
+  for (const t of Object.keys(supportedTokens)) {
     log.info(`Checking ${t}`);
 
     const mCalls: Array<keyof ERC20Interface["functions"]> = [
