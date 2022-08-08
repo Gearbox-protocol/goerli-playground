@@ -43,6 +43,8 @@ const tokensToDeploy: Array<SupportedToken> = [
   "LUNA",
 ];
 
+// deployTokens deploys mock ERC20 contracts for each of provided tokens
+// it copies name, symbol and decimals from mainnet, origin contract address is taken from @gearbox-protocol/sdk mainnet mapping
 async function deployTokens() {
   dotenv.config({ path: ".env.local" });
   const log: Logger = new Logger();
