@@ -1,8 +1,5 @@
-// @ts-ignore
-import { ethers } from "hardhat";
+import { ethers, run } from "hardhat";
 import * as dotenv from "dotenv";
-// @ts-ignore
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
 import { providers } from "ethers";
 import {
   SupportedToken,
@@ -13,22 +10,26 @@ import {
 import { ERC20__factory, ERC20Kovan } from "../types";
 import { deploy } from "../utils/transaction";
 import { Logger } from "tslog";
-
-const hre = require("hardhat");
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 const tokensToDeploy: Array<SupportedToken> = [
   "1INCH",
   "AAVE",
   "COMP",
   "CRV",
+  "DAI",
   "DPI",
   "FEI",
+  "LINK",
+  "SNX",
   "SUSHI",
   "UNI",
-  "LQTY",
-  "WETH",
-  "YFI",
+  "USDT",
+  "USDC",
+  "WBTC",
+  // "WETH",
 
+  "YFI",
   /// UPDATE
   "STETH",
   "FTM",
@@ -41,6 +42,7 @@ const tokensToDeploy: Array<SupportedToken> = [
   "sUSD",
   "GUSD",
   "LUNA",
+  "LQTY",
 ];
 
 // deployTokens deploys mock ERC20 contracts for each of provided tokens
@@ -93,7 +95,7 @@ async function deployTokens() {
     if (chainId !== LOCAL_NETWORK) {
       await newToken.deployTransaction.wait(10);
 
-      await hre.run("verify:verify", {
+      await run("verify:verify", {
         address: newToken.address,
         constructorArguments: [name, symbol, decimals],
       });

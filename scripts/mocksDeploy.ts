@@ -4,6 +4,7 @@ import { ethers, SignerOrProvider } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
 import { Verifier } from "@gearbox-protocol/devops";
 import {
+  MAINNET_NETWORK,
   SupportedContract,
   SupportedToken,
   supportedTokens,
@@ -47,7 +48,7 @@ const yearnTokenList: Array<YearnLPToken> = [
   "yvCurve_FRAX",
 ];
 
-class KovanPlaygroundDeployer implements ProgressGetter {
+class TestnetPlaygroundDeployer implements ProgressGetter {
   log: Logger = new Logger({
     minLevel: "debug",
     displayFunctionName: false,
@@ -63,9 +64,14 @@ class KovanPlaygroundDeployer implements ProgressGetter {
     const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
     this.deployer = accounts[0];
     const chainId = await this.deployer.getChainId();
+    if (chainId === MAINNET_NETWORK) {
+      throw new Error("Switch to Kovan network");
+    }
 
     const mainnetRpc = process.env.ETH_MAINNET_PROVIDER;
-    if (!mainnetRpc) throw new Error("ETH_MAINNET_PROVIDER is not defined");
+    if (!mainnetRpc) {
+      throw new Error("ETH_MAINNET_PROVIDER is not defined");
+    }
 
     if (fs.existsSync(PROGRESS_FILE_NAME)) {
       this.log.warn("FOUND FILE WITH PREVIOUS PROGRESS!");
@@ -81,9 +87,6 @@ class KovanPlaygroundDeployer implements ProgressGetter {
     ) as SignerOrProvider;
 
     this.log.info(`Deployer: ${this.deployer.address}`);
-
-    if (chainId !== 42 && chainId !== 1337)
-      throw new Error("Switch to Kovan network");
 
     const lidoDeployer = new LidoDeployer(
       this.log,
@@ -156,7 +159,7 @@ class KovanPlaygroundDeployer implements ProgressGetter {
   }
 }
 
-const kovanPlaygroundDeployer = new KovanPlaygroundDeployer();
+const kovanPlaygroundDeployer = new TestnetPlaygroundDeployer();
 kovanPlaygroundDeployer
   .deployMocks()
   .then(() => console.log("Ok"))

@@ -582,10 +582,8 @@
   dependencies:
     axios "^0.27.2"
 
-"@gearbox-protocol/sdk@^0.0.91":
-  version "0.0.91"
-  resolved "https://registry.yarnpkg.com/@gearbox-protocol/sdk/-/sdk-0.0.91.tgz#5f2944b3ced8fa785fa2c42ead40b1840c8faef7"
-  integrity sha512-cFHf4PFcL6Yi7DiLLI78Y7duRIglgtXpgZXTz63Y9DUpKlcqyx0T+QLW06uVTAvyUAYq5E9srt4DDZTGRb3QKQ==
+"@gearbox-protocol/sdk@file:../gearbox-sdk":
+  version "0.0.105"
   dependencies:
     decimal.js-light "^2.5.1"
     moment "^2.29.1"

@@ -10,6 +10,7 @@ import { providers } from "ethers";
 import { Logger } from "tslog";
 import { ERC20__factory } from "../types";
 import { ERC20Interface } from "../types/ERC20";
+import config from "../config";
 
 // checkTokens compares tokens on different networks
 // it uses list of supportedTokens from @gearbox-protocol/sdk
@@ -18,11 +19,10 @@ async function checkTokens() {
   dotenv.config({ path: ".env" });
   const log: Logger = new Logger();
 
-  const providersByNetwork: Record<NetworkType, providers.JsonRpcProvider> = {
-    Mainnet: new providers.JsonRpcProvider(process.env.ETH_MAINNET_PROVIDER),
-    Kovan: new providers.JsonRpcProvider(process.env.ETH_TESTNET_PROVIDER),
-    Goerli: new providers.JsonRpcProvider(process.env.ETH_TESTNET_PROVIDER),
-  };
+  const mainnet = new providers.JsonRpcProvider(
+    process.env.ETH_MAINNET_PROVIDER
+  );
+  const testnet = new providers.JsonRpcProvider(config.url);
 
   for (const t of Object.keys(supportedTokens)) {
     log.info(`Checking ${t}`);
@@ -44,22 +44,22 @@ async function checkTokens() {
       const tokenMutlicall = new MultiCallContract(
         tokenDataByNetwork[networkType][t],
         ERC20__factory.createInterface(),
-        providersByNetwork[networkType]
+        networkType === "Mainnet" ? mainnet : testnet
       );
 
       return tokenMutlicall.call(mCalls.map((method) => ({ method })));
     };
 
-    const [mainnetData, kovanData] = await Promise.all([
+    const [mainnetData, testnetData] = await Promise.all([
       getTokenData(t as SupportedToken, "Mainnet"),
-      getTokenData(t as SupportedToken, "Kovan"),
+      getTokenData(t as SupportedToken, config.network),
     ]);
 
     for (let i = 0; i < mCalls.length; i++) {
-      if (mainnetData[i] !== kovanData[i]) {
-        log.error("Mainnet <> Kovan difference");
+      if (mainnetData[i] !== testnetData[i]) {
+        log.error("Mainnet <> Testnet difference");
         log.error(`Mainnet data: ${mainnetData}`);
-        log.error(`Kovan data: ${kovanData}`);
+        log.error(`Testnet data: ${testnetData}`);
       }
     }
   }
