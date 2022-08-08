@@ -14,13 +14,12 @@ import { LOCAL_NETWORK, MAINNET_NETWORK } from "@gearbox-protocol/sdk";
 // gets data from .env file
 dotEnvConfig();
 
-const INFURA_API_KEY = process.env.INFURA_API_KEY || "";
-const KOVAN_PRIVATE_KEY =
-  process.env.KOVAN_PRIVATE_KEY! ||
+const TESTNET_PRIVATE_KEY =
+  process.env.TESTNET_PRIVATE_KEY! ||
   "0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3"; // well known private key
 
-const KOVAN2_PRIVATE_KEY =
-  process.env.KOVAN2_PRIVATE_KEY! ||
+const TESTNET2_PRIVATE_KEY =
+  process.env.TESTNET2_PRIVATE_KEY! ||
   "0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3"; // well known private key
 
 const BOXCODE_PRIVATE_KEY =
@@ -54,7 +53,7 @@ const config: HardhatUserConfig = {
     },
     localhost: {
       timeout: 0,
-      accounts: [KOVAN_PRIVATE_KEY, KOVAN2_PRIVATE_KEY],
+      accounts: [TESTNET_PRIVATE_KEY, TESTNET2_PRIVATE_KEY],
     },
     mainnet: {
       url: process.env.ETH_MAINNET_PROVIDER || "",
@@ -66,9 +65,9 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: false,
     },
 
-    kovan: {
-      url: `${process.env.ETH_KOVAN_PROVIDER}`,
-      accounts: [KOVAN_PRIVATE_KEY, KOVAN2_PRIVATE_KEY],
+    testnet: {
+      url: `${process.env.ETH_TESTNET_PROVIDER}`,
+      accounts: [TESTNET_PRIVATE_KEY, TESTNET2_PRIVATE_KEY],
       gasPrice: 2e9,
       gasMultiplier: 1.5,
       minGasPrice: 1e9,

@@ -1,63 +1,70 @@
 // @ts-ignore
-import { ethers, network } from "hardhat";
+import { ethers } from "hardhat";
 import * as dotenv from "dotenv";
 // @ts-ignore
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
 import { providers } from "ethers";
-import { SupportedTokens, tokenDataByNetwork } from "@gearbox-protocol/sdk";
-import { ERC20, ERC20__factory, ERC20Kovan } from "../types";
+import {
+  SupportedToken,
+  tokenDataByNetwork,
+  LOCAL_NETWORK,
+  MAINNET_NETWORK,
+} from "@gearbox-protocol/sdk";
+import { ERC20__factory, ERC20Kovan } from "../types";
 import { deploy } from "../utils/transaction";
 import { Logger } from "tslog";
 
 const hre = require("hardhat");
 
-const tokensToDeploy: Array<SupportedTokens> = [
-//   "1INCH",
-//   "AAVE",
-//   "COMP",
-//   "CRV",
-//   "DPI",
-//   "FEI",
-//   "SUSHI",
-//   "UNI",
+const tokensToDeploy: Array<SupportedToken> = [
+  "1INCH",
+  "AAVE",
+  "COMP",
+  "CRV",
+  "DPI",
+  "FEI",
+  "SUSHI",
+  "UNI",
   "LQTY",
-//   "WETH",
-//   "YFI",
+  "WETH",
+  "YFI",
 
-//   /// UPDATE
-//   "STETH",
-//   "FTM",
-//   "CVX",
-//   "FRAX",
-//   "FXS",
-  // "LDO",
-  // "SPELL",
-  // "LUSD",
-  // "SUSD",
-  // "GUSD",
-  // "LUNA",
+  /// UPDATE
+  "STETH",
+  "FTM",
+  "CVX",
+  "FRAX",
+  "FXS",
+  "LDO",
+  "SPELL",
+  "LUSD",
+  "sUSD",
+  "GUSD",
+  "LUNA",
 ];
 
 async function deployTokens() {
   dotenv.config({ path: ".env.local" });
   const log: Logger = new Logger();
 
+  const mainnetRpc = process.env.ETH_MAINNET_PROVIDER;
+  if (!mainnetRpc) {
+    throw new Error("ETH_MAINNET_PROVIDER is not defined");
+  }
+
   const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
   const deployer = accounts[0];
   const chainId = await deployer.getChainId();
-
-  const mainnetRpc = process.env.ETH_MAINNET_PROVIDER;
-  if (!mainnetRpc) throw new Error("ETH_MAINNET_PROVIDER is not defined");
-
-  if (chainId !== 42) throw new Error("Switch to Kovan network");
+  if (chainId === MAINNET_NETWORK) {
+    throw new Error("Switch to test network");
+  }
+  log.debug(`Deploying on ${chainId}`);
 
   const mainnetProvider = new providers.JsonRpcProvider(mainnetRpc);
 
-  let update = "{";
+  const update: Record<string, string> = {};
 
-  const addr = [];
-
-  for (let t of tokensToDeploy) {
+  for (const t of tokensToDeploy) {
     const mainnetAddress = tokenDataByNetwork.Mainnet[t];
 
     const mainnetToken = ERC20__factory.connect(
@@ -69,10 +76,9 @@ async function deployTokens() {
     const name = await mainnetToken.name();
     const decimals = await mainnetToken.decimals();
 
-    console.log(t, mainnetAddress);
-    console.log(symbol);
-    console.log(name);
-    console.log(decimals);
+    console.log(
+      `Token ${symbol} at ${mainnetAddress}, ${decimals} decimals, Name = ${name}`
+    );
 
     const newToken = await deploy<ERC20Kovan>(
       "ERC20Kovan",
@@ -82,17 +88,17 @@ async function deployTokens() {
       decimals
     );
 
-    await newToken.deployTransaction.wait(10);
+    if (chainId !== LOCAL_NETWORK) {
+      await newToken.deployTransaction.wait(10);
 
-    await hre.run("verify:verify", {
-      address: newToken.address,
-      constructorArguments: [name, symbol, decimals],
-    });
+      await hre.run("verify:verify", {
+        address: newToken.address,
+        constructorArguments: [name, symbol, decimals],
+      });
+    }
 
-    update += `"${symbol}": ${newToken.address}\n`;
+    update[symbol] = newToken.address;
   }
-
-  update += "}";
 
   console.log(update);
 }
