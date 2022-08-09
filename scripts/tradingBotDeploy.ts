@@ -11,19 +11,14 @@ import { TradingBot } from "../types";
 const hre = require("hardhat");
 const log: Logger = new Logger();
 
-
 async function deployTradingBot() {
   const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
   const deployer = accounts[0];
   const chainId = await deployer.getChainId();
 
-  if (chainId !== 42) throw new Error("Switch to Kovan network");
+  if (chainId !== 42) throw new Error("Switch to test network");
 
-  const bot = await deploy<TradingBot>(
-    "TradingBot",
-    log,
-    SYNCER
-  );
+  const bot = await deploy<TradingBot>("TradingBot", log, SYNCER);
 
   await bot.deployTransaction.wait(10);
 
@@ -32,7 +27,6 @@ async function deployTradingBot() {
     constructorArguments: [SYNCER],
   });
 }
-
 
 deployTradingBot()
   .then(() => console.log("Ok"))

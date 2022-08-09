@@ -1,16 +1,15 @@
-import { ethers, run } from "hardhat";
-import * as dotenv from "dotenv";
-import { providers } from "ethers";
 import {
+  LOCAL_NETWORK,
   SupportedToken,
   tokenDataByNetwork,
-  LOCAL_NETWORK,
-  MAINNET_NETWORK,
 } from "@gearbox-protocol/sdk";
-import { ERC20__factory, ERC20Kovan } from "../types";
-import { deploy } from "../utils/transaction";
+import * as dotenv from "dotenv";
+import { run } from "hardhat";
 import { Logger } from "tslog";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import config from "../config";
+import { ERC20Kovan, ERC20__factory } from "../types";
+import setupScriptRuntime from "../utils/setupScriptRuntime";
+import { deploy } from "../utils/transaction";
 
 const tokensToDeploy: Array<SupportedToken> = [
   "1INCH",
@@ -31,9 +30,9 @@ const tokensToDeploy: Array<SupportedToken> = [
 
   "YFI",
   /// UPDATE
-  "STETH",
+  // "STETH", -- Not needed here, deployed in LidoDeployer
   "FTM",
-  "CVX",
+  // "CVX",  -- Not needed here, deployed in ConvexDeployer
   "FRAX",
   "FXS",
   "LDO",
@@ -51,20 +50,7 @@ async function deployTokens() {
   dotenv.config({ path: ".env.local" });
   const log: Logger = new Logger();
 
-  const mainnetRpc = process.env.ETH_MAINNET_PROVIDER;
-  if (!mainnetRpc) {
-    throw new Error("ETH_MAINNET_PROVIDER is not defined");
-  }
-
-  const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
-  const deployer = accounts[0];
-  const chainId = await deployer.getChainId();
-  if (chainId === MAINNET_NETWORK) {
-    throw new Error("Switch to test network");
-  }
-  log.debug(`Deploying on ${chainId}`);
-
-  const mainnetProvider = new providers.JsonRpcProvider(mainnetRpc);
+  const runtime = await setupScriptRuntime();
 
   const update: Record<string, string> = {};
 
@@ -73,7 +59,7 @@ async function deployTokens() {
 
     const mainnetToken = ERC20__factory.connect(
       mainnetAddress,
-      mainnetProvider
+      runtime.mainnetProvider
     );
 
     const symbol = await mainnetToken.symbol();
@@ -92,9 +78,8 @@ async function deployTokens() {
       decimals
     );
 
-    if (chainId !== LOCAL_NETWORK) {
-      await newToken.deployTransaction.wait(10);
-
+    await newToken.deployTransaction.wait(config.confirmations);
+    if (runtime.chainId !== LOCAL_NETWORK) {
       await run("verify:verify", {
         address: newToken.address,
         constructorArguments: [name, symbol, decimals],

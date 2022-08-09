@@ -18,6 +18,7 @@ import {
   ContractTransaction,
   Overrides,
 } from "ethers";
+import config from "../config";
 import {
   Curve3PoolMock,
   Curve3PoolMock__factory,
@@ -27,7 +28,6 @@ import {
   CurveToken,
 } from "../types";
 import { AbstractDeployer } from "./abstractDeployer";
-import { SYNCER } from "./constants";
 
 const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const USDC_UNIT = BigNumber.from(10 ** 6);
@@ -49,14 +49,14 @@ export class CurveDeployer extends AbstractDeployer {
 
   async deploy() {
     if (this.isDeployNeeded("3Crv")) {
-      let coins = [
-        tokenDataByNetwork.Kovan.DAI,
-        tokenDataByNetwork.Kovan.USDC,
-        tokenDataByNetwork.Kovan.USDT,
+      const coins = [
+        tokenDataByNetwork[config.network].DAI,
+        tokenDataByNetwork[config.network].USDC,
+        tokenDataByNetwork[config.network].USDT,
       ];
 
       const poolAgrsFn = (lpToken: string) => [
-        SYNCER,
+        config.syncer,
         this.deployer.address,
         coins,
         lpToken,
@@ -116,7 +116,7 @@ export class CurveDeployer extends AbstractDeployer {
       const coins = [ETH_ADDRESS, stETH];
 
       const poolAgrsFn = (lpToken: string) => [
-        SYNCER,
+        config.syncer,
         this.deployer.address,
         coins,
         lpToken,
@@ -150,14 +150,14 @@ export class CurveDeployer extends AbstractDeployer {
     /// CURVE SUSD DEPLOYMENT
     if (this.isDeployNeeded("crvPlain3andSUSD")) {
       const coins = [
-        tokenDataByNetwork.Kovan.DAI,
-        tokenDataByNetwork.Kovan.USDC,
-        tokenDataByNetwork.Kovan.USDT,
-        tokenDataByNetwork.Kovan.sUSD,
+        tokenDataByNetwork[config.network].DAI,
+        tokenDataByNetwork[config.network].USDC,
+        tokenDataByNetwork[config.network].USDT,
+        tokenDataByNetwork[config.network].sUSD,
       ];
 
       const poolAgrsFn = (lpToken: string) => [
-        SYNCER,
+        config.syncer,
         coins,
         coins,
         lpToken,
@@ -183,7 +183,7 @@ export class CurveDeployer extends AbstractDeployer {
       const lpToken = this.getProgress("crvPlain3andSUSD");
       const pool = this.getProgress("CURVE_SUSD_POOL");
 
-      let depositConstructorArgs = [coins, coins, pool, lpToken];
+      const depositConstructorArgs = [coins, coins, pool, lpToken];
 
       this.log.debug("Deploying SUSD wrapper");
 
@@ -199,10 +199,10 @@ export class CurveDeployer extends AbstractDeployer {
     ///
     /// CURVE GUSD3CRV DEPLOYMENT
     if (this.isDeployNeeded("gusd3CRV")) {
-      const coins = [tokenDataByNetwork.Kovan.GUSD, this._3CrvToken];
+      const coins = [tokenDataByNetwork[config.network].GUSD, this._3CrvToken];
 
       const poolAgrs = (lpToken: string) => [
-        SYNCER,
+        config.syncer,
         this.deployer.address,
         coins,
         lpToken,
@@ -252,7 +252,7 @@ export class CurveDeployer extends AbstractDeployer {
       this.mainnetProvider
     );
 
-    let tokenConstructorArgs = [
+    const tokenConstructorArgs = [
       await mainnetToken.name(),
       tokenSymbol,
       await mainnetToken.decimals(),
@@ -306,7 +306,7 @@ export class CurveDeployer extends AbstractDeployer {
     A: number,
     fee: number
   ) {
-    const coins = [tokenDataByNetwork.Kovan[token], this._3CrvToken];
+    const coins = [tokenDataByNetwork[config.network][token], this._3CrvToken];
 
     const mainnetToken = IERC20Metadata__factory.connect(
       tokenDataByNetwork.Mainnet[token],
@@ -314,7 +314,7 @@ export class CurveDeployer extends AbstractDeployer {
     );
 
     const poolConstructorArgs = [
-      SYNCER,
+      config.syncer,
       await mainnetToken.name(),
       token,
       coins[0],
@@ -333,10 +333,12 @@ export class CurveDeployer extends AbstractDeployer {
       ...poolConstructorArgs
     );
 
-    let symbol = await pool.symbol();
+    const symbol = await pool.symbol();
 
     if (symbol !== `${lpTokenSymbol}-f`) {
-      throw `Incorrect metapool symbol: ${symbol} should be ${`${lpTokenSymbol}-f`}`;
+      throw new Error(
+        `Incorrect metapool symbol: ${symbol} should be ${`${lpTokenSymbol}-f`}`
+      );
     }
 
     this.log.info(

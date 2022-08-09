@@ -1,4 +1,3 @@
-import * as dotenv from "dotenv";
 import {
   MultiCallContract,
   NetworkType,
@@ -6,11 +5,12 @@ import {
   supportedTokens,
   tokenDataByNetwork,
 } from "@gearbox-protocol/sdk";
-import { providers } from "ethers";
+import * as dotenv from "dotenv";
 import { Logger } from "tslog";
+import config from "../config";
 import { ERC20__factory } from "../types";
 import { ERC20Interface } from "../types/ERC20";
-import config from "../config";
+import setupScriptRuntime from "../utils/setupScriptRuntime";
 
 // checkTokens compares tokens on different networks
 // it uses list of supportedTokens from @gearbox-protocol/sdk
@@ -19,16 +19,12 @@ async function checkTokens() {
   dotenv.config({ path: ".env" });
   const log: Logger = new Logger();
 
-  const mainnet = new providers.JsonRpcProvider(
-    process.env.ETH_MAINNET_PROVIDER
-  );
-  const testnet = new providers.JsonRpcProvider(config.url);
+  const runtime = await setupScriptRuntime();
 
   for (const t of Object.keys(supportedTokens)) {
     log.info(`Checking ${t}`);
 
     const mCalls: Array<keyof ERC20Interface["functions"]> = [
-      // "name()",
       "symbol()",
       "decimals()",
     ];
@@ -44,7 +40,9 @@ async function checkTokens() {
       const tokenMutlicall = new MultiCallContract(
         tokenDataByNetwork[networkType][t],
         ERC20__factory.createInterface(),
-        networkType === "Mainnet" ? mainnet : testnet
+        networkType === "Mainnet"
+          ? runtime.mainnetProvider
+          : runtime.testnetProvider
       );
 
       return tokenMutlicall.call(mCalls.map((method) => ({ method })));

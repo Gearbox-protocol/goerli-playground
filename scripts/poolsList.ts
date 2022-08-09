@@ -25,7 +25,7 @@ async function deployTokens() {
   );
 
   const chainId = await deployer.getChainId();
-  if (chainId !== 42) throw new Error("Switch to Kovan network");
+  if (chainId !== 42) throw new Error("Switch to test network");
 
   const dc = DataCompressor__factory.connect(
     await addressProvider.getDataCompressor(),
@@ -41,7 +41,6 @@ async function deployTokens() {
     console.log(`${sym}: `);
     console.log(`addr: ${addr} `);
     console.log(`diesel: ${dieselToken} `);
-
   }
 }
 

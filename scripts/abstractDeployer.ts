@@ -1,16 +1,17 @@
 // @ts-ignore
-import { SignerOrProvider } from "hardhat";
 import { Verifier, waitForTransaction } from "@gearbox-protocol/devops";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { Logger } from "tslog";
-import { ProgressGetter, SupportedEntity } from "./mocksDeploy";
 import {
   MAX_INT,
   NormalToken,
   tokenDataByNetwork,
 } from "@gearbox-protocol/sdk";
-import { ERC20Kovan__factory } from "../types";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from "ethers";
+import { SignerOrProvider } from "hardhat";
+import { Logger } from "tslog";
+import config from "../config";
+import { ERC20Kovan__factory } from "../types";
+import { ProgressGetter, SupportedEntity } from "./mocksDeploy";
 
 export abstract class AbstractDeployer {
   log: Logger;
@@ -60,7 +61,11 @@ export abstract class AbstractDeployer {
 
   protected async mintToken(token: NormalToken, to: string, amount: number) {
     this.log.debug(`Minting ${token}`);
-    await this.mintTokenByAddress(tokenDataByNetwork.Kovan[token], to, amount);
+    await this.mintTokenByAddress(
+      tokenDataByNetwork[config.network][token],
+      to,
+      amount
+    );
   }
 
   protected async mintTokenByAddress(
@@ -83,7 +88,7 @@ export abstract class AbstractDeployer {
     this.log.debug(`Approving ${token}`);
 
     const contract = ERC20Kovan__factory.connect(
-      tokenDataByNetwork.Kovan[token],
+      tokenDataByNetwork[config.network][token],
       this.deployer
     );
 

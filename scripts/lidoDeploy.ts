@@ -6,14 +6,14 @@ import {
   LidoParams,
   tokenDataByNetwork,
 } from "@gearbox-protocol/sdk";
-import { Lido, Lido__factory, LidoOracle, LidoOracle__factory } from "../types";
+import config from "../config";
+import { Lido, LidoOracle, LidoOracle__factory, Lido__factory } from "../types";
 import { AbstractDeployer } from "./abstractDeployer";
-import { SYNCER } from "./constants";
 
 export class LidoDeployer extends AbstractDeployer {
   async deploy() {
     if (this.isDeployNeeded("STETH")) {
-      const lido = await deploy<Lido>("Lido", this.log, SYNCER);
+      const lido = await deploy<Lido>("Lido", this.log, config.syncer);
 
       this.log.info(`Lido mock deployed at: ${lido.address}`);
 
@@ -42,7 +42,7 @@ export class LidoDeployer extends AbstractDeployer {
       const lidoOracle = await deploy<LidoOracle>(
         "LidoOracle",
         this.log,
-        SYNCER
+        config.syncer
       );
 
       this.log.info(`Lido mock deployed at: ${lidoOracle.address}`);
@@ -64,12 +64,12 @@ export class LidoDeployer extends AbstractDeployer {
 
       this.verifier.addContract({
         address: lidoOracle.address,
-        constructorArguments: [SYNCER],
+        constructorArguments: [config.syncer],
       });
 
       this.verifier.addContract({
         address: lido.address,
-        constructorArguments: [SYNCER],
+        constructorArguments: [config.syncer],
       });
 
       this.saveProgress("LIDO_ORACLE", lidoOracle.address);

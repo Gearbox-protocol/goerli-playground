@@ -7,10 +7,10 @@ import {
   convexTokens,
   MultiCallContract,
   NormalToken,
-  RAY,
   SupportedToken,
   tokenDataByNetwork,
 } from "@gearbox-protocol/sdk";
+import config from "../config";
 import {
   BaseRewardPool__factory,
   ClaimZap,
@@ -21,7 +21,6 @@ import {
 } from "../types";
 import { BaseRewardPoolInterface } from "../types/BaseRewardPool";
 import { AbstractDeployer } from "./abstractDeployer";
-import { SYNCER } from "./constants";
 
 const convexExtraRewardTokens: Record<
   ConvexPoolContract,
@@ -32,7 +31,7 @@ const convexExtraRewardTokens: Record<
   CONVEX_SUSD_POOL: ["SNX"],
   CONVEX_STECRV_POOL: ["LDO"],
   CONVEX_FRAX3CRV_POOL: ["FXS"],
-  CONVEX_LUSD3CRV_POOL: ["LQTY"]
+  CONVEX_LUSD3CRV_POOL: ["LQTY"],
 };
 
 const tokenList: ConvexLPToken[] = [
@@ -53,7 +52,7 @@ export class ConvexDeployer extends AbstractDeployer {
     await this.deployManager();
 
     this._convexManager = KovanConvexManager__factory.connect(
-      this.getProgressOrThrow("KOVAN_CONVEX_MANAGER"),
+      this.getProgressOrThrow("TESTNET_CONVEX_MANAGER"),
       this.deployer
     );
 
@@ -65,20 +64,23 @@ export class ConvexDeployer extends AbstractDeployer {
   }
 
   async deployManager() {
-    if (this.isDeployNeeded("KOVAN_CONVEX_MANAGER")) {
+    if (this.isDeployNeeded("TESTNET_CONVEX_MANAGER")) {
       const convexManager = await deploy<KovanConvexManager>(
         "KovanConvexManager",
         this.log,
-        SYNCER,
-        tokenDataByNetwork.Kovan.CRV
+        config.syncer,
+        tokenDataByNetwork[config.network].CRV
       );
 
       this.verifier.addContract({
         address: convexManager.address,
-        constructorArguments: [SYNCER, tokenDataByNetwork.Kovan.CRV],
+        constructorArguments: [
+          config.syncer,
+          tokenDataByNetwork[config.network].CRV,
+        ],
       });
 
-      this.saveProgress("KOVAN_CONVEX_MANAGER", convexManager.address);
+      this.saveProgress("TESTNET_CONVEX_MANAGER", convexManager.address);
 
       this.log.info(
         `KovanConvexManager was deployed at ${convexManager.address}`
@@ -89,7 +91,7 @@ export class ConvexDeployer extends AbstractDeployer {
 
       this.verifier.addContract({
         address: boosterAddr,
-        constructorArguments: [cvxAddr, tokenDataByNetwork.Kovan.CRV],
+        constructorArguments: [cvxAddr, tokenDataByNetwork[config.network].CRV],
       });
 
       this.verifier.addContract({
@@ -106,7 +108,7 @@ export class ConvexDeployer extends AbstractDeployer {
   }
 
   async deployPools() {
-    for (let poolToken of tokenList) {
+    for (const poolToken of tokenList) {
       // DEPLOY BASE POOL
       if (this.isDeployNeeded(poolToken)) {
         await this.deployPool(poolToken);
@@ -123,7 +125,7 @@ export class ConvexDeployer extends AbstractDeployer {
     );
 
     const crvToken = ERC20Kovan__factory.connect(
-      tokenDataByNetwork.Kovan.CRV,
+      tokenDataByNetwork[config.network].CRV,
       this.deployer
     );
 
@@ -176,8 +178,9 @@ export class ConvexDeployer extends AbstractDeployer {
 
     // DEPLOY AND SYNC EXTRA REWARDS
 
-    for (let extraRewardToken of convexExtraRewardTokens[convexData.pool]) {
-      const rewardTokenAddr = tokenDataByNetwork.Kovan[extraRewardToken];
+    for (const extraRewardToken of convexExtraRewardTokens[convexData.pool]) {
+      const rewardTokenAddr =
+        tokenDataByNetwork[config.network][extraRewardToken];
 
       await this.mintToken(extraRewardToken, this.deployer.address, 10 ** 9);
       await this.approve(extraRewardToken, this.convexManager.address);
@@ -216,8 +219,10 @@ export class ConvexDeployer extends AbstractDeployer {
 
       const mainnetExtraRewardSymbol = await mainnetExtraReward.symbol();
 
-      if (mainnetExtraRewardSymbol != extraRewardToken) {
-        throw `Mainnet and testnet extra reward tokens inconsistent: ${mainnetExtraRewardSymbol} and ${extraRewardToken}`;
+      if (mainnetExtraRewardSymbol !== extraRewardToken) {
+        throw new Error(
+          `Mainnet and testnet extra reward tokens inconsistent: ${mainnetExtraRewardSymbol} and ${extraRewardToken}`
+        );
       }
 
       await this.syncPool(
@@ -317,13 +322,13 @@ export class ConvexDeployer extends AbstractDeployer {
     const claimZap = await deploy<ClaimZap>(
       "ClaimZap",
       this.log,
-      tokenDataByNetwork.Kovan.CRV,
+      tokenDataByNetwork[config.network].CRV,
       cvxAddr
     );
 
     this.verifier.addContract({
       address: claimZap.address,
-      constructorArguments: [tokenDataByNetwork.Kovan.CRV, cvxAddr],
+      constructorArguments: [tokenDataByNetwork[config.network].CRV, cvxAddr],
     });
 
     this.log.info(`ClaimZap was deployed at ${claimZap.address}`);

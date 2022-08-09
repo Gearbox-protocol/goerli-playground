@@ -1,10 +1,5 @@
-// @ts-ignore
-import { ethers, SignerOrProvider } from "hardhat";
-// @ts-ignore
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
 import { Verifier } from "@gearbox-protocol/devops";
 import {
-  MAINNET_NETWORK,
   SupportedContract,
   SupportedToken,
   supportedTokens,
@@ -12,10 +7,13 @@ import {
 } from "@gearbox-protocol/sdk";
 import { PartialRecord } from "@gearbox-protocol/sdk/lib/utils/types";
 
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import * as dotenv from "dotenv";
 import { providers } from "ethers";
 import fs from "fs";
 import { Logger } from "tslog";
+import config from "../config";
+import setupScriptRuntime from "../utils/setupScriptRuntime";
 import { ConvexDeployer } from "./convexDeployer";
 import { CurveDeployer } from "./curveDeployer";
 import { LidoDeployer } from "./lidoDeploy";
@@ -23,13 +21,11 @@ import { YearnDeployer } from "./yearnDeployer";
 
 dotenv.config({ path: ".env.local" });
 
-const PROGRESS_FILE_NAME = "./mockAddresses.json";
-
 export type SupportedEntity =
   | SupportedToken
   | SupportedContract
   | "CURVE_STECRV_POOL"
-  | "KOVAN_CONVEX_MANAGER"
+  | "TESTNET_CONVEX_MANAGER"
   | "LIDO_ORACLE";
 
 export interface ProgressGetter {
@@ -39,15 +35,6 @@ export interface ProgressGetter {
 
 type AddressList = PartialRecord<SupportedEntity, string>;
 
-const yearnTokenList: Array<YearnLPToken> = [
-  "yvDAI",
-  "yvUSDC",
-  "yvWETH",
-  "yvWBTC",
-  "yvCurve_stETH",
-  "yvCurve_FRAX",
-];
-
 class TestnetPlaygroundDeployer implements ProgressGetter {
   log: Logger = new Logger({
     minLevel: "debug",
@@ -56,35 +43,23 @@ class TestnetPlaygroundDeployer implements ProgressGetter {
     displayFilePath: "hidden",
   });
   verifier: Verifier = new Verifier();
-  deployer: SignerWithAddress;
-  mainnetProvider: SignerOrProvider;
+  deployer!: SignerWithAddress;
+  mainnetProvider!: providers.JsonRpcProvider;
   contractAddresses: AddressList = {};
 
   async deployMocks() {
-    const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
-    this.deployer = accounts[0];
-    const chainId = await this.deployer.getChainId();
-    if (chainId === MAINNET_NETWORK) {
-      throw new Error("Switch to Kovan network");
-    }
+    const runtime = await setupScriptRuntime();
+    this.deployer = runtime.deployer;
+    this.mainnetProvider = runtime.mainnetProvider;
 
-    const mainnetRpc = process.env.ETH_MAINNET_PROVIDER;
-    if (!mainnetRpc) {
-      throw new Error("ETH_MAINNET_PROVIDER is not defined");
-    }
-
-    if (fs.existsSync(PROGRESS_FILE_NAME)) {
+    if (fs.existsSync(config.progressFileName)) {
       this.log.warn("FOUND FILE WITH PREVIOUS PROGRESS!");
-      const savedProgress = fs.readFileSync(PROGRESS_FILE_NAME, {
+      const savedProgress = fs.readFileSync(config.progressFileName, {
         encoding: "utf-8",
       });
 
       this.contractAddresses = JSON.parse(savedProgress);
     }
-
-    this.mainnetProvider = new providers.JsonRpcProvider(
-      mainnetRpc
-    ) as SignerOrProvider;
 
     this.log.info(`Deployer: ${this.deployer.address}`);
 
@@ -133,7 +108,7 @@ class TestnetPlaygroundDeployer implements ProgressGetter {
   saveProgress(entity: SupportedEntity, address: string) {
     this.contractAddresses[entity] = address;
     fs.writeFileSync(
-      PROGRESS_FILE_NAME,
+      config.progressFileName,
       JSON.stringify(this.contractAddresses)
     );
   }
@@ -159,8 +134,8 @@ class TestnetPlaygroundDeployer implements ProgressGetter {
   }
 }
 
-const kovanPlaygroundDeployer = new TestnetPlaygroundDeployer();
-kovanPlaygroundDeployer
+const testnetPlaygroundDeployer = new TestnetPlaygroundDeployer();
+testnetPlaygroundDeployer
   .deployMocks()
   .then(() => console.log("Ok"))
   .catch((e) => console.log(e));

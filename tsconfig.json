@@ -8,10 +8,10 @@
     "declaration": true
   },
   "include": [
-    "./scripts",
-    "./test",
-    "./typechain",
-    "./types"
+    "scripts/**/*",
+    "test/**/*",
+    "typechain/**/*",
+    "types/**/*"
   ],
   "files": [
     "./hardhat.config.ts",

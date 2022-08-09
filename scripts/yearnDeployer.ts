@@ -5,9 +5,9 @@ import {
   YearnLPToken,
   yearnTokens,
 } from "@gearbox-protocol/sdk";
+import config from "../config";
 import { YearnMock } from "../types";
 import { AbstractDeployer } from "./abstractDeployer";
-import { SYNCER } from "./constants";
 
 const yearnTokenList: Array<YearnLPToken> = [
   "yvDAI",
@@ -29,7 +29,7 @@ const yearnDependency: Record<YearnLPToken, boolean> = {
 
 export class YearnDeployer extends AbstractDeployer {
   async deploy() {
-    for (let yearnToken of yearnTokenList) {
+    for (const yearnToken of yearnTokenList) {
       if (this.isDeployNeeded(yearnToken)) {
         await this.deployVault(yearnToken);
       }
@@ -43,13 +43,22 @@ export class YearnDeployer extends AbstractDeployer {
 
     const underlyingAddress = yearnDependency[yearnToken]
       ? this.getProgressOrThrow(underlying)
-      : tokenDataByNetwork.Kovan[underlying];
+      : tokenDataByNetwork[config.network][underlying];
 
     const symbol = yearnTokens[yearnToken].name;
+
+    console.log(
+      "underlyingAddress",
+      underlyingAddress,
+      "underlying",
+      underlying,
+      "symbol",
+      symbol
+    );
     const vault = await deploy<YearnMock>(
       "YearnMock",
       this.log,
-      SYNCER,
+      config.syncer,
       underlyingAddress,
       symbol
     );
@@ -75,7 +84,7 @@ export class YearnDeployer extends AbstractDeployer {
 
     this.verifier.addContract({
       address: vault.address,
-      constructorArguments: [SYNCER, underlyingAddress, symbol],
+      constructorArguments: [config.syncer, underlyingAddress, symbol],
     });
 
     this.saveProgress(yearnToken, vault.address);
