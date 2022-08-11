@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@chainlink/contracts": "^0.4.2",
-    "@gearbox-protocol/devops": "^0.0.19",
+    "@gearbox-protocol/devops": "0.0.16",
     "@gearbox-protocol/sdk": "^0.0.109",
     "@openzeppelin/contracts": "^4.7.3",
     "fs-extra": "^10.1.0",

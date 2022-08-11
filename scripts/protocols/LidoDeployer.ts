@@ -1,3 +1,4 @@
+import { deploy, waitForTransaction } from "@gearbox-protocol/devops";
 import {
   contractParams,
   LidoParams,
@@ -10,7 +11,6 @@ import {
   LidoOracle,
   LidoOracle__factory,
 } from "../../types";
-import { deploy, waitForTransaction } from "../../utils/transaction";
 import { AbstractDeployer } from "../support";
 
 export class LidoDeployer extends AbstractDeployer {

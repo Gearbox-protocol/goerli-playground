@@ -1,8 +1,8 @@
+import { deploy, waitForTransaction } from "@gearbox-protocol/devops";
 import { run } from "hardhat";
 
 import config from "../config";
 import { Syncer } from "../types";
-import { deploy, waitForTransaction } from "../utils/transaction";
 import { AbstractScript } from "./support";
 
 class SyncerDeployer extends AbstractScript {

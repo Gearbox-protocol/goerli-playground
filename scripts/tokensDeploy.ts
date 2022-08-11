@@ -1,9 +1,9 @@
+import { deploy } from "@gearbox-protocol/devops";
 import { NormalToken, tokenDataByNetwork } from "@gearbox-protocol/sdk";
 import { run } from "hardhat";
 
 import config from "../config";
 import { ERC20__factory, ERC20Kovan } from "../types";
-import { deploy } from "../utils/transaction";
 import { AbstractScript } from "./support";
 
 const tokensToDeploy: Array<NormalToken> = [
