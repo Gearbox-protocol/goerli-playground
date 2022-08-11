@@ -1,17 +1,16 @@
-// @ts-ignore
-// @ts-ignore
 import { deploy, waitForTransaction } from "@gearbox-protocol/devops";
 import {
   contractParams,
   LidoParams,
   tokenDataByNetwork,
 } from "@gearbox-protocol/sdk";
+
 import config from "../config";
-import { Lido, LidoOracle, LidoOracle__factory, Lido__factory } from "../types";
+import { Lido, Lido__factory, LidoOracle, LidoOracle__factory } from "../types";
 import { AbstractDeployer } from "./abstractDeployer";
 
 export class LidoDeployer extends AbstractDeployer {
-  async deploy() {
+  public async deploy(): Promise<void> {
     if (this.isDeployNeeded("STETH")) {
       const lido = await deploy<Lido>("Lido", this.log, config.syncer);
 

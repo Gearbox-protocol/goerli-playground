@@ -9,10 +9,11 @@ import {
   tokenDataByNetwork,
   WETHToken,
   YEARN_DAI_ADDRESS,
-  YEARN_USDC_ADDRESS
+  YEARN_USDC_ADDRESS,
 } from "@gearbox-protocol/sdk";
-import { IAppERC20__factory } from "../types/ethers-v5";
 import { Signer } from "ethers";
+
+import { IAppERC20__factory } from "../types/ethers-v5";
 
 export function getTokenData(
   address: string,
@@ -41,7 +42,7 @@ export async function getMainnetTokenData(
   return [
     ...(await Promise.all(jobs)),
     new TokenData({ addr: WETHToken.Mainnet, decimals: 18, symbol: "WETH" }),
-    new TokenData({addr: YEARN_DAI_ADDRESS, decimals: 18, symbol: "yDAI"}),
-    new TokenData({addr: YEARN_USDC_ADDRESS, decimals: 6, symbol: "yUSDC"}),
+    new TokenData({ addr: YEARN_DAI_ADDRESS, decimals: 18, symbol: "yDAI" }),
+    new TokenData({ addr: YEARN_USDC_ADDRESS, decimals: 6, symbol: "yUSDC" }),
   ];
 }

@@ -1,15 +1,11 @@
-// @ts-ignore
-import { ethers } from "hardhat";
-import * as dotenv from "dotenv";
-// @ts-ignore
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
 import {
   AddressProvider__factory,
   DataCompressor__factory,
   ERC20__factory,
-  SupportedTokens,
-  tokenDataByNetwork,
 } from "@gearbox-protocol/sdk";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import * as dotenv from "dotenv";
+import { ethers } from "hardhat";
 import { Logger } from "tslog";
 
 async function deployTokens() {
@@ -35,8 +31,8 @@ async function deployTokens() {
   const pools = await dc.getPoolsList();
 
   for (let p of pools) {
-    const { addr, underlyingToken, dieselToken } = p;
-    const token = ERC20__factory.connect(underlyingToken, deployer);
+    const { addr, underlying, dieselToken } = p;
+    const token = ERC20__factory.connect(underlying, deployer);
     const sym = await token.symbol();
     console.log(`${sym}: `);
     console.log(`addr: ${addr} `);

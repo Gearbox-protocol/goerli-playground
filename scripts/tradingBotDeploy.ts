@@ -1,18 +1,14 @@
-// @ts-ignore
-import { ethers } from "hardhat";
-// @ts-ignore
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
-
+import { ethers, run } from "hardhat";
 import { Logger } from "tslog";
-import { deploy } from "../utils/transaction";
-import { TradingBot } from "../types";
-import config from "../config";
 
-const hre = require("hardhat");
+import config from "../config";
+import { TradingBot } from "../types";
+import { deploy } from "../utils/transaction";
+
 const log: Logger = new Logger();
 
 async function deployTradingBot() {
-  const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
+  const accounts = await ethers.getSigners();
   const deployer = accounts[0];
   const chainId = await deployer.getChainId();
 
@@ -22,7 +18,7 @@ async function deployTradingBot() {
 
   await bot.deployTransaction.wait(10);
 
-  await hre.run("verify:verify", {
+  await run("verify:verify", {
     address: bot.address,
     constructorArguments: [config.syncer],
   });

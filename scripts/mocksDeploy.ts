@@ -5,12 +5,12 @@ import {
   supportedTokens,
 } from "@gearbox-protocol/sdk";
 import { PartialRecord } from "@gearbox-protocol/sdk/lib/utils/types";
-
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import * as dotenv from "dotenv";
 import { providers } from "ethers";
 import fs from "fs";
 import { Logger } from "tslog";
+
 import config from "../config";
 import setupScriptRuntime from "../utils/setupScriptRuntime";
 import { ConvexDeployer } from "./convexDeployer";
@@ -28,25 +28,25 @@ export type SupportedEntity =
   | "LIDO_ORACLE";
 
 export interface ProgressGetter {
-  saveProgress(entity: SupportedEntity, address: string): void;
-  getProgress(entity: SupportedEntity): string | undefined;
+  saveProgress: (entity: SupportedEntity, address: string) => void;
+  getProgress: (entity: SupportedEntity) => string | undefined;
 }
 
 type AddressList = PartialRecord<SupportedEntity, string>;
 
 class TestnetPlaygroundDeployer implements ProgressGetter {
-  log: Logger = new Logger({
+  private log: Logger = new Logger({
     minLevel: "debug",
     displayFunctionName: false,
     displayLoggerName: false,
     displayFilePath: "hidden",
   });
-  verifier: Verifier = new Verifier();
-  deployer!: SignerWithAddress;
-  mainnetProvider!: providers.JsonRpcProvider;
-  contractAddresses: AddressList = {};
+  private verifier: Verifier = new Verifier();
+  private deployer?: SignerWithAddress;
+  private mainnetProvider!: providers.JsonRpcProvider;
+  private contractAddresses: AddressList = {};
 
-  async deployMocks() {
+  public async deployMocks(): Promise<void> {
     const runtime = await setupScriptRuntime();
     this.deployer = runtime.deployer;
     this.mainnetProvider = runtime.mainnetProvider;
@@ -104,7 +104,7 @@ class TestnetPlaygroundDeployer implements ProgressGetter {
     this.printProgress();
   }
 
-  saveProgress(entity: SupportedEntity, address: string) {
+  public saveProgress(entity: SupportedEntity, address: string): void {
     this.contractAddresses[entity] = address;
     fs.writeFileSync(
       config.progressFileName,
@@ -112,11 +112,11 @@ class TestnetPlaygroundDeployer implements ProgressGetter {
     );
   }
 
-  getProgress(entity: SupportedEntity): string | undefined {
+  public getProgress(entity: SupportedEntity): string | undefined {
     return this.contractAddresses[entity];
   }
 
-  printProgress() {
+  public printProgress(): void {
     const tokens = Object.keys(supportedTokens);
 
     const tokensToPrint = Object.entries(this.contractAddresses)

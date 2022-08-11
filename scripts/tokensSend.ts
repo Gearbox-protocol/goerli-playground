@@ -1,16 +1,13 @@
-// @ts-ignore
-import { ethers } from "hardhat";
-import * as dotenv from "dotenv";
-// @ts-ignore
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
-import { BigNumber } from "ethers";
 import { SupportedToken, tokenDataByNetwork } from "@gearbox-protocol/sdk";
+import * as dotenv from "dotenv";
+import { BigNumber } from "ethers";
+import { ethers } from "hardhat";
+import { Logger } from "tslog";
+
+import config from "../config";
 import { ERC20Kovan__factory } from "../types";
 import { waitForTransaction } from "../utils/transaction";
-import { Logger } from "tslog";
-import config from "../config";
 
-const hre = require("hardhat");
 const log: Logger = new Logger();
 
 const tokensToDeploy: Array<SupportedToken> = [
@@ -46,11 +43,11 @@ const tokensToDeploy: Array<SupportedToken> = [
 
 const addressToSend = "0x8002e5D8cA10e2b0e7d1bd98C367fE08FA555A71";
 
-async function deployTokens() {
+async function deployTokens(): Promise<void> {
   dotenv.config({ path: ".env.local" });
   const log: Logger = new Logger();
 
-  const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
+  const accounts = await ethers.getSigners();
   const deployer = accounts[0];
 
   const chainId = await deployer.getChainId();

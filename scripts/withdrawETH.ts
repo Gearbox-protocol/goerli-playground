@@ -1,12 +1,12 @@
-// @ts-ignore
-import { ethers } from "hardhat";
-import * as dotenv from "dotenv";
-import { Logger } from "tslog";
-import { providers, Signer } from "ethers";
 import { waitForTransaction } from "@gearbox-protocol/devops";
+import * as dotenv from "dotenv";
+import { providers, Signer } from "ethers";
+import { ethers } from "hardhat";
+import { Logger } from "tslog";
+
 import { IStETHMock__factory } from "../types";
 
-async function deployTokens() {
+async function withdrawETH(): Promise<void> {
   dotenv.config({ path: ".env" });
   dotenv.config({ path: ".env.kovan" });
   const log: Logger = new Logger();
@@ -56,6 +56,6 @@ async function deployTokens() {
   console.log();
 }
 
-deployTokens()
+withdrawETH()
   .then(() => console.log("Ok"))
   .catch((e) => console.log(e));

@@ -1,7 +1,8 @@
-import { ethers } from "hardhat";
-import { providers } from "ethers";
 import { MAINNET_NETWORK } from "@gearbox-protocol/sdk";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { providers } from "ethers";
+import { ethers } from "hardhat";
+
 import config from "../config";
 
 export interface ScriptRuntime {

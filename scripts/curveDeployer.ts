@@ -6,8 +6,8 @@ import {
   CurvePoolContract,
   CurveSteCRVPoolParams,
   ICurvePool__factory,
-  IERC20Metadata__factory,
   IERC20__factory,
+  IERC20Metadata__factory,
   NormalToken,
   tokenDataByNetwork,
   WAD,
@@ -18,6 +18,7 @@ import {
   ContractTransaction,
   Overrides,
 } from "ethers";
+
 import config from "../config";
 import {
   Curve3PoolMock,
@@ -36,18 +37,18 @@ type CurvePoolArgs = (lpToken: string) => Array<unknown>;
 type SeedFn = (pool: string) => Promise<void>;
 
 interface SyncedPool {
-  sync_pool(
+  sync_pool: (
     new_mainnet_virtual_price: BigNumberish,
     _a: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
+  ) => Promise<ContractTransaction>;
 }
 
 export class CurveDeployer extends AbstractDeployer {
-  _3CrvToken: string | undefined;
-  _3CrvPool: string | undefined;
+  private _3CrvToken: string | undefined;
+  private _3CrvPool: string | undefined;
 
-  async deploy() {
+  public async deploy(): Promise<void> {
     if (this.isDeployNeeded("3Crv")) {
       const coins = [
         tokenDataByNetwork[config.network].DAI,
@@ -239,73 +240,12 @@ export class CurveDeployer extends AbstractDeployer {
     }
   }
 
-  protected async deployCurvePool(
-    tokenSymbol: CurveLPToken,
-    poolContractName: string,
-    poolType: CurvePoolContract | "CURVE_STECRV_POOL",
-    poolAgrs: CurvePoolArgs,
-    seedFn: SeedFn,
-    mainnetAddress?: string
-  ) {
-    const mainnetToken = IERC20Metadata__factory.connect(
-      tokenDataByNetwork.Mainnet[tokenSymbol],
-      this.mainnetProvider
-    );
-
-    const tokenConstructorArgs = [
-      await mainnetToken.name(),
-      tokenSymbol,
-      await mainnetToken.decimals(),
-    ];
-
-    this.log.debug(`Deploying ${tokenSymbol}: token mock`);
-
-    const lpToken = await deploy<CurveToken>(
-      "CurveToken",
-      this.log,
-      ...tokenConstructorArgs
-    );
-
-    const poolConstructorArgs = poolAgrs(lpToken.address);
-
-    this.log.debug(`Deploying ${poolType}: contract`);
-
-    const pool = await deploy<Curve3PoolMock>(
-      poolContractName,
-      this.log,
-      ...poolConstructorArgs
-    );
-    this.log.debug(`Deploying ${tokenSymbol}: set as minter`);
-
-    await waitForTransaction(lpToken.set_minter(pool.address));
-
-    this.log.info(
-      `${tokenSymbol} token mock was deployed at at ${lpToken.address}`
-    );
-    this.log.info(`${poolType} was deployed at at ${pool.address}`);
-
-    if (!mainnetAddress && poolType !== "CURVE_STECRV_POOL") {
-      mainnetAddress = contractsByNetwork.Mainnet[poolType];
-    }
-
-    if (!mainnetAddress) {
-      throw new Error("Mainnet address is undefined");
-    }
-
-    await this.syncVirtualPrice(mainnetAddress, pool, tokenSymbol);
-
-    await seedFn(pool.address);
-
-    this.saveProgress(tokenSymbol, lpToken.address);
-    this.saveProgress(poolType, pool.address);
-  }
-
-  async deployMetapool(
+  public async deployMetapool(
     lpTokenSymbol: CurveLPToken,
     token: NormalToken,
     A: number,
     fee: number
-  ) {
+  ): Promise<void> {
     const coins = [tokenDataByNetwork[config.network][token], this._3CrvToken];
 
     const mainnetToken = IERC20Metadata__factory.connect(
@@ -359,11 +299,73 @@ export class CurveDeployer extends AbstractDeployer {
     this.saveProgress(lpTokenSymbol, pool.address);
   }
 
+  protected async deployCurvePool(
+    tokenSymbol: CurveLPToken,
+    poolContractName: string,
+    poolType: CurvePoolContract | "CURVE_STECRV_POOL",
+    poolAgrs: CurvePoolArgs,
+    seedFn: SeedFn,
+    mainnetAddress?: string
+  ) {
+    const mainnetToken = IERC20Metadata__factory.connect(
+      tokenDataByNetwork.Mainnet[tokenSymbol],
+      this.mainnetProvider
+    );
+
+    const tokenConstructorArgs = [
+      await mainnetToken.name(),
+      tokenSymbol,
+      await mainnetToken.decimals(),
+    ];
+
+    this.log.debug(`Deploying ${tokenSymbol}: token mock`);
+
+    const lpToken = await deploy<CurveToken>(
+      "CurveToken",
+      this.log,
+      ...tokenConstructorArgs
+    );
+
+    const poolConstructorArgs = poolAgrs(lpToken.address);
+
+    this.log.debug(`Deploying ${poolType}: contract`);
+
+    const pool = await deploy<Curve3PoolMock>(
+      poolContractName,
+      this.log,
+      ...poolConstructorArgs
+    );
+    this.log.debug(`Deploying ${tokenSymbol}: set as minter`);
+
+    await waitForTransaction(lpToken.set_minter(pool.address));
+
+    this.log.info(
+      `${tokenSymbol} token mock was deployed at at ${lpToken.address}`
+    );
+    this.log.info(`${poolType} was deployed at at ${pool.address}`);
+
+    let mainnetAddr = mainnetAddress;
+    if (!mainnetAddr && poolType !== "CURVE_STECRV_POOL") {
+      mainnetAddr = contractsByNetwork.Mainnet[poolType];
+    }
+
+    if (!mainnetAddr) {
+      throw new Error("Mainnet address is undefined");
+    }
+
+    await this.syncVirtualPrice(mainnetAddr, pool, tokenSymbol);
+
+    await seedFn(pool.address);
+
+    this.saveProgress(tokenSymbol, lpToken.address);
+    this.saveProgress(poolType, pool.address);
+  }
+
   protected async syncVirtualPrice(
     address: string,
     pool: SyncedPool,
     symbol: string
-  ) {
+  ): Promise<void> {
     const mainnetSteCRV = ICurvePool__factory.connect(
       address,
       this.mainnetProvider

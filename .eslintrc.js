@@ -1,24 +1,24 @@
 module.exports = {
+  plugins: ["simple-import-sort"],
+  extends: [
+    "alloy",
+    "alloy/typescript",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+  ],
   env: {
-    browser: false,
-    es2021: true,
-    mocha: true,
     node: true,
   },
-  plugins: ["@typescript-eslint"],
-  extends: [
-    "standard",
-    "plugin:prettier/recommended",
-    "plugin:node/recommended",
-  ],
-  parser: "@typescript-eslint/parser",
-  parserOptions: {
-    ecmaVersion: 12,
-  },
   rules: {
-    "node/no-unsupported-features/es-syntax": [
-      "error",
-      { ignores: ["modules"] },
-    ],
+    "max-params": "off",
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
+  },
+  settings: {
+    "import/resolver": {
+      typescript: {
+        alwaysTryTypes: true, // always try to resolve types under `<root>@types` directory even it doesn't contain any source code, like `@types/unist`
+      },
+    },
   },
 };

@@ -1,4 +1,3 @@
-// @ts-ignore
 import { Verifier, waitForTransaction } from "@gearbox-protocol/devops";
 import {
   MAX_INT,
@@ -8,18 +7,19 @@ import {
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber, providers } from "ethers";
 import { Logger } from "tslog";
+
 import config from "../config";
 import { ERC20Kovan__factory } from "../types";
 import { ProgressGetter, SupportedEntity } from "./mocksDeploy";
 
 export abstract class AbstractDeployer {
-  log: Logger;
-  verifier: Verifier;
-  deployer: SignerWithAddress;
-  mainnetProvider: providers.JsonRpcProvider;
-  progress: ProgressGetter;
+  protected log: Logger;
+  protected verifier: Verifier;
+  protected deployer: SignerWithAddress;
+  protected mainnetProvider: providers.JsonRpcProvider;
+  protected progress: ProgressGetter;
 
-  constructor(
+  public constructor(
     log: Logger,
     verifier: Verifier,
     deployer: SignerWithAddress,
@@ -32,10 +32,16 @@ export abstract class AbstractDeployer {
     this.mainnetProvider = mainnetProvider;
     this.progress = progressGetter;
   }
-  abstract deploy(): void;
 
-  protected saveProgress(entity: SupportedEntity, address: string) {
-    this.progress.saveProgress(entity, address);
+  protected async approve(token: NormalToken, to: string) {
+    this.log.debug(`Approving ${token}`);
+
+    const contract = ERC20Kovan__factory.connect(
+      tokenDataByNetwork[config.network][token],
+      this.deployer
+    );
+
+    await waitForTransaction(contract.approve(to, MAX_INT));
   }
 
   protected getProgress(entity: SupportedEntity): string | undefined {
@@ -83,14 +89,9 @@ export abstract class AbstractDeployer {
     );
   }
 
-  protected async approve(token: NormalToken, to: string) {
-    this.log.debug(`Approving ${token}`);
-
-    const contract = ERC20Kovan__factory.connect(
-      tokenDataByNetwork[config.network][token],
-      this.deployer
-    );
-
-    await waitForTransaction(contract.approve(to, MAX_INT));
+  protected saveProgress(entity: SupportedEntity, address: string) {
+    this.progress.saveProgress(entity, address);
   }
+
+  public abstract deploy(): void;
 }

@@ -3,20 +3,23 @@ import { BigNumber, BigNumberish } from "ethers";
 export function formatBN(
   num?: BigNumberish,
   decimals?: number,
-  precision: number = 4
+  precision?: number
 ): string {
-  if (!num) return "-";
+  let p = precision ?? 4;
+  if (!num) {
+    return "-";
+  }
 
   if (BigNumber.from(num).gt(BigNumber.from(10).pow(28))) {
     return "MAX";
   }
 
   if (BigNumber.from(num).gt(BigNumber.from(10).pow(21))) {
-    precision = 2;
+    p = 2;
   }
 
   if (BigNumber.from(num).gt(BigNumber.from(10).pow(24))) {
-    precision = 0;
+    p = 0;
   }
 
   return !decimals || decimals >= 4
@@ -24,8 +27,8 @@ export function formatBN(
         BigNumber.from(num)
           .div(BigNumber.from(10).pow((decimals || 18) - 4))
           .toNumber() / 10000
-      ).toFixed(precision)
-    : (BigNumber.from(num).toNumber() / (10 ^ decimals)).toFixed(precision);
+      ).toFixed(p)
+    : (BigNumber.from(num).toNumber() / (10 ^ decimals)).toFixed(p);
 }
 
 export function toBN(num: number, decimals?: number): BigNumber {
@@ -34,9 +37,10 @@ export function toBN(num: number, decimals?: number): BigNumber {
   );
 }
 
-export const formatRate = (rate: BigNumberish | undefined) =>
-  rate
+export function formatRate(rate: BigNumberish | undefined): string {
+  return rate
     ? (
         BigNumber.from(rate).div(BigNumber.from(10).pow(14)).toNumber() / 100
       ).toFixed(2) + "%"
     : "0.00%";
+}

@@ -12,6 +12,7 @@ import {
 } from "@gearbox-protocol/sdk";
 import { BigNumber } from "ethers";
 import { Logger } from "tslog";
+
 import config from "../config";
 import {
   ChainlinkPriceFeed__factory,
@@ -26,7 +27,7 @@ import { waitForTransaction } from "../utils/transaction";
 const log: Logger = new Logger();
 const ethUsdPriceFeed = priceFeedsByNetwork.WETH.priceFeedUSD;
 
-async function pairDeploy() {
+async function pairDeploy(): Promise<void> {
   const { mainnetProvider, deployer } = await setupScriptRuntime();
 
   if (ethUsdPriceFeed?.type !== OracleType.CHAINLINK_ORACLE)

@@ -7,6 +7,7 @@ import * as dotenv from "dotenv";
 import { providers } from "ethers";
 import { run } from "hardhat";
 import { Logger } from "tslog";
+
 import config from "../config";
 import { ChainlinkPriceFeed, ChainlinkPriceFeed__factory } from "../types";
 import setupScriptRuntime from "../utils/setupScriptRuntime";
@@ -14,7 +15,10 @@ import { deploy } from "../utils/transaction";
 
 const log: Logger = new Logger();
 
-async function deployPF(provider: providers.JsonRpcProvider, addr: string) {
+async function deployPF(
+  provider: providers.JsonRpcProvider,
+  addr: string
+): Promise<void> {
   const mainnetPF = ChainlinkPriceFeed__factory.connect(addr, provider);
 
   const decimals = await mainnetPF.decimals();

@@ -10,6 +10,7 @@ import {
   SupportedToken,
   tokenDataByNetwork,
 } from "@gearbox-protocol/sdk";
+
 import config from "../config";
 import {
   BaseRewardPool__factory,
@@ -44,9 +45,9 @@ const tokenList: ConvexLPToken[] = [
 ];
 
 export class ConvexDeployer extends AbstractDeployer {
-  _convexManager: KovanConvexManager | undefined;
+  private _convexManager: KovanConvexManager | undefined;
 
-  async deploy() {
+  public async deploy(): Promise<void> {
     this.log.debug("Deploying KovanConvexManager");
 
     await this.deployManager();
@@ -63,7 +64,7 @@ export class ConvexDeployer extends AbstractDeployer {
     await this.deployClaimZap();
   }
 
-  async deployManager() {
+  public async deployManager(): Promise<void> {
     if (this.isDeployNeeded("TESTNET_CONVEX_MANAGER")) {
       const convexManager = await deploy<KovanConvexManager>(
         "KovanConvexManager",
@@ -107,7 +108,7 @@ export class ConvexDeployer extends AbstractDeployer {
     }
   }
 
-  async deployPools() {
+  public async deployPools(): Promise<void> {
     for (const poolToken of tokenList) {
       // DEPLOY BASE POOL
       if (this.isDeployNeeded(poolToken)) {
@@ -116,7 +117,7 @@ export class ConvexDeployer extends AbstractDeployer {
     }
   }
 
-  async deployPool(poolToken: ConvexLPToken) {
+  public async deployPool(poolToken: ConvexLPToken): Promise<void> {
     this.log.debug("Pool:", poolToken);
     const convexData = convexTokens[poolToken] as ConvexLPTokenData;
 
@@ -260,12 +261,12 @@ export class ConvexDeployer extends AbstractDeployer {
     this.log.info(`${poolToken} token deployed at: ${stakingToken}`);
   }
 
-  async syncPool(
+  public async syncPool(
     rewardPool: string,
     mainnetAddress: string,
     token: SupportedToken,
     isExtra: boolean
-  ) {
+  ): Promise<void> {
     const multiCallContract = new MultiCallContract(
       mainnetAddress,
       BaseRewardPool__factory.createInterface(),
@@ -316,7 +317,7 @@ export class ConvexDeployer extends AbstractDeployer {
     );
   }
 
-  async deployClaimZap() {
+  public async deployClaimZap(): Promise<void> {
     const cvxAddr = this.getProgressOrThrow("CVX");
 
     const claimZap = await deploy<ClaimZap>(
@@ -336,8 +337,10 @@ export class ConvexDeployer extends AbstractDeployer {
     this.saveProgress("CONVEX_CLAIM_ZAP", claimZap.address);
   }
 
-  get convexManager(): KovanConvexManager {
-    if (!this._convexManager) throw new Error("ConvexManager is not set");
+  public get convexManager(): KovanConvexManager {
+    if (!this._convexManager) {
+      throw new Error("ConvexManager is not set");
+    }
     return this._convexManager;
   }
 }

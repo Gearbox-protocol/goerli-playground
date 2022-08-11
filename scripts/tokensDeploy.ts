@@ -6,8 +6,9 @@ import {
 import * as dotenv from "dotenv";
 import { run } from "hardhat";
 import { Logger } from "tslog";
+
 import config from "../config";
-import { ERC20Kovan, ERC20__factory } from "../types";
+import { ERC20__factory, ERC20Kovan } from "../types";
 import setupScriptRuntime from "../utils/setupScriptRuntime";
 import { deploy } from "../utils/transaction";
 
@@ -26,7 +27,7 @@ const tokensToDeploy: Array<SupportedToken> = [
   "USDT",
   "USDC",
   "WBTC",
-  // "WETH",
+  // "WETH", -- not needed here, stable addresses on all testnets
 
   "YFI",
   /// UPDATE
@@ -46,7 +47,7 @@ const tokensToDeploy: Array<SupportedToken> = [
 
 // deployTokens deploys mock ERC20 contracts for each of provided tokens
 // it copies name, symbol and decimals from mainnet, origin contract address is taken from @gearbox-protocol/sdk mainnet mapping
-async function deployTokens() {
+async function deployTokens(): Promise<void> {
   dotenv.config({ path: ".env.local" });
   const log: Logger = new Logger();
 

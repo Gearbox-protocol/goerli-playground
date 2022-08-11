@@ -1,14 +1,14 @@
+import { LOCAL_NETWORK } from "@gearbox-protocol/sdk";
 import * as dotenv from "dotenv";
+import { run } from "hardhat";
 import { Logger } from "tslog";
+
 import config from "../config";
 import { Syncer } from "../types";
 import setupScriptRuntime from "../utils/setupScriptRuntime";
 import { deploy, waitForTransaction } from "../utils/transaction";
 
-import { LOCAL_NETWORK } from "@gearbox-protocol/sdk";
-import { run } from "hardhat";
-
-async function deploySyncer() {
+async function deploySyncer(): Promise<void> {
   dotenv.config({ path: ".env.local" });
   const log: Logger = new Logger();
 

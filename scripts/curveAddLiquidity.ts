@@ -9,6 +9,7 @@ import {
 } from "@gearbox-protocol/sdk";
 import * as dotenv from "dotenv";
 import { Logger } from "tslog";
+
 import config from "../config";
 import {
   CurveGUSDMock__factory,
