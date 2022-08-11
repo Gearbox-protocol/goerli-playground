@@ -1,0 +1,67 @@
+import { Verifier, waitForTransaction } from "@gearbox-protocol/devops";
+import { MAX_INT, NormalToken } from "@gearbox-protocol/sdk";
+import { BigNumber } from "ethers";
+
+import { ERC20Kovan__factory } from "../../types";
+import { AbstractScript } from "./AbstractScript";
+
+export abstract class AbstractDeployer extends AbstractScript {
+  protected verifier: Verifier = new Verifier();
+  // syncer address
+  protected syncer!: string;
+
+  public constructor() {
+    super();
+  }
+
+  protected override async setup(): Promise<void> {
+    await super.setup();
+    this.syncer = await this.progressTracker.getProgressOrThrow(
+      "syncer",
+      "address"
+    );
+    this.log.debug(`Syncer: ${this.syncer}`);
+  }
+
+  /**
+   * Approves (ERC20) transfer of MAX_INT normal tokens to some addres
+   * @param token ERC20 token to call approve on
+   * @param to Address to approve transfer to
+   */
+  protected async approve(token: NormalToken, to: string): Promise<void> {
+    this.log.debug(`Approving ${token}`);
+    const tokenAddr = await this.progressTracker.getProgressOrThrow(
+      "normalTokens",
+      token
+    );
+
+    const contract = ERC20Kovan__factory.connect(tokenAddr, this.deployer);
+
+    await waitForTransaction(contract.approve(to, MAX_INT));
+  }
+
+  protected async mintToken(token: NormalToken, to: string, amount: number) {
+    const tokenAddr = await this.progressTracker.getProgressOrThrow(
+      "normalTokens",
+      token
+    );
+    this.log.debug(`Minting ${token}`);
+    await this.mintTokenByAddress(tokenAddr, to, amount);
+  }
+
+  protected async mintTokenByAddress(
+    address: string,
+    to: string,
+    amount: number
+  ) {
+    this.log.debug(`Minting ${address}`);
+
+    const contract = ERC20Kovan__factory.connect(address, this.deployer);
+
+    const decimals = await contract.decimals();
+
+    await waitForTransaction(
+      contract.mint(to, BigNumber.from(10).pow(decimals).mul(amount))
+    );
+  }
+}

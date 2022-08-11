@@ -54,6 +54,7 @@ const config: HardhatUserConfig = {
           ? parseInt(process.env.ETH_TESTNET_BLOCK, 10)
           : undefined,
       },
+      loggingEnabled: true,
     },
     localhost: {
       timeout: 0,

@@ -6,7 +6,6 @@ import {
 } from "@gearbox-protocol/sdk";
 import { PartialRecord } from "@gearbox-protocol/sdk/lib/utils/types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import * as dotenv from "dotenv";
 import { providers } from "ethers";
 import fs from "fs";
 import { Logger } from "tslog";
@@ -17,8 +16,6 @@ import { ConvexDeployer } from "./convexDeployer";
 import { CurveDeployer } from "./curveDeployer";
 import { LidoDeployer } from "./lidoDeploy";
 import { YearnDeployer } from "./yearnDeployer";
-
-dotenv.config({ path: ".env.local" });
 
 export type SupportedEntity =
   | SupportedToken

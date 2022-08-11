@@ -14,6 +14,10 @@ export interface Progress {
   normalTokens?: {
     [key in NormalToken]?: string;
   };
+  lido?: {
+    LIDO_ORACLE?: string;
+    STETH?: string;
+  };
 }
 
 export class ProgressTracker {
@@ -46,6 +50,29 @@ export class ProgressTracker {
     const p = progress[script];
     // @ts-ignore
     return p?.[entity];
+  }
+
+  public async getProgressOrThrow<
+    S extends keyof Progress,
+    E extends keyof NonNullable<Progress[S]>
+  >(script: S, entity: E): Promise<NonNullable<NonNullable<Progress[S]>[E]>> {
+    const result = await this.getProgress(script, entity);
+    if (!result) {
+      throw new Error(`${String(entity)} is undefined in ${script}`);
+    }
+    return result!;
+  }
+
+  public async isDeployNeeded<S extends keyof Progress>(
+    script: S,
+    entity: keyof NonNullable<Progress[S]>
+  ): Promise<boolean> {
+    const addr = await this.getProgress(script, entity);
+    if (addr) {
+      this.log.warn(`${String(entity)} is already deployed at: ${addr}`);
+      return false;
+    }
+    return true;
   }
 
   /**

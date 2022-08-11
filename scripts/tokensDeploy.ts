@@ -39,7 +39,7 @@ const tokensToDeploy: Array<NormalToken> = [
   "LQTY",
 ];
 
-// deployTokens deploys mock ERC20 contracts for each of provided tokens normal tokens
+// TokensDeployer deploys mock ERC20 contracts for each of provided normal tokens
 // it copies name, symbol and decimals from mainnet, origin contract address is taken from @gearbox-protocol/sdk mainnet mapping
 class TokensDeployer extends AbstractScript {
   protected async run(): Promise<void> {
@@ -108,4 +108,4 @@ class TokensDeployer extends AbstractScript {
   }
 }
 
-new TokensDeployer().exec();
+new TokensDeployer().exec().catch(console.error);

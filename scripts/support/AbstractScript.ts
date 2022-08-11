@@ -1,4 +1,3 @@
-import { Verifier } from "@gearbox-protocol/devops";
 import {
   HARDHAT_NETWORK,
   LOCAL_NETWORK,
@@ -17,19 +16,16 @@ export abstract class AbstractScript {
   protected log: Logger = new Logger();
   protected chainId!: number;
   protected deployer!: SignerWithAddress;
-  protected verifier: Verifier = new Verifier();
   protected mainnetProvider!: providers.JsonRpcProvider;
   protected testnetProvider!: providers.JsonRpcProvider;
   protected progressTracker = new ProgressTracker(config.progressFileName);
 
-  public exec(): void {
-    this.setup()
-      .then(() => this.run())
-      .then(() => this.log.debug("Ok"))
-      .catch((e) => this.log.error(e));
+  public async exec(): Promise<void> {
+    await this.setup();
+    await this.run();
   }
 
-  private async setup(): Promise<void> {
+  protected async setup(): Promise<void> {
     dotEnvConfig();
     const mainnetRpc = process.env.ETH_MAINNET_PROVIDER;
     if (!mainnetRpc) {
