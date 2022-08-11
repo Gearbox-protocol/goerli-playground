@@ -1,7 +1,13 @@
-import { NormalToken } from "@gearbox-protocol/sdk";
+import {
+  CurveLPToken,
+  CurvePoolContract,
+  NormalToken,
+} from "@gearbox-protocol/sdk";
 import fs from "fs";
 import { readJson, writeJson } from "fs-extra";
 import { Logger } from "tslog";
+
+type CurveProgressKey = CurveLPToken | CurvePoolContract | "CURVE_STECRV_POOL";
 
 /**
  * This interface describes intermediate deployment state
@@ -17,6 +23,9 @@ export interface Progress {
   lido?: {
     LIDO_ORACLE?: string;
     STETH?: string;
+  };
+  curve?: {
+    [key in CurveProgressKey]?: string;
   };
 }
 

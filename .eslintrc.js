@@ -11,6 +11,7 @@ module.exports = {
   },
   rules: {
     "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-floating-promises": "warn",
     "max-params": "off",
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error",
@@ -31,5 +32,8 @@ module.exports = {
         alwaysTryTypes: true, // always try to resolve types under `<root>@types` directory even it doesn't contain any source code, like `@types/unist`
       },
     },
+  },
+  parserOptions: {
+    project: "./tsconfig.json",
   },
 };

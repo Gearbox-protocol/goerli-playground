@@ -15,7 +15,7 @@ import { AbstractDeployer } from "../support";
 
 export class LidoDeployer extends AbstractDeployer {
   protected async run(): Promise<void> {
-    const needed = this.progressTracker.isDeployNeeded("lido", "STETH");
+    const needed = await this.progressTracker.isDeployNeeded("lido", "STETH");
     if (!needed) {
       return;
     }
