@@ -1,13 +1,8 @@
-import {
-  KOVAN_NETWORK,
-  LOCAL_NETWORK,
-  NetworkType,
-} from "@gearbox-protocol/sdk";
+import { NetworkType } from "@gearbox-protocol/sdk";
 
 export interface TestnetConfig {
   url: string;
   network: NetworkType;
-  chainId: number;
   // Address of syncer contract
   syncer: string;
   // Address of ???
@@ -24,7 +19,6 @@ export interface TestnetConfig {
 const KOVAN: TestnetConfig = {
   url: process.env.ETH_KOVAN_PROVIDER!,
   network: "Kovan",
-  chainId: KOVAN_NETWORK,
   syncer: "0xC6493381d29e813D56063A1AffBbbC534fdCd70b",
   syncerRobot: "0xd037ca7a2b62c66b0f01cb2c93b978493dcd06d6",
   confirmations: 10,
@@ -34,7 +28,6 @@ const KOVAN: TestnetConfig = {
 const GOERLY_LOCAL: TestnetConfig = {
   url: "http://localhost:8545",
   network: "Goerli",
-  chainId: LOCAL_NETWORK,
   syncer: "0xa0945a7aC164287B4e6B8f234337820807074a29",
   syncerRobot: "0xd037ca7a2b62c66b0f01cb2c93b978493dcd06d6",
   progressFileName: "./mock_addresses_goerli_local.json",

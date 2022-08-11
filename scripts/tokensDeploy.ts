@@ -1,18 +1,12 @@
-import {
-  LOCAL_NETWORK,
-  SupportedToken,
-  tokenDataByNetwork,
-} from "@gearbox-protocol/sdk";
-import * as dotenv from "dotenv";
+import { NormalToken, tokenDataByNetwork } from "@gearbox-protocol/sdk";
 import { run } from "hardhat";
-import { Logger } from "tslog";
 
 import config from "../config";
 import { ERC20__factory, ERC20Kovan } from "../types";
-import setupScriptRuntime from "../utils/setupScriptRuntime";
 import { deploy } from "../utils/transaction";
+import { AbstractScript } from "./support";
 
-const tokensToDeploy: Array<SupportedToken> = [
+const tokensToDeploy: Array<NormalToken> = [
   "1INCH",
   "AAVE",
   "COMP",
@@ -45,54 +39,73 @@ const tokensToDeploy: Array<SupportedToken> = [
   "LQTY",
 ];
 
-// deployTokens deploys mock ERC20 contracts for each of provided tokens
+// deployTokens deploys mock ERC20 contracts for each of provided tokens normal tokens
 // it copies name, symbol and decimals from mainnet, origin contract address is taken from @gearbox-protocol/sdk mainnet mapping
-async function deployTokens(): Promise<void> {
-  dotenv.config({ path: ".env.local" });
-  const log: Logger = new Logger();
+class TokensDeployer extends AbstractScript {
+  protected async run(): Promise<void> {
+    const update: Record<string, string> = {};
 
-  const runtime = await setupScriptRuntime();
+    for (const t of tokensToDeploy) {
+      const addr = await this.maybeDeployToken(t);
+      update[t] = addr;
+    }
 
-  const update: Record<string, string> = {};
+    this.log.info("Done");
+    this.log.info(update);
+  }
 
-  for (const t of tokensToDeploy) {
+  /**
+   * Deploys normal token or reads it from progress
+   * @param t token symbol
+   * @returns token address
+   */
+  private async maybeDeployToken(t: NormalToken): Promise<string> {
+    let addr = await this.progressTracker.getProgress("normalTokens", t);
+    if (!addr) {
+      addr = await this.deployToken(t);
+      await this.progressTracker.saveProgress("normalTokens", t, addr);
+    }
+    return addr;
+  }
+
+  /**
+   * Deploys normal token
+   * @param t token symbol
+   * @returns token address
+   */
+  private async deployToken(t: NormalToken): Promise<string> {
     const mainnetAddress = tokenDataByNetwork.Mainnet[t];
 
     const mainnetToken = ERC20__factory.connect(
       mainnetAddress,
-      runtime.mainnetProvider
+      this.mainnetProvider
     );
 
     const symbol = await mainnetToken.symbol();
     const name = await mainnetToken.name();
     const decimals = await mainnetToken.decimals();
 
-    console.log(
+    this.log.debug(
       `Token ${symbol} at ${mainnetAddress}, ${decimals} decimals, Name = ${name}`
     );
 
     const newToken = await deploy<ERC20Kovan>(
       "ERC20Kovan",
-      log,
+      this.log,
       name,
       symbol,
       decimals
     );
 
     await newToken.deployTransaction.wait(config.confirmations);
-    if (runtime.chainId !== LOCAL_NETWORK) {
+    if (this.canVerify) {
       await run("verify:verify", {
         address: newToken.address,
         constructorArguments: [name, symbol, decimals],
       });
     }
-
-    update[symbol] = newToken.address;
+    return newToken.address;
   }
-
-  console.log(update);
 }
 
-deployTokens()
-  .then(() => console.log("Ok"))
-  .catch((e) => console.log(e));
+new TokensDeployer().exec();

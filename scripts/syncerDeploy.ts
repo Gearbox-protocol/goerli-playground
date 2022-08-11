@@ -1,31 +1,36 @@
-import { LOCAL_NETWORK } from "@gearbox-protocol/sdk";
-import * as dotenv from "dotenv";
 import { run } from "hardhat";
-import { Logger } from "tslog";
 
 import config from "../config";
 import { Syncer } from "../types";
-import setupScriptRuntime from "../utils/setupScriptRuntime";
 import { deploy, waitForTransaction } from "../utils/transaction";
+import { AbstractScript } from "./support";
 
-async function deploySyncer(): Promise<void> {
-  dotenv.config({ path: ".env.local" });
-  const log: Logger = new Logger();
+class SyncerDeployer extends AbstractScript {
+  protected async run(): Promise<void> {
+    let syncerAddr = await this.progressTracker.getProgress(
+      "syncer",
+      "address"
+    );
+    if (syncerAddr) {
+      this.log.debug(`Syncer already deployed at: ${syncerAddr}`);
+    } else {
+      const syncer = await deploy<Syncer>("Syncer", this.log);
+      await syncer.deployTransaction.wait(config.confirmations);
+      await waitForTransaction(syncer.addSyncer(config.syncerRobot));
+      await this.progressTracker.saveProgress(
+        "syncer",
+        "address",
+        syncer.address
+      );
+      syncerAddr = syncer.address;
+    }
 
-  const runtime = await setupScriptRuntime();
-
-  const syncer = await deploy<Syncer>("Syncer", log);
-  await syncer.deployTransaction.wait(config.confirmations);
-
-  await waitForTransaction(syncer.addSyncer(config.syncerRobot));
-
-  if (runtime.chainId !== LOCAL_NETWORK) {
-    await run("verify:verify", {
-      address: syncer.address,
-    });
+    if (this.canVerify) {
+      await run("verify:verify", {
+        address: syncerAddr,
+      });
+    }
   }
 }
 
-deploySyncer()
-  .then(() => console.log("Ok"))
-  .catch((e) => console.log(e));
+new SyncerDeployer().exec();

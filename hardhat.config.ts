@@ -1,15 +1,15 @@
+import "@nomiclabs/hardhat-ethers";
+import "@nomiclabs/hardhat-etherscan";
+import "@nomiclabs/hardhat-vyper";
+import "@nomiclabs/hardhat-waffle";
+import "@typechain/hardhat";
+import "hardhat-contract-sizer";
+import "hardhat-gas-reporter";
+import "solidity-coverage";
+
+import { MAINNET_NETWORK } from "@gearbox-protocol/sdk";
 import { config as dotEnvConfig } from "dotenv";
 import { HardhatUserConfig } from "hardhat/types";
-
-import "@nomiclabs/hardhat-waffle";
-import "@nomiclabs/hardhat-etherscan";
-import "@nomiclabs/hardhat-ethers";
-import "@nomiclabs/hardhat-vyper";
-import "@typechain/hardhat";
-import "hardhat-gas-reporter";
-import "hardhat-contract-sizer";
-import "solidity-coverage";
-import { LOCAL_NETWORK, MAINNET_NETWORK } from "@gearbox-protocol/sdk";
 
 // gets data from .env file
 dotEnvConfig();
@@ -47,9 +47,13 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      chainId: LOCAL_NETWORK,
-      initialBaseFeePerGas: 0,
-      allowUnlimitedContractSize: true,
+      forking: {
+        url: process.env.ETH_TESTNET_PROVIDER!,
+        // pin block number to have stable addresses every time during local development
+        blockNumber: process.env.ETH_TESTNET_BLOCK
+          ? parseInt(process.env.ETH_TESTNET_BLOCK, 10)
+          : undefined,
+      },
     },
     localhost: {
       timeout: 0,
