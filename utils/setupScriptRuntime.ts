@@ -27,6 +27,8 @@ export default async function setupScriptRuntime(): Promise<ScriptRuntime> {
   const mainnetProvider = new providers.JsonRpcProvider(mainnetRpc);
   const testnetProvider = new providers.JsonRpcProvider(config.url);
 
+  console.log(`Deployer = ${deployer.address}`);
+
   return {
     chainId,
     deployer,

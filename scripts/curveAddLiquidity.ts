@@ -1,100 +1,79 @@
-// @ts-ignore
-import { ethers } from "hardhat";
-// @ts-ignore
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
-import * as dotenv from "dotenv";
-import { Logger } from "tslog";
-import {
-  Curve3PoolMock__factory,
-  CurveSUSDMock__factory,
-  CurveMetapoolMock__factory,
-  CurveGUSDMock__factory,
-  ERC20Kovan__factory,
-  CurveStETHMock__factory,
-  CurveToken__factory,
-  Lido__factory,
-} from "../types";
 import { waitForTransaction } from "@gearbox-protocol/devops";
 import {
-  tokenDataByNetwork,
-  contractsByNetwork,
-  contractParams,
-  WAD,
-  MAX_INT,
   AdapterInterface,
+  contractParams,
+  contractsByNetwork,
+  MAX_INT,
+  tokenDataByNetwork,
+  WAD,
 } from "@gearbox-protocol/sdk";
-import { BigNumber } from "ethers";
-
-const hre = require("hardhat");
-
-const KOVAN_ROOT = "0x19301B8e700925E850C945a28256b6A6FDe5904C";
+import * as dotenv from "dotenv";
+import { Logger } from "tslog";
+import config from "../config";
+import {
+  CurveGUSDMock__factory,
+  CurveMetapoolMock__factory,
+  CurveStETHMock__factory,
+  CurveSUSDMock__factory,
+  CurveToken__factory,
+  ERC20Kovan__factory,
+  Lido__factory,
+} from "../types";
+import setupScriptRuntime from "../utils/setupScriptRuntime";
 
 async function seedCurveTokens() {
   dotenv.config({ path: ".env.local" });
   const log: Logger = new Logger();
 
-  const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
-  let deployer = accounts[0];
-  const chainId = await deployer.getChainId();
-
-  log.info(`Deployer: ${deployer.address}`);
-
-  if (chainId !== 42 && chainId !== 1337)
-    throw new Error("Switch to Kovan network");
-
-  if (chainId === 1337) {
-    await hre.network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [KOVAN_ROOT],
-    });
-
-    deployer = await ethers.getSigner(KOVAN_ROOT);
-  }
+  const { deployer } = await setupScriptRuntime();
   //
   // Define tokens
   //
 
   const dai = ERC20Kovan__factory.connect(
-    tokenDataByNetwork.Kovan.DAI,
+    tokenDataByNetwork[config.network].DAI,
     deployer
   );
 
   const usdc = ERC20Kovan__factory.connect(
-    tokenDataByNetwork.Kovan.USDC,
+    tokenDataByNetwork[config.network].USDC,
     deployer
   );
 
   const usdt = ERC20Kovan__factory.connect(
-    tokenDataByNetwork.Kovan.USDT,
+    tokenDataByNetwork[config.network].USDT,
     deployer
   );
 
   const susd = ERC20Kovan__factory.connect(
-    tokenDataByNetwork.Kovan.sUSD,
+    tokenDataByNetwork[config.network].sUSD,
     deployer
   );
 
   const gusd = ERC20Kovan__factory.connect(
-    tokenDataByNetwork.Kovan.GUSD,
+    tokenDataByNetwork[config.network].GUSD,
     deployer
   );
 
   const frax = ERC20Kovan__factory.connect(
-    tokenDataByNetwork.Kovan.FRAX,
+    tokenDataByNetwork[config.network].FRAX,
     deployer
   );
 
   const lusd = ERC20Kovan__factory.connect(
-    tokenDataByNetwork.Kovan.LUSD,
+    tokenDataByNetwork[config.network].LUSD,
     deployer
   );
 
   const _3crv = CurveToken__factory.connect(
-    tokenDataByNetwork.Kovan["3Crv"],
+    tokenDataByNetwork[config.network]["3Crv"],
     deployer
   );
 
-  const steth = Lido__factory.connect(tokenDataByNetwork.Kovan.STETH, deployer);
+  const steth = Lido__factory.connect(
+    tokenDataByNetwork[config.network].STETH,
+    deployer
+  );
 
   //
   // Adding liquidity to steCRV
@@ -102,19 +81,19 @@ async function seedCurveTokens() {
 
   log.info("Adding liquidity to steCRV");
 
-  const gateway_params = contractParams.CURVE_STETH_GATEWAY;
+  const gatewayParams = contractParams.CURVE_STETH_GATEWAY;
 
-  if (gateway_params.type != AdapterInterface.CURVE_V1_STECRV_POOL) {
-    throw "Incorrect stETH type";
+  if (gatewayParams.type !== AdapterInterface.CURVE_V1_STECRV_POOL) {
+    throw new Error("Incorrect stETH type");
   }
 
-  const steCRV_address = gateway_params.pool.Kovan;
+  const steCRVAddress = gatewayParams.pool[config.network];
 
-  const steCRV = CurveStETHMock__factory.connect(steCRV_address, deployer);
+  const steCRV = CurveStETHMock__factory.connect(steCRVAddress, deployer);
 
   log.info("Approving stETH");
 
-  await waitForTransaction(steth.approve(steCRV_address, MAX_INT));
+  await waitForTransaction(steth.approve(steCRVAddress, MAX_INT));
   await waitForTransaction(steth.mint(deployer.address, WAD));
 
   log.info("Adding liquidity to steCRV");
@@ -133,18 +112,18 @@ async function seedCurveTokens() {
 
   log.info("Adding liquidity to SUSD pool");
 
-  const sCRV_address = contractsByNetwork.Kovan.CURVE_SUSD_POOL;
+  const sCRVAddress = contractsByNetwork[config.network].CURVE_SUSD_POOL;
 
   log.info("Approving tokens");
 
-  await waitForTransaction(dai.approve(sCRV_address, MAX_INT));
-  await waitForTransaction(usdc.approve(sCRV_address, MAX_INT));
-  await waitForTransaction(usdt.approve(sCRV_address, MAX_INT));
-  await waitForTransaction(susd.approve(sCRV_address, MAX_INT));
+  await waitForTransaction(dai.approve(sCRVAddress, MAX_INT));
+  await waitForTransaction(usdc.approve(sCRVAddress, MAX_INT));
+  await waitForTransaction(usdt.approve(sCRVAddress, MAX_INT));
+  await waitForTransaction(susd.approve(sCRVAddress, MAX_INT));
 
   log.info("Adding liquidity to SUSD");
 
-  const sCRV = CurveSUSDMock__factory.connect(sCRV_address, deployer);
+  const sCRV = CurveSUSDMock__factory.connect(sCRVAddress, deployer);
 
   await waitForTransaction(sCRV.add_liquidity([WAD, 10 ** 6, 10 ** 6, WAD], 0));
 
@@ -161,22 +140,22 @@ async function seedCurveTokens() {
 
   log.info("Adding liquidity to GUSD pool");
 
-  const gusd_address = contractsByNetwork.Kovan.CURVE_GUSD_POOL;
+  const gusdAddress = contractsByNetwork[config.network].CURVE_GUSD_POOL;
 
   log.info("Approving tokens");
 
-  await waitForTransaction(gusd.approve(gusd_address, MAX_INT));
-  await waitForTransaction(_3crv.approve(gusd_address, MAX_INT));
+  await waitForTransaction(gusd.approve(gusdAddress, MAX_INT));
+  await waitForTransaction(_3crv.approve(gusdAddress, MAX_INT));
 
   log.info("Adding liquidity to GUSD");
 
-  const gusd_pool = CurveGUSDMock__factory.connect(gusd_address, deployer);
+  const gusdPool = CurveGUSDMock__factory.connect(gusdAddress, deployer);
 
-  await waitForTransaction(gusd_pool.add_liquidity([10 ** 2, WAD], 0));
+  await waitForTransaction(gusdPool.add_liquidity([10 ** 2, WAD], 0));
 
   log.info(
-    `GUSD balance: ${await gusd_pool.balances(0)},
-  3CRV balance: ${await gusd_pool.balances(1)}`
+    `GUSD balance: ${await gusdPool.balances(0)},
+     3CRV balance: ${await gusdPool.balances(1)}`
   );
 
   //
@@ -185,17 +164,17 @@ async function seedCurveTokens() {
 
   log.info("Adding liquidity to FRAX3CRV pool");
 
-  const frax3crv_address = contractsByNetwork.Kovan.CURVE_FRAX_POOL;
+  const frax3crvAddress = contractsByNetwork[config.network].CURVE_FRAX_POOL;
 
   log.info("Approving tokens");
 
-  await waitForTransaction(frax.approve(frax3crv_address, MAX_INT));
-  await waitForTransaction(_3crv.approve(frax3crv_address, MAX_INT));
+  await waitForTransaction(frax.approve(frax3crvAddress, MAX_INT));
+  await waitForTransaction(_3crv.approve(frax3crvAddress, MAX_INT));
 
   log.info("Adding liquidity to FRAX3CRV");
 
   const frax3crv = CurveMetapoolMock__factory.connect(
-    frax3crv_address,
+    frax3crvAddress,
     deployer
   );
 
@@ -214,17 +193,17 @@ async function seedCurveTokens() {
 
   log.info("Adding liquidity to LUSD3CRV pool");
 
-  const lusd3crv_address = contractsByNetwork.Kovan.CURVE_LUSD_POOL;
+  const lusd3crvAddress = contractsByNetwork[config.network].CURVE_LUSD_POOL;
 
   log.info("Approving tokens");
 
-  await waitForTransaction(lusd.approve(lusd3crv_address, MAX_INT));
-  await waitForTransaction(_3crv.approve(lusd3crv_address, MAX_INT));
+  await waitForTransaction(lusd.approve(lusd3crvAddress, MAX_INT));
+  await waitForTransaction(_3crv.approve(lusd3crvAddress, MAX_INT));
 
   log.info("Adding liquidity to LUSD3CRV");
 
   const lusd3crv = CurveMetapoolMock__factory.connect(
-    lusd3crv_address,
+    lusd3crvAddress,
     deployer
   );
 

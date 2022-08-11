@@ -16,6 +16,9 @@ export interface TestnetConfig {
   progressFileName: string;
   // Optionally wait for N confirmations before considering that contract is deployed
   confirmations?: number;
+  // Price feeds for following token symbols won't be deployed
+  // used during local fork development, when main gearbox contracts haven't been deployed yet
+  skipPriceFeedsFor?: string[];
 }
 
 const KOVAN: TestnetConfig = {
@@ -32,9 +35,10 @@ const GOERLY_LOCAL: TestnetConfig = {
   url: "http://localhost:8545",
   network: "Goerli",
   chainId: LOCAL_NETWORK,
-  syncer: "0x8E02433C31B51ABe3Ac65908d59eF82ddB52714F",
+  syncer: "0xa0945a7aC164287B4e6B8f234337820807074a29",
   syncerRobot: "0xd037ca7a2b62c66b0f01cb2c93b978493dcd06d6",
   progressFileName: "./mock_addresses_goerli_local.json",
+  skipPriceFeedsFor: ["dDAI", "dUSDC", "dWBTC", "dWETH", "GEAR"],
 };
 
 // export one of testnet configs as default

@@ -6,8 +6,7 @@ import {
   tokenDataByNetwork,
 } from "@gearbox-protocol/sdk";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { BigNumber } from "ethers";
-import { SignerOrProvider } from "hardhat";
+import { BigNumber, providers } from "ethers";
 import { Logger } from "tslog";
 import config from "../config";
 import { ERC20Kovan__factory } from "../types";
@@ -17,14 +16,14 @@ export abstract class AbstractDeployer {
   log: Logger;
   verifier: Verifier;
   deployer: SignerWithAddress;
-  mainnetProvider: SignerOrProvider;
+  mainnetProvider: providers.JsonRpcProvider;
   progress: ProgressGetter;
 
   constructor(
     log: Logger,
     verifier: Verifier,
     deployer: SignerWithAddress,
-    mainnetProvider: SignerOrProvider,
+    mainnetProvider: providers.JsonRpcProvider,
     progressGetter: ProgressGetter
   ) {
     this.log = log;

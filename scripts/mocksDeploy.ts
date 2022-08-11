@@ -3,7 +3,6 @@ import {
   SupportedContract,
   SupportedToken,
   supportedTokens,
-  YearnLPToken,
 } from "@gearbox-protocol/sdk";
 import { PartialRecord } from "@gearbox-protocol/sdk/lib/utils/types";
 

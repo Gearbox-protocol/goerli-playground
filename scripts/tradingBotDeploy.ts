@@ -5,8 +5,8 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-
 
 import { Logger } from "tslog";
 import { deploy } from "../utils/transaction";
-import { SYNCER } from "./constants";
 import { TradingBot } from "../types";
+import config from "../config";
 
 const hre = require("hardhat");
 const log: Logger = new Logger();
@@ -18,13 +18,13 @@ async function deployTradingBot() {
 
   if (chainId !== 42) throw new Error("Switch to test network");
 
-  const bot = await deploy<TradingBot>("TradingBot", log, SYNCER);
+  const bot = await deploy<TradingBot>("TradingBot", log, config.syncer);
 
   await bot.deployTransaction.wait(10);
 
   await hre.run("verify:verify", {
     address: bot.address,
-    constructorArguments: [SYNCER],
+    constructorArguments: [config.syncer],
   });
 }
 

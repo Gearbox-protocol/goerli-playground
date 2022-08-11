@@ -1,23 +1,18 @@
-// @ts-ignore
-import { ethers, network } from "hardhat";
-import * as dotenv from "dotenv";
-// @ts-ignore
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
-import { providers } from "ethers";
 import {
+  LOCAL_NETWORK,
   OracleType,
   priceFeedsByNetwork,
-  SupportedTokens,
-  tokenDataByNetwork,
 } from "@gearbox-protocol/sdk";
-import { deploy } from "../utils/transaction";
+import * as dotenv from "dotenv";
+import { providers } from "ethers";
+import { run } from "hardhat";
 import { Logger } from "tslog";
+import config from "../config";
 import { ChainlinkPriceFeed, ChainlinkPriceFeed__factory } from "../types";
-import { SYNCER } from "./constants";
+import setupScriptRuntime from "../utils/setupScriptRuntime";
+import { deploy } from "../utils/transaction";
 
-const hre = require("hardhat");
 const log: Logger = new Logger();
-
 
 async function deployPF(provider: providers.JsonRpcProvider, addr: string) {
   const mainnetPF = ChainlinkPriceFeed__factory.connect(addr, provider);
@@ -26,54 +21,53 @@ async function deployPF(provider: providers.JsonRpcProvider, addr: string) {
   const newToken = await deploy<ChainlinkPriceFeed>(
     "ChainlinkPriceFeed",
     log,
-    SYNCER,
+    config.syncer,
     decimals,
     addr
   );
 
-  await newToken.deployTransaction.wait(10);
+  await newToken.deployTransaction.wait(config.confirmations);
 
-  await hre.run("verify:verify", {
-    address: newToken.address,
-    constructorArguments: [SYNCER, decimals, addr],
-  });
+  if (config.chainId !== LOCAL_NETWORK) {
+    await run("verify:verify", {
+      address: newToken.address,
+      constructorArguments: [config.syncer, decimals, addr],
+    });
+  }
 }
 
 async function deployPriceFeeds() {
   dotenv.config({ path: ".env.local" });
 
-  const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
-  const deployer = accounts[0];
-  const chainId = await deployer.getChainId();
-
-  const mainnetRpc = process.env.ETH_MAINNET_PROVIDER;
-  if (!mainnetRpc) throw new Error("ETH_MAINNET_PROVIDER is not defined");
-
-  if (chainId !== 42) throw new Error("Switch to Kovan network");
-
-  const mainnetProvider = new providers.JsonRpcProvider(mainnetRpc);
+  const { mainnetProvider, deployer } = await setupScriptRuntime();
 
   const addr = [];
+  const deployed: Record<string, string> = {};
 
-  for (let [sym, pf] of Object.entries(priceFeedsByNetwork)) {
+  for (const [sym, pf] of Object.entries(priceFeedsByNetwork)) {
+    if (config.skipPriceFeedsFor?.includes(sym)) {
+      log.debug(`Skipped ${sym}`);
+      continue;
+    }
     if (
       pf.priceFeedETH &&
       pf.priceFeedETH.type === OracleType.CHAINLINK_ORACLE &&
-      !pf.priceFeedETH.kovan
+      !pf.priceFeedETH.address[config.network]
     ) {
-      const pfAddr = pf.priceFeedETH.address;
+      const pfAddr = pf.priceFeedETH.address.Mainnet;
       log.info(`Deploying pricefeed ${sym}/ETH for oracle: ${pfAddr}`);
       await deployPF(mainnetProvider, pfAddr);
       addr.push(pfAddr);
       log.debug(`Deplyed at: ${pfAddr}`);
+      deployed[`${sym}/ETH`] = pfAddr;
     }
 
     if (
       pf.priceFeedETH &&
       pf.priceFeedETH.type === OracleType.CHAINLINK_ORACLE &&
-      pf.priceFeedETH.kovan
+      pf.priceFeedETH.address[config.network]
     ) {
-      const pfAddr = pf.priceFeedETH.kovan;
+      const pfAddr = pf.priceFeedETH.address[config.network];
       const pfeed = ChainlinkPriceFeed__factory.connect(pfAddr, deployer);
       try {
         await pfeed.mainnetOracle();
@@ -84,32 +78,32 @@ async function deployPriceFeeds() {
     if (
       pf.priceFeedUSD &&
       pf.priceFeedUSD.type === OracleType.CHAINLINK_ORACLE &&
-      !pf.priceFeedUSD.kovan
+      !pf.priceFeedUSD.address[config.network]
     ) {
-      const pfAddr = pf.priceFeedUSD.address;
+      const pfAddr = pf.priceFeedUSD.address.Mainnet;
       log.info(`Deploying pricefeed ${sym}/USD for oracle: ${pfAddr}`);
       await deployPF(mainnetProvider, pfAddr);
       addr.push(pfAddr);
       log.debug(`Deplyed at: ${pfAddr}`);
+      deployed[`${sym}/USD`] = pfAddr;
     }
-
 
     if (
       pf.priceFeedUSD &&
       pf.priceFeedUSD.type === OracleType.CHAINLINK_ORACLE &&
-      pf.priceFeedUSD.kovan
+      pf.priceFeedUSD.address[config.network]
     ) {
-      const pfAddr = pf.priceFeedUSD.kovan;
+      const pfAddr = pf.priceFeedUSD.address[config.network];
       const pfeed = ChainlinkPriceFeed__factory.connect(pfAddr, deployer);
       try {
         await pfeed.mainnetOracle();
         addr.push(pfAddr);
       } catch (e) {}
     }
-
   }
 
   console.log(addr);
+  console.log(deployed);
 }
 
 deployPriceFeeds()

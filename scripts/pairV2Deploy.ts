@@ -1,53 +1,39 @@
 // @ts-ignore
-import { ethers } from "hardhat";
-import { providers } from "ethers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { formatBN } from "../utils/formatter";
-import { BigNumber } from "ethers";
 import {
-  ADDRESS_0x0,
+  ADDRESS_0X0,
+  contractsByNetwork,
   IUniswapV2Router02__factory,
   MAX_INT,
   OracleType,
   priceFeedsByNetwork,
-  SupportedTokens,
-  SUSHISWAP_KOVAN,
+  SupportedToken,
   tokenDataByNetwork,
-  UNISWAP_V2_ROUTER,
   WAD,
 } from "@gearbox-protocol/sdk";
+import { BigNumber } from "ethers";
+import { Logger } from "tslog";
+import config from "../config";
 import {
   ChainlinkPriceFeed__factory,
   ERC20Kovan__factory,
-  IUniswapV2Factory,
   IUniswapV2Factory__factory,
   IUniswapV2Pair__factory,
 } from "../types";
-import { Logger } from "tslog";
+import { formatBN } from "../utils/formatter";
+import setupScriptRuntime from "../utils/setupScriptRuntime";
 import { waitForTransaction } from "../utils/transaction";
 
 const log: Logger = new Logger();
-const ethUsdPriceFeedAddr = priceFeedsByNetwork.WETH.priceFeedUSD;
+const ethUsdPriceFeed = priceFeedsByNetwork.WETH.priceFeedUSD;
 
 async function pairDeploy() {
-  const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
-  const deployer = accounts[0];
-  const chainId = await deployer.getChainId();
+  const { mainnetProvider, deployer } = await setupScriptRuntime();
 
-  log.info(`Deployer: ${deployer.address}`);
-
-  const mainnetRpc = process.env.ETH_MAINNET_PROVIDER;
-  if (!mainnetRpc) throw new Error("ETH_MAINNET_PROVIDER is not defined");
-
-  // if (chainId !== 42) throw new Error("Switch to Kovan network");
-
-  const mainnetProvider = new providers.JsonRpcProvider(mainnetRpc);
-
-  if (ethUsdPriceFeedAddr?.type !== OracleType.CHAINLINK_ORACLE)
+  if (ethUsdPriceFeed?.type !== OracleType.CHAINLINK_ORACLE)
     throw new Error("Incorrect ETH/USD pricefeed");
 
   const ethUsdPf = ChainlinkPriceFeed__factory.connect(
-    ethUsdPriceFeedAddr.address,
+    ethUsdPriceFeed.address.Mainnet,
     mainnetProvider
   );
   const ethUsdPrice = (await ethUsdPf.latestRoundData()).answer;
@@ -55,14 +41,17 @@ async function pairDeploy() {
   console.log("ETH/USD", ethUsdPrice.toString());
 
   // USDC TOKEN
-  const usdcAddr = tokenDataByNetwork.Kovan.USDC;
+  const usdcAddr = tokenDataByNetwork[config.network].USDC;
   const usdcToken = ERC20Kovan__factory.connect(usdcAddr, deployer);
   const usdcDecimals = await usdcToken.decimals();
 
   const usdcDecimalMult = BigNumber.from(10).pow(usdcDecimals);
   const usdcAmount = usdcDecimalMult.mul(100e6);
 
-  for (let routerAddr of [UNISWAP_V2_ROUTER, SUSHISWAP_KOVAN]) {
+  for (const routerAddr of [
+    contractsByNetwork[config.network].UNISWAP_V2_ROUTER,
+    contractsByNetwork[config.network].SUSHISWAP_ROUTER,
+  ]) {
     const uniV2Router = IUniswapV2Router02__factory.connect(
       routerAddr,
       deployer
@@ -80,8 +69,10 @@ async function pairDeploy() {
       deployer
     );
 
-    for (const [sym, token] of Object.entries(tokenDataByNetwork.Kovan)) {
-      const pf = priceFeedsByNetwork[sym as SupportedTokens];
+    for (const [sym, token] of Object.entries(
+      tokenDataByNetwork[config.network]
+    )) {
+      const pf = priceFeedsByNetwork[sym as SupportedToken];
 
       if (sym === "WETH" || sym === "USDC") continue;
 
@@ -96,14 +87,14 @@ async function pairDeploy() {
 
       if (pf.priceFeedUSD?.type === OracleType.CHAINLINK_ORACLE) {
         const pfeed = ChainlinkPriceFeed__factory.connect(
-          pf.priceFeedUSD.address,
+          pf.priceFeedUSD.address.Mainnet,
           mainnetProvider
         );
         const data = await pfeed.latestRoundData();
         usdPrice = data.answer;
       } else if (pf.priceFeedETH?.type === OracleType.CHAINLINK_ORACLE) {
         const pfeed = ChainlinkPriceFeed__factory.connect(
-          pf.priceFeedETH.address,
+          pf.priceFeedETH.address.Mainnet,
           mainnetProvider
         );
         const data = await pfeed.latestRoundData();
@@ -114,7 +105,7 @@ async function pairDeploy() {
       log.debug(`${sym}: ${usdPrice.div(1e4).toNumber() / 10000}`);
 
       let pairAddr = await uniV2factory.getPair(token, usdcAddr);
-      if (pairAddr === ADDRESS_0x0) {
+      if (pairAddr === ADDRESS_0X0) {
         await waitForTransaction(uniV2factory.createPair(token, usdcAddr));
         pairAddr = await uniV2factory.getPair(token, usdcAddr);
       }

@@ -4,15 +4,16 @@ import * as dotenv from "dotenv";
 // @ts-ignore
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
 import { BigNumber } from "ethers";
-import { SupportedTokens, tokenDataByNetwork } from "@gearbox-protocol/sdk";
+import { SupportedToken, tokenDataByNetwork } from "@gearbox-protocol/sdk";
 import { ERC20Kovan__factory } from "../types";
 import { waitForTransaction } from "../utils/transaction";
 import { Logger } from "tslog";
+import config from "../config";
 
 const hre = require("hardhat");
 const log: Logger = new Logger();
 
-const tokensToDeploy: Array<SupportedTokens> = [
+const tokensToDeploy: Array<SupportedToken> = [
   // "1INCH",
   // "AAVE",
   // "COMP",
@@ -53,10 +54,10 @@ async function deployTokens() {
   const deployer = accounts[0];
 
   const chainId = await deployer.getChainId();
-  if (chainId !== 42) throw new Error("Switch to Kovan network");
+  if (chainId !== 42) throw new Error("Switch to test network");
 
-  for (let t of tokensToDeploy) {
-    const tokenAddr = tokenDataByNetwork.Kovan[t];
+  for (const t of tokensToDeploy) {
+    const tokenAddr = tokenDataByNetwork[config.network][t];
 
     const token = ERC20Kovan__factory.connect(tokenAddr, deployer);
     const decimals = await token.decimals();
@@ -67,7 +68,11 @@ async function deployTokens() {
       token.mint(addressToSend, BigNumber.from(10).pow(decimals).mul(100000))
     );
 
-    console.log(`https://kovan.etherscan.io/tx/${tx.transactionHash}`)
+    console.log(
+      `https://${config.network.toLowerCase()}.etherscan.io/tx/${
+        tx.transactionHash
+      }`
+    );
   }
 }
 
