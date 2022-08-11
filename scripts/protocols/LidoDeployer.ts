@@ -15,7 +15,8 @@ import { AbstractDeployer } from "../support";
 
 export class LidoDeployer extends AbstractDeployer {
   protected async run(): Promise<void> {
-    const needed = await this.progressTracker.isDeployNeeded("lido", "STETH");
+    this.log.info("Deploying Lido");
+    const needed = await this.progress.isDeployNeeded("lido", "STETH");
     if (!needed) {
       return;
     }
@@ -79,12 +80,8 @@ export class LidoDeployer extends AbstractDeployer {
       constructorArguments: [this.syncer],
     });
 
-    this.progressTracker.saveProgress(
-      "lido",
-      "LIDO_ORACLE",
-      lidoOracle.address
-    );
-    this.progressTracker.saveProgress("lido", "STETH", lido.address);
+    await this.progress.save("lido", "LIDO_ORACLE", lidoOracle.address);
+    await this.progress.save("lido", "STETH", lido.address);
 
     this.log.info(
       `Testnet Lido oracle synced -

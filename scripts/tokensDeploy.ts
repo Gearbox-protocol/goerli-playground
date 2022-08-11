@@ -60,10 +60,10 @@ class TokensDeployer extends AbstractScript {
    * @returns token address
    */
   private async maybeDeployToken(t: NormalToken): Promise<string> {
-    let addr = await this.progressTracker.getProgress("normalTokens", t);
+    let addr = await this.progress.get("normalTokens", t);
     if (!addr) {
       addr = await this.deployToken(t);
-      await this.progressTracker.saveProgress("normalTokens", t, addr);
+      await this.progress.save("normalTokens", t, addr);
     }
     return addr;
   }

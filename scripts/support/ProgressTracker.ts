@@ -1,13 +1,29 @@
 import {
+  ConvexLPToken,
+  ConvexPoolContract,
   CurveLPToken,
   CurvePoolContract,
   NormalToken,
+  YearnLPToken,
 } from "@gearbox-protocol/sdk";
 import fs from "fs";
 import { readJson, writeJson } from "fs-extra";
 import { Logger } from "tslog";
 
 type CurveProgressKey = CurveLPToken | CurvePoolContract | "CURVE_STECRV_POOL";
+
+export type DeployedToken = Exclude<NormalToken, "STETH" | "CVX">;
+
+type ConvexExtraRewardPool = `${ConvexPoolContract}_EXTRA_${DeployedToken}`;
+
+type ConvexProgressKey =
+  | ConvexLPToken
+  | ConvexPoolContract
+  | ConvexExtraRewardPool
+  | "CVX"
+  | "TESTNET_CONVEX_MANAGER"
+  | "CONVEX_BOOSTER"
+  | "CONVEX_CLAIM_ZAP";
 
 /**
  * This interface describes intermediate deployment state
@@ -18,7 +34,7 @@ export interface Progress {
     address?: string;
   };
   normalTokens?: {
-    [key in NormalToken]?: string;
+    [key in DeployedToken]?: string;
   };
   lido?: {
     LIDO_ORACLE?: string;
@@ -26,6 +42,12 @@ export interface Progress {
   };
   curve?: {
     [key in CurveProgressKey]?: string;
+  };
+  convex?: {
+    [key in ConvexProgressKey]?: string;
+  };
+  yearn?: {
+    [key in YearnLPToken]?: string;
   };
 }
 
@@ -38,7 +60,7 @@ export class ProgressTracker {
     this._progressFileName = progressFileName;
   }
 
-  public async saveProgress<
+  public async save<
     S extends keyof Progress,
     E extends keyof NonNullable<Progress[S]>
   >(script: S, entity: E, address: NonNullable<Progress[S]>[E]): Promise<void> {
@@ -51,7 +73,7 @@ export class ProgressTracker {
     await writeJson(this._progressFileName, progress, { spaces: 2 });
   }
 
-  public async getProgress<
+  public async get<
     S extends keyof Progress,
     E extends keyof NonNullable<Progress[S]>
   >(script: S, entity: E): Promise<NonNullable<Progress[S]>[E]> {
@@ -61,11 +83,11 @@ export class ProgressTracker {
     return p?.[entity];
   }
 
-  public async getProgressOrThrow<
+  public async getOrThrow<
     S extends keyof Progress,
     E extends keyof NonNullable<Progress[S]>
   >(script: S, entity: E): Promise<NonNullable<NonNullable<Progress[S]>[E]>> {
-    const result = await this.getProgress(script, entity);
+    const result = await this.get(script, entity);
     if (!result) {
       throw new Error(`${String(entity)} is undefined in ${script}`);
     }
@@ -76,7 +98,7 @@ export class ProgressTracker {
     script: S,
     entity: keyof NonNullable<Progress[S]>
   ): Promise<boolean> {
-    const addr = await this.getProgress(script, entity);
+    const addr = await this.get(script, entity);
     if (addr) {
       this.log.warn(`${String(entity)} is already deployed at: ${addr}`);
       return false;
@@ -88,7 +110,7 @@ export class ProgressTracker {
    * Lazily reads current deploy progress from file or returns empty progress
    * @returns
    */
-  protected async loadProgress(): Promise<Progress> {
+  private async loadProgress(): Promise<Progress> {
     if (!this._progress) {
       if (fs.existsSync(this._progressFileName)) {
         this.log.warn("FOUND FILE WITH PREVIOUS PROGRESS!");

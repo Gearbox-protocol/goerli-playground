@@ -7,10 +7,7 @@ import { AbstractScript } from "./support";
 
 class SyncerDeployer extends AbstractScript {
   protected async run(): Promise<void> {
-    const needed = await this.progressTracker.isDeployNeeded(
-      "syncer",
-      "address"
-    );
+    const needed = await this.progress.isDeployNeeded("syncer", "address");
 
     if (!needed) {
       return;
@@ -21,11 +18,7 @@ class SyncerDeployer extends AbstractScript {
       await waitForTransaction(syncer.addSyncer(syncAddr));
       this.log.debug(`Added ${syncAddr} to syncer`);
     }
-    await this.progressTracker.saveProgress(
-      "syncer",
-      "address",
-      syncer.address
-    );
+    await this.progress.save("syncer", "address", syncer.address);
     if (this.canVerify) {
       await run("verify:verify", {
         address: syncer.address,

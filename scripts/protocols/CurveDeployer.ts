@@ -8,7 +8,6 @@ import {
   ICurvePool__factory,
   IERC20__factory,
   IERC20Metadata__factory,
-  NormalToken,
   tokenDataByNetwork,
   WAD,
 } from "@gearbox-protocol/sdk";
@@ -27,7 +26,7 @@ import {
   CurveSUSDDeposit,
   CurveToken,
 } from "../../types";
-import { AbstractDeployer } from "../support";
+import { AbstractDeployer, DeployedToken } from "../support";
 
 const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const USDC_UNIT = BigNumber.from(10 ** 6);
@@ -48,51 +47,45 @@ export class CurveDeployer extends AbstractDeployer {
   private _3CrvPool: string | undefined;
 
   protected async run(): Promise<void> {
-    if (await this.progressTracker.isDeployNeeded("curve", "3Crv")) {
+    this.log.info("Deploying curve");
+
+    if (await this.progress.isDeployNeeded("curve", "3Crv")) {
       await this.deploy3Crv();
     }
-    this._3CrvToken = await this.progressTracker.getProgressOrThrow(
-      "curve",
-      "3Crv"
-    );
-    this._3CrvPool = await this.progressTracker.getProgressOrThrow(
-      "curve",
-      "CURVE_3CRV_POOL"
-    );
+    this._3CrvToken = await this.progress.getOrThrow("curve", "3Crv");
+    this._3CrvPool = await this.progress.getOrThrow("curve", "CURVE_3CRV_POOL");
 
     // STECRV DEPLOYMENT
-    if (await this.progressTracker.isDeployNeeded("curve", "steCRV")) {
+    if (await this.progress.isDeployNeeded("curve", "steCRV")) {
       await this.deploySteCRV();
     }
 
     // CURVE SUSD DEPLOYMENT
-    if (
-      await this.progressTracker.isDeployNeeded("curve", "crvPlain3andSUSD")
-    ) {
+    if (await this.progress.isDeployNeeded("curve", "crvPlain3andSUSD")) {
       await this.deploySUSD();
     }
 
     // CURVE GUSD3CRV DEPLOYMENT
-    if (await this.progressTracker.isDeployNeeded("curve", "gusd3CRV")) {
+    if (await this.progress.isDeployNeeded("curve", "gusd3CRV")) {
       await this.deployGUSD3CRV();
     }
 
     // CURVE FRAX3CRV DEPLOYMENT
-    if (await this.progressTracker.isDeployNeeded("curve", "FRAX3CRV")) {
+    if (await this.progress.isDeployNeeded("curve", "FRAX3CRV")) {
       await this.deployMetapool("FRAX3CRV", "FRAX", 1500, 4000000);
     }
 
     // CURVE LUSD3CRV DEPLOYMENT
-    if (await this.progressTracker.isDeployNeeded("curve", "LUSD3CRV")) {
+    if (await this.progress.isDeployNeeded("curve", "LUSD3CRV")) {
       await this.deployMetapool("LUSD3CRV", "LUSD", 1500, 4000000);
     }
   }
 
   private async deploy3Crv(): Promise<void> {
     const coins = await Promise.all([
-      this.progressTracker.getProgressOrThrow("normalTokens", "DAI"),
-      this.progressTracker.getProgressOrThrow("normalTokens", "USDC"),
-      this.progressTracker.getProgressOrThrow("normalTokens", "USDT"),
+      this.progress.getOrThrow("normalTokens", "DAI"),
+      this.progress.getOrThrow("normalTokens", "USDC"),
+      this.progress.getOrThrow("normalTokens", "USDT"),
     ]);
 
     const poolAgrsFn = (lpToken: string) => [
@@ -145,10 +138,7 @@ export class CurveDeployer extends AbstractDeployer {
   }
 
   private async deploySteCRV(): Promise<void> {
-    const stETH = await this.progressTracker.getProgressOrThrow(
-      "lido",
-      "STETH"
-    );
+    const stETH = await this.progress.getOrThrow("lido", "STETH");
 
     const coins = [ETH_ADDRESS, stETH];
 
@@ -185,10 +175,10 @@ export class CurveDeployer extends AbstractDeployer {
 
   private async deploySUSD(): Promise<void> {
     const coins = await Promise.all([
-      this.progressTracker.getProgressOrThrow("normalTokens", "DAI"),
-      this.progressTracker.getProgressOrThrow("normalTokens", "USDC"),
-      this.progressTracker.getProgressOrThrow("normalTokens", "USDT"),
-      this.progressTracker.getProgressOrThrow("normalTokens", "sUSD"),
+      this.progress.getOrThrow("normalTokens", "DAI"),
+      this.progress.getOrThrow("normalTokens", "USDC"),
+      this.progress.getOrThrow("normalTokens", "USDT"),
+      this.progress.getOrThrow("normalTokens", "sUSD"),
     ]);
 
     const poolAgrsFn = (lpToken: string) => [
@@ -215,11 +205,8 @@ export class CurveDeployer extends AbstractDeployer {
       seedFn
     );
 
-    const lpToken = this.progressTracker.getProgress(
-      "curve",
-      "crvPlain3andSUSD"
-    );
-    const pool = this.progressTracker.getProgress("curve", "CURVE_SUSD_POOL");
+    const lpToken = this.progress.get("curve", "crvPlain3andSUSD");
+    const pool = this.progress.get("curve", "CURVE_SUSD_POOL");
 
     const depositConstructorArgs = [coins, coins, pool, lpToken];
 
@@ -231,7 +218,7 @@ export class CurveDeployer extends AbstractDeployer {
       ...depositConstructorArgs
     );
 
-    this.progressTracker.saveProgress(
+    await this.progress.save(
       "curve",
       "CURVE_SUSD_DEPOSIT",
       sCRV_deposit.address
@@ -240,7 +227,7 @@ export class CurveDeployer extends AbstractDeployer {
 
   private async deployGUSD3CRV(): Promise<void> {
     const coins = [
-      await this.progressTracker.getProgressOrThrow("normalTokens", "GUSD"),
+      await this.progress.getOrThrow("normalTokens", "GUSD"),
       this._3CrvToken,
     ];
 
@@ -329,8 +316,8 @@ export class CurveDeployer extends AbstractDeployer {
 
     await seedFn(pool.address);
 
-    this.progressTracker.saveProgress("curve", tokenSymbol, lpToken.address);
-    this.progressTracker.saveProgress("curve", poolType, pool.address);
+    await this.progress.save("curve", tokenSymbol, lpToken.address);
+    await this.progress.save("curve", poolType, pool.address);
   }
 
   private async syncVirtualPrice(
@@ -357,14 +344,11 @@ export class CurveDeployer extends AbstractDeployer {
 
   private async deployMetapool(
     lpTokenSymbol: CurveLPToken,
-    token: NormalToken,
+    token: DeployedToken,
     A: number,
     fee: number
   ): Promise<void> {
-    const tokenAddr = await this.progressTracker.getProgressOrThrow(
-      "normalTokens",
-      token
-    );
+    const tokenAddr = await this.progress.getOrThrow("normalTokens", token);
     const coins = [tokenAddr, this._3CrvToken];
 
     const mainnetToken = IERC20Metadata__factory.connect(
@@ -415,6 +399,6 @@ export class CurveDeployer extends AbstractDeployer {
     const _3crv = IERC20__factory.connect(this._3CrvToken!, this.deployer);
     await waitForTransaction(_3crv.transfer(pool.address, WAD.mul(10 ** 6)));
 
-    this.progressTracker.saveProgress("curve", lpTokenSymbol, pool.address);
+    await this.progress.save("curve", lpTokenSymbol, pool.address);
   }
 }

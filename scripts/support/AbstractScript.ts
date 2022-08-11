@@ -18,7 +18,7 @@ export abstract class AbstractScript {
   protected deployer!: SignerWithAddress;
   protected mainnetProvider!: providers.JsonRpcProvider;
   protected testnetProvider!: providers.JsonRpcProvider;
-  protected progressTracker = new ProgressTracker(config.progressFileName);
+  protected progress = new ProgressTracker(config.progressFileName);
 
   public async exec(): Promise<void> {
     await this.setup();

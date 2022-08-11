@@ -1,9 +1,10 @@
 import { Verifier, waitForTransaction } from "@gearbox-protocol/devops";
-import { MAX_INT, NormalToken } from "@gearbox-protocol/sdk";
+import { MAX_INT } from "@gearbox-protocol/sdk";
 import { BigNumber } from "ethers";
 
 import { ERC20Kovan__factory } from "../../types";
 import { AbstractScript } from "./AbstractScript";
+import { DeployedToken } from "./ProgressTracker";
 
 export abstract class AbstractDeployer extends AbstractScript {
   protected verifier: Verifier = new Verifier();
@@ -16,10 +17,7 @@ export abstract class AbstractDeployer extends AbstractScript {
 
   protected override async setup(): Promise<void> {
     await super.setup();
-    this.syncer = await this.progressTracker.getProgressOrThrow(
-      "syncer",
-      "address"
-    );
+    this.syncer = await this.progress.getOrThrow("syncer", "address");
     this.log.debug(`Syncer: ${this.syncer}`);
   }
 
@@ -28,23 +26,17 @@ export abstract class AbstractDeployer extends AbstractScript {
    * @param token ERC20 token to call approve on
    * @param to Address to approve transfer to
    */
-  protected async approve(token: NormalToken, to: string): Promise<void> {
+  protected async approve(token: DeployedToken, to: string): Promise<void> {
     this.log.debug(`Approving ${token}`);
-    const tokenAddr = await this.progressTracker.getProgressOrThrow(
-      "normalTokens",
-      token
-    );
+    const tokenAddr = await this.progress.getOrThrow("normalTokens", token);
 
     const contract = ERC20Kovan__factory.connect(tokenAddr, this.deployer);
 
     await waitForTransaction(contract.approve(to, MAX_INT));
   }
 
-  protected async mintToken(token: NormalToken, to: string, amount: number) {
-    const tokenAddr = await this.progressTracker.getProgressOrThrow(
-      "normalTokens",
-      token
-    );
+  protected async mintToken(token: DeployedToken, to: string, amount: number) {
+    const tokenAddr = await this.progress.getOrThrow("normalTokens", token);
     this.log.debug(`Minting ${token}`);
     await this.mintTokenByAddress(tokenAddr, to, amount);
   }
