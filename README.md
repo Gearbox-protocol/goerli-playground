@@ -19,3 +19,8 @@ Use `--network localhost` flag to connect to running fork
    Deploys syncer. This is a contract that is accessed by robots that sync mainnet data with testnet.
 2. `npx hardhat run scripts/tokensDeploy.ts --network localhost`  
    Deploys mock of normal ERC20 tokens
+3. `npx hardhat run scripts/mocksDeploy.ts --network localhost`  
+   Deploys DeFi protocol mocks: Lido, Curve, Convex, Yearn
+4. `npx hardhat run scripts/curveAddLiquidity2.ts --network localhost`  
+   Adds liquidity to Curve pools deployed on step 3. Can be run multiple times.
+5.
