@@ -2,6 +2,7 @@ import { TransactionReceipt } from "@ethersproject/providers";
 import { Contract, ContractFactory, ContractTransaction } from "ethers";
 import { ethers } from "hardhat";
 import { Logger } from "tslog";
+
 import { formatBN } from "./formatter";
 
 export async function waitForTransaction(
