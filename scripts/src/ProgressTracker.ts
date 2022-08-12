@@ -1,63 +1,9 @@
-import {
-  ConvexLPToken,
-  ConvexPoolContract,
-  CurveLPToken,
-  CurvePoolContract,
-  NormalToken,
-  SupportedToken,
-  YearnLPToken,
-} from "@gearbox-protocol/sdk";
+import { SupportedToken } from "@gearbox-protocol/sdk";
 import fs from "fs";
 import { readJson, writeJson } from "fs-extra";
 import { Logger } from "tslog";
 
-type CurveProgressKey = CurveLPToken | CurvePoolContract | "CURVE_STECRV_POOL";
-
-export type DeployedToken = Exclude<NormalToken, "STETH" | "CVX">;
-
-type ConvexExtraRewardPool = `${ConvexPoolContract}_EXTRA_${DeployedToken}`;
-
-export type ChainlinkSuffix = "ETH" | "USD";
-
-export type ChainlinkProgressKey = `${SupportedToken}/${ChainlinkSuffix}`;
-
-type ConvexProgressKey =
-  | ConvexLPToken
-  | ConvexPoolContract
-  | ConvexExtraRewardPool
-  | "CVX"
-  | "TESTNET_CONVEX_MANAGER"
-  | "CONVEX_BOOSTER"
-  | "CONVEX_CLAIM_ZAP";
-
-/**
- * This interface describes intermediate deployment state
- * JSON files follow this schema
- */
-export interface Progress {
-  syncer?: {
-    address?: string;
-  };
-  normalTokens?: {
-    [key in DeployedToken]?: string;
-  };
-  lido?: {
-    LIDO_ORACLE?: string;
-    STETH?: string;
-  };
-  curve?: {
-    [key in CurveProgressKey]?: string;
-  };
-  convex?: {
-    [key in ConvexProgressKey]?: string;
-  };
-  yearn?: {
-    [key in YearnLPToken]?: string;
-  };
-  chainlink?: {
-    [key in ChainlinkProgressKey]?: string;
-  };
-}
+import { Progress } from "./types";
 
 export class ProgressTracker {
   private log: Logger = new Logger();
@@ -112,6 +58,22 @@ export class ProgressTracker {
       return false;
     }
     return true;
+  }
+
+  /**
+   * Looks up for token symbol in all progress categories
+   * @param symbol
+   */
+  public async getSupportedToken(
+    symbol: SupportedToken
+  ): Promise<string | undefined> {
+    const progress = await this.loadProgress();
+    for (const script of Object.values(progress)) {
+      if (symbol in script) {
+        return script[symbol];
+      }
+    }
+    return undefined;
   }
 
   /**

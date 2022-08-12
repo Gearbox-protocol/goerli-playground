@@ -1,6 +1,7 @@
 node_modules
 .env
 .env.local
+progress.*json
 coverage
 coverage.json
 typechain

@@ -16,9 +16,10 @@ import {
   KovanConvexManager,
   KovanConvexManager__factory,
   VirtualBalanceRewardPool__factory,
-} from "../../types";
-import { BaseRewardPoolInterface } from "../../types/contracts/convex/ConvexBaseRewardPoolK.sol/BaseRewardPool";
-import { AbstractDeployer, DeployedToken } from "../support";
+} from "../../../types";
+import { BaseRewardPoolInterface } from "../../../types/contracts/convex/ConvexBaseRewardPoolK.sol/BaseRewardPool";
+import { AbstractDeployer } from "../AbstractDeployer";
+import { DeployedToken } from "../types";
 
 const convexExtraRewardTokens: Record<
   ConvexPoolContract,
@@ -201,11 +202,11 @@ export class ConvexDeployer extends AbstractDeployer {
       const numRewards = await basePool.extraRewardsLength();
       const extraPoolAddr = await basePool.extraRewards(numRewards.sub(1));
 
-      this.log.info(
-        `Deployed extra reward pool for reward
-                  token ${extraRewardToken} and base pool ${convexData.pool}
-                  at address ${extraPoolAddr}`
-      );
+      this.log.info(`
+        Deployed extra reward pool for reward
+        token ${extraRewardToken} and base pool ${convexData.pool}
+        at address ${extraPoolAddr}
+      `);
 
       await this.progress.save(
         "convex",

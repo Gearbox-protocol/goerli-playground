@@ -25,8 +25,9 @@ import {
   CurveStETHMock__factory,
   CurveSUSDDeposit,
   CurveToken,
-} from "../../types";
-import { AbstractDeployer, DeployedToken } from "../support";
+} from "../../../types";
+import { AbstractDeployer } from "../AbstractDeployer";
+import { DeployedToken } from "../types";
 
 const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const USDC_UNIT = BigNumber.from(10 ** 6);

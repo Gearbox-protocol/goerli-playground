@@ -4,7 +4,7 @@ import { BigNumber } from "ethers";
 
 import { ERC20Kovan__factory } from "../../types";
 import { AbstractScript } from "./AbstractScript";
-import { DeployedToken } from "./ProgressTracker";
+import { DeployedToken } from "./types";
 
 export abstract class AbstractDeployer extends AbstractScript {
   protected verifier: Verifier = new Verifier();

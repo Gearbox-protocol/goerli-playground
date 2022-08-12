@@ -7,9 +7,10 @@ import {
   yearnTokens,
 } from "@gearbox-protocol/sdk";
 
-import config from "../../config";
-import { YearnMock } from "../../types";
-import { AbstractDeployer, DeployedToken } from "../support";
+import config from "../../../config";
+import { YearnMock } from "../../../types";
+import { AbstractDeployer } from "../AbstractDeployer";
+import { DeployedToken } from "../types";
 
 const yearnTokenList: Array<YearnLPToken> = [
   "yvDAI",

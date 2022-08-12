@@ -10,8 +10,8 @@ import {
   Lido__factory,
   LidoOracle,
   LidoOracle__factory,
-} from "../../types";
-import { AbstractDeployer } from "../support";
+} from "../../../types";
+import { AbstractDeployer } from "../AbstractDeployer";
 
 export class LidoDeployer extends AbstractDeployer {
   protected async run(): Promise<void> {
