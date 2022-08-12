@@ -1,3 +1,8 @@
 export * from "./AbstractDeployer";
 export * from "./AbstractScript";
-export { DeployedToken, Progress } from "./ProgressTracker";
+export {
+  ChainlinkProgressKey,
+  ChainlinkSuffix,
+  DeployedToken,
+  Progress,
+} from "./ProgressTracker";

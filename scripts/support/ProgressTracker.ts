@@ -4,6 +4,7 @@ import {
   CurveLPToken,
   CurvePoolContract,
   NormalToken,
+  SupportedToken,
   YearnLPToken,
 } from "@gearbox-protocol/sdk";
 import fs from "fs";
@@ -15,6 +16,10 @@ type CurveProgressKey = CurveLPToken | CurvePoolContract | "CURVE_STECRV_POOL";
 export type DeployedToken = Exclude<NormalToken, "STETH" | "CVX">;
 
 type ConvexExtraRewardPool = `${ConvexPoolContract}_EXTRA_${DeployedToken}`;
+
+export type ChainlinkSuffix = "ETH" | "USD";
+
+export type ChainlinkProgressKey = `${SupportedToken}/${ChainlinkSuffix}`;
 
 type ConvexProgressKey =
   | ConvexLPToken
@@ -48,6 +53,9 @@ export interface Progress {
   };
   yearn?: {
     [key in YearnLPToken]?: string;
+  };
+  chainlink?: {
+    [key in ChainlinkProgressKey]?: string;
   };
 }
 

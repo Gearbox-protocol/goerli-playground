@@ -23,4 +23,5 @@ Use `--network localhost` flag to connect to running fork
    Deploys DeFi protocol mocks: Lido, Curve, Convex, Yearn
 4. `npx hardhat run scripts/curveAddLiquidity2.ts --network localhost`  
    Adds liquidity to Curve pools deployed on step 3. Can be run multiple times.
-5.
+5. `npx hardhat run scripts/priceFeedDeploy2.ts --network localhost`  
+   Deploys chainlink price feeds that will be synced with mainnets by robot
