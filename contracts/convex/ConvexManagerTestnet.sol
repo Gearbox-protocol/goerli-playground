@@ -8,8 +8,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "./interfaces/Interfaces.sol";
 import "../Syncer.sol";
-import {CVXKovan} from "./CVXMockK.sol";
-import {Booster} from "./ConvexBoosterMockK.sol";
+import {CVXTestnet} from "./CVXTestnet.sol";
+import {Booster} from "./ConvexBoosterMock.sol";
 import {IConvexPoolFactory, ConvexPoolFactory} from "./ConvexPoolFactory.sol";
 import {ConvexTokenFactory} from "./ConvexTokenFactory.sol";
 
@@ -27,7 +27,7 @@ interface ISyncablePool {
     ) external;
 }
 
-contract KovanConvexManager is Ownable {
+contract ConvexManagerTestnet is Ownable {
     address public cvx;
     address public crv;
 
@@ -47,14 +47,14 @@ contract KovanConvexManager is Ownable {
         syncer = syncer_;
         crv = crv_;
 
-        cvx = address(new CVXKovan());
+        cvx = address(new CVXTestnet());
 
         poolFactory = address(new ConvexPoolFactory());
         tokenFactory = address(new ConvexTokenFactory());
 
         booster = address(new Booster(cvx, crv));
         Booster(booster).setFactories(poolFactory, tokenFactory);
-        CVXKovan(cvx).setOperator(booster);
+        CVXTestnet(cvx).setOperator(booster);
     }
 
     // dev: This function assumes that RAY=1e27 of CRV is allowed to this contract per pool
@@ -110,7 +110,7 @@ contract KovanConvexManager is Ownable {
     function syncCVXSupply(uint256 supply) external syncerOnly {
         uint256 currentSupply = IERC20(cvx).totalSupply();
         if (currentSupply < supply) {
-            CVXKovan(cvx).mintExact(supply - currentSupply);
+            CVXTestnet(cvx).mintExact(supply - currentSupply);
         }
     }
 

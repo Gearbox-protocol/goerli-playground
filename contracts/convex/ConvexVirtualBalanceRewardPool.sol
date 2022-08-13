@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Gearbox Protocol. Generalized leverage for DeFi protocols
 // (c) Gearbox Holdings, 2021
-pragma solidity 0.8.10;
-
+pragma solidity ^0.8.10;
 
 import "./interfaces/Interfaces.sol";
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import '@openzeppelin/contracts/utils/Address.sol';
-import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 library MathUtil {
-
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
         return a < b ? a : b;
     }
@@ -70,7 +68,6 @@ contract VirtualBalanceRewardPool is VirtualBalanceWrapper {
         manager = manager_;
     }
 
-
     modifier updateReward(address account) {
         if (account != address(0)) {
             rewards[account] = earned(account);
@@ -101,7 +98,7 @@ contract VirtualBalanceRewardPool is VirtualBalanceWrapper {
         updateReward(_account)
     {
         require(msg.sender == address(deposits), "!authorized");
-       // require(amount > 0, 'VirtualDepositRewardPool: Cannot stake 0');
+        // require(amount > 0, 'VirtualDepositRewardPool: Cannot stake 0');
         emit Staked(_account, amount);
     }
 
@@ -115,7 +112,7 @@ contract VirtualBalanceRewardPool is VirtualBalanceWrapper {
         emit Withdrawn(_account, amount);
     }
 
-    function getReward(address _account) public updateReward(_account){
+    function getReward(address _account) public updateReward(_account) {
         uint256 reward = earned(_account);
         if (reward > 0) {
             rewards[_account] = 0;
@@ -124,15 +121,15 @@ contract VirtualBalanceRewardPool is VirtualBalanceWrapper {
         }
     }
 
-    function getReward() external{
+    function getReward() external {
         getReward(msg.sender);
     }
 
-    function donate(uint256 _amount) external returns(bool){
+    function donate(uint256 _amount) external returns (bool) {
         revert("Not implemented");
     }
 
-    function queueNewRewards(uint256 _rewards) external returns(bool){
+    function queueNewRewards(uint256 _rewards) external returns (bool) {
         revert("Not implemented");
     }
 
@@ -151,9 +148,7 @@ contract VirtualBalanceRewardPool is VirtualBalanceWrapper {
         uint256 _queuedRewards,
         uint256 _currentRewards,
         uint256 _historicalRewards
-    )
-    external
-    {
+    ) external {
         require(msg.sender == manager, "!authorized");
         periodFinish = _periodFinish;
         rewardRate = _rewardRate;

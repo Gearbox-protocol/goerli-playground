@@ -3,7 +3,7 @@ import { NormalToken, tokenDataByNetwork } from "@gearbox-protocol/sdk";
 import { run } from "hardhat";
 
 import config from "../../config";
-import { ERC20__factory, ERC20Kovan } from "../../types";
+import { ERC20__factory, ERC20Testnet } from "../../types";
 import { AbstractScript } from "./AbstractScript";
 import { DeployedToken } from "./types";
 
@@ -44,15 +44,11 @@ const tokensToDeploy: Array<DeployedToken> = [
 // it copies name, symbol and decimals from mainnet, origin contract address is taken from @gearbox-protocol/sdk mainnet mapping
 export class TokensDeployer extends AbstractScript {
   protected async run(): Promise<void> {
-    const update: Record<string, string> = {};
-
+    this.log.info("Deploying normal tokens");
     for (const t of tokensToDeploy) {
-      const addr = await this.maybeDeployToken(t);
-      update[t] = addr;
+      await this.maybeDeployToken(t);
     }
-
     this.log.info("Done");
-    this.log.info(update);
   }
 
   /**
@@ -90,8 +86,8 @@ export class TokensDeployer extends AbstractScript {
       `Token ${symbol} at ${mainnetAddress}, ${decimals} decimals, Name = ${name}`
     );
 
-    const newToken = await deploy<ERC20Kovan>(
-      "ERC20Kovan",
+    const newToken = await deploy<ERC20Testnet>(
+      "ERC20Testnet",
       this.log,
       name,
       symbol,

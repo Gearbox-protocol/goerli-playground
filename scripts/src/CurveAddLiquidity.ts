@@ -12,7 +12,7 @@ import {
   CurveStETHMock__factory,
   CurveSUSDMock__factory,
   CurveToken__factory,
-  ERC20Kovan__factory,
+  ERC20Testnet__factory,
   Lido__factory,
 } from "../../types";
 import { AbstractScript } from "./AbstractScript";
@@ -27,37 +27,37 @@ export class CurveAddLiquidity extends AbstractScript {
     //
     // Define tokens
     //
-    const dai = ERC20Kovan__factory.connect(
+    const dai = ERC20Testnet__factory.connect(
       await this.progress.getOrThrow("normalTokens", "DAI"),
       this.deployer
     );
 
-    const usdc = ERC20Kovan__factory.connect(
+    const usdc = ERC20Testnet__factory.connect(
       await this.progress.getOrThrow("normalTokens", "USDC"),
       this.deployer
     );
 
-    const usdt = ERC20Kovan__factory.connect(
+    const usdt = ERC20Testnet__factory.connect(
       await this.progress.getOrThrow("normalTokens", "USDT"),
       this.deployer
     );
 
-    const susd = ERC20Kovan__factory.connect(
+    const susd = ERC20Testnet__factory.connect(
       await this.progress.getOrThrow("normalTokens", "sUSD"),
       this.deployer
     );
 
-    const gusd = ERC20Kovan__factory.connect(
+    const gusd = ERC20Testnet__factory.connect(
       await this.progress.getOrThrow("normalTokens", "GUSD"),
       this.deployer
     );
 
-    const frax = ERC20Kovan__factory.connect(
+    const frax = ERC20Testnet__factory.connect(
       await this.progress.getOrThrow("normalTokens", "FRAX"),
       this.deployer
     );
 
-    const lusd = ERC20Kovan__factory.connect(
+    const lusd = ERC20Testnet__factory.connect(
       await this.progress.getOrThrow("normalTokens", "LUSD"),
       this.deployer
     );

@@ -6,7 +6,7 @@ pragma solidity ^0.8.10;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract ERC20Kovan is ERC20, Ownable {
+contract ERC20Testnet is ERC20, Ownable {
     uint8 public immutable _decimals;
 
     constructor(

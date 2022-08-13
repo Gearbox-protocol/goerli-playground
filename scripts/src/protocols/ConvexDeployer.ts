@@ -12,12 +12,12 @@ import {
 import {
   BaseRewardPool__factory,
   ClaimZap,
-  ERC20Kovan__factory,
-  KovanConvexManager,
-  KovanConvexManager__factory,
+  ConvexManagerTestnet,
+  ConvexManagerTestnet__factory,
+  ERC20Testnet__factory,
   VirtualBalanceRewardPool__factory,
 } from "../../../types";
-import { BaseRewardPoolInterface } from "../../../types/contracts/convex/ConvexBaseRewardPoolK.sol/BaseRewardPool";
+import { BaseRewardPoolInterface } from "../../../types/contracts/convex/ConvexBaseRewardPool.sol/BaseRewardPool";
 import { AbstractDeployer } from "../AbstractDeployer";
 import { DeployedToken } from "../types";
 
@@ -43,7 +43,7 @@ const tokenList: ConvexLPToken[] = [
 ];
 
 export class ConvexDeployer extends AbstractDeployer {
-  private _convexManager?: KovanConvexManager;
+  private _convexManager?: ConvexManagerTestnet;
 
   protected async run(): Promise<void> {
     this.log.info("Deploying Convex");
@@ -54,7 +54,7 @@ export class ConvexDeployer extends AbstractDeployer {
       "convex",
       "TESTNET_CONVEX_MANAGER"
     );
-    this._convexManager = KovanConvexManager__factory.connect(
+    this._convexManager = ConvexManagerTestnet__factory.connect(
       convexMgrAddr,
       this.deployer
     );
@@ -72,8 +72,8 @@ export class ConvexDeployer extends AbstractDeployer {
     ) {
       const crv = await this.progress.getOrThrow("normalTokens", "CRV");
 
-      const convexManager = await deploy<KovanConvexManager>(
-        "KovanConvexManager",
+      const convexManager = await deploy<ConvexManagerTestnet>(
+        "ConvexManagerTestnet",
         this.log,
         this.syncer,
         crv
@@ -91,7 +91,7 @@ export class ConvexDeployer extends AbstractDeployer {
       );
 
       this.log.info(
-        `KovanConvexManager was deployed at ${convexManager.address}`
+        `ConvexManagerTestnet was deployed at ${convexManager.address}`
       );
 
       const boosterAddr = await convexManager.booster();
@@ -134,9 +134,9 @@ export class ConvexDeployer extends AbstractDeployer {
       convexData.underlying
     );
 
-    const crvToken = ERC20Kovan__factory.connect(crv, this.deployer);
+    const crvToken = ERC20Testnet__factory.connect(crv, this.deployer);
 
-    const curveUnderlyingToken = ERC20Kovan__factory.connect(
+    const curveUnderlyingToken = ERC20Testnet__factory.connect(
       curveUnderlyingTokenAddress,
       this.deployer
     );
@@ -227,7 +227,7 @@ export class ConvexDeployer extends AbstractDeployer {
 
       const mainnetExtraRewardAddr = await mainnetExtraPool.rewardToken();
 
-      const mainnetExtraReward = ERC20Kovan__factory.connect(
+      const mainnetExtraReward = ERC20Testnet__factory.connect(
         mainnetExtraRewardAddr,
         this.mainnetProvider
       );
@@ -352,7 +352,7 @@ export class ConvexDeployer extends AbstractDeployer {
     await this.progress.save("convex", "CONVEX_CLAIM_ZAP", claimZap.address);
   }
 
-  private get convexManager(): KovanConvexManager {
+  private get convexManager(): ConvexManagerTestnet {
     if (!this._convexManager) {
       throw new Error("ConvexManager is not set");
     }

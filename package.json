@@ -5,7 +5,6 @@
     "clean": "npx hardhat clean",
     "compile": "npx hardhat compile",
     "test": "npx hardhat test",
-    "fork": "scripts/fork.sh",
     "typegen": "npx typechain --target=ethers-v5 './artifacts/!(build-info)/**/+([a-zA-Z0-9_]).json' --out-dir types",
     "abifix": "npx ts-node scripts/abifix.ts",
     "verify": "npx hardhat run node_modules/@gearbox-protocol/devops/lib/verifier/verify.js",

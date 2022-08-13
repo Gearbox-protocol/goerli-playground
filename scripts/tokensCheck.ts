@@ -11,7 +11,6 @@ import { Logger } from "tslog";
 import config from "../config";
 import { ERC20__factory } from "../types";
 import { ERC20Interface } from "../types/ERC20";
-import setupScriptRuntime from "../utils/setupScriptRuntime";
 
 // checkTokens compares tokens on different networks
 // it uses list of supportedTokens from @gearbox-protocol/sdk

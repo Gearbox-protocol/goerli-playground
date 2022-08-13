@@ -15,7 +15,7 @@ import { BigNumber } from "ethers";
 import config from "../../config";
 import {
   ChainlinkPriceFeed__factory,
-  ERC20Kovan__factory,
+  ERC20Testnet__factory,
   IUniswapV2Factory__factory,
   IUniswapV2Pair__factory,
 } from "../../types";
@@ -44,7 +44,7 @@ export class PairV2Deployer extends AbstractScript {
 
     // USDC TOKEN
     const usdcAddr = await this.progress.getOrThrow("normalTokens", "USDC");
-    const usdcToken = ERC20Kovan__factory.connect(usdcAddr, this.deployer);
+    const usdcToken = ERC20Testnet__factory.connect(usdcAddr, this.deployer);
     const usdcDecimals = await usdcToken.decimals();
 
     const usdcDecimalMult = BigNumber.from(10).pow(usdcDecimals);
@@ -60,7 +60,7 @@ export class PairV2Deployer extends AbstractScript {
       );
 
       await waitForTransaction(
-        ERC20Kovan__factory.connect(usdcAddr, this.deployer).approve(
+        ERC20Testnet__factory.connect(usdcAddr, this.deployer).approve(
           routerAddr,
           MAX_INT
         )
@@ -125,7 +125,10 @@ export class PairV2Deployer extends AbstractScript {
           pairAddr = await uniV2factory.getPair(token, usdcAddr);
         }
 
-        const tokenContract = ERC20Kovan__factory.connect(token, this.deployer);
+        const tokenContract = ERC20Testnet__factory.connect(
+          token,
+          this.deployer
+        );
 
         const tokenDecimals = await tokenContract.decimals();
 

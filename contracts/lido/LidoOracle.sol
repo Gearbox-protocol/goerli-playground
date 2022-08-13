@@ -3,7 +3,6 @@ pragma solidity ^0.8.10;
 import "../SyncerTrait.sol";
 
 contract LidoOracle is SyncerTrait {
-
     uint256 public postTotalPooledEtherSynced;
     uint256 public preTotalPooledEtherSynced;
     uint256 public timeElapsedSynced;
@@ -33,5 +32,4 @@ contract LidoOracle is SyncerTrait {
         preTotalPooledEtherSynced = _preTotalPooledEther;
         timeElapsedSynced = _timeElapsed;
     }
-
 }

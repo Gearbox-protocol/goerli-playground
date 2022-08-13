@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { Logger } from "tslog";
 
 import config from "../config";
-import { ERC20Kovan__factory } from "../types";
+import { ERC20Testnet__factory } from "../types";
 import { waitForTransaction } from "../utils/transaction";
 
 const log: Logger = new Logger();
@@ -56,7 +56,7 @@ async function deployTokens(): Promise<void> {
   for (const t of tokensToDeploy) {
     const tokenAddr = tokenDataByNetwork[config.network][t];
 
-    const token = ERC20Kovan__factory.connect(tokenAddr, deployer);
+    const token = ERC20Testnet__factory.connect(tokenAddr, deployer);
     const decimals = await token.decimals();
 
     log.info(`Sending ${t} to ${addressToSend}`);

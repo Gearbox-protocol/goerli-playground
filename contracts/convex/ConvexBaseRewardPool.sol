@@ -1,23 +1,22 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Gearbox Protocol. Generalized leverage for DeFi protocols
 // (c) Gearbox Holdings, 2021
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
 import "./interfaces/Interfaces.sol";
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import '@openzeppelin/contracts/utils/Address.sol';
-import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 library MathUtil {
-
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
         return a < b ? a : b;
     }
 }
 
 contract BaseRewardPool {
-     using SafeMath for uint256;
+    using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     IERC20 public rewardToken;
@@ -74,14 +73,15 @@ contract BaseRewardPool {
         return extraRewards.length;
     }
 
-    function addExtraReward(address _reward) external returns(bool){
+    function addExtraReward(address _reward) external returns (bool) {
         require(msg.sender == manager, "!authorized");
-        require(_reward != address(0),"!reward setting");
+        require(_reward != address(0), "!reward setting");
 
         extraRewards.push(_reward);
         return true;
     }
-    function clearExtraRewards() external{
+
+    function clearExtraRewards() external {
         require(msg.sender == manager, "!authorized");
         delete extraRewards;
     }
@@ -113,12 +113,12 @@ contract BaseRewardPool {
     function stake(uint256 _amount)
         public
         updateReward(msg.sender)
-        returns(bool)
+        returns (bool)
     {
-        require(_amount > 0, 'RewardPool : Cannot stake 0');
+        require(_amount > 0, "RewardPool : Cannot stake 0");
 
         //also stake to linked rewards
-        for(uint i=0; i < extraRewards.length; i++){
+        for (uint256 i = 0; i < extraRewards.length; i++) {
             IRewards(extraRewards[i]).stake(msg.sender, _amount);
         }
 
@@ -128,11 +128,10 @@ contract BaseRewardPool {
         stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
         emit Staked(msg.sender, _amount);
 
-
         return true;
     }
 
-    function stakeAll() external returns(bool){
+    function stakeAll() external returns (bool) {
         uint256 balance = stakingToken.balanceOf(msg.sender);
         stake(balance);
         return true;
@@ -141,12 +140,12 @@ contract BaseRewardPool {
     function stakeFor(address _for, uint256 _amount)
         public
         updateReward(_for)
-        returns(bool)
+        returns (bool)
     {
-        require(_amount > 0, 'RewardPool : Cannot stake 0');
+        require(_amount > 0, "RewardPool : Cannot stake 0");
 
         //also stake to linked rewards
-        for(uint i=0; i < extraRewards.length; i++){
+        for (uint256 i = 0; i < extraRewards.length; i++) {
             IRewards(extraRewards[i]).stake(_for, _amount);
         }
 
@@ -161,16 +160,15 @@ contract BaseRewardPool {
         return true;
     }
 
-
     function withdraw(uint256 amount, bool claim)
         public
         updateReward(msg.sender)
-        returns(bool)
+        returns (bool)
     {
-        require(amount > 0, 'RewardPool : Cannot withdraw 0');
+        require(amount > 0, "RewardPool : Cannot withdraw 0");
 
         //also withdraw from linked rewards
-        for(uint i=0; i < extraRewards.length; i++){
+        for (uint256 i = 0; i < extraRewards.length; i++) {
             IRewards(extraRewards[i]).withdraw(msg.sender, amount);
         }
 
@@ -180,21 +178,24 @@ contract BaseRewardPool {
         stakingToken.safeTransfer(msg.sender, amount);
         emit Withdrawn(msg.sender, amount);
 
-        if(claim){
-            getReward(msg.sender,true);
+        if (claim) {
+            getReward(msg.sender, true);
         }
 
         return true;
     }
 
-    function withdrawAll(bool claim) external{
-        withdraw(_balances[msg.sender],claim);
+    function withdrawAll(bool claim) external {
+        withdraw(_balances[msg.sender], claim);
     }
 
-    function withdrawAndUnwrap(uint256 amount, bool claim) public updateReward(msg.sender) returns(bool){
-
+    function withdrawAndUnwrap(uint256 amount, bool claim)
+        public
+        updateReward(msg.sender)
+        returns (bool)
+    {
         //also withdraw from linked rewards
-        for(uint i=0; i < extraRewards.length; i++){
+        for (uint256 i = 0; i < extraRewards.length; i++) {
             IRewards(extraRewards[i]).withdraw(msg.sender, amount);
         }
 
@@ -202,21 +203,25 @@ contract BaseRewardPool {
         _balances[msg.sender] = _balances[msg.sender].sub(amount);
 
         //tell operator to withdraw from here directly to user
-        IDeposit(operator).withdrawTo(pid,amount,msg.sender);
+        IDeposit(operator).withdrawTo(pid, amount, msg.sender);
         emit Withdrawn(msg.sender, amount);
 
         //get rewards too
-        if(claim){
-            getReward(msg.sender,true);
+        if (claim) {
+            getReward(msg.sender, true);
         }
         return true;
     }
 
-    function withdrawAllAndUnwrap(bool claim) external{
-        withdrawAndUnwrap(_balances[msg.sender],claim);
+    function withdrawAllAndUnwrap(bool claim) external {
+        withdrawAndUnwrap(_balances[msg.sender], claim);
     }
 
-    function getReward(address _account, bool _claimExtras) public updateReward(_account) returns(bool){
+    function getReward(address _account, bool _claimExtras)
+        public
+        updateReward(_account)
+        returns (bool)
+    {
         uint256 reward = earned(_account);
         if (reward > 0) {
             rewards[_account] = 0;
@@ -226,24 +231,24 @@ contract BaseRewardPool {
         }
 
         //also get rewards from linked rewards
-        if(_claimExtras){
-            for(uint i=0; i < extraRewards.length; i++){
+        if (_claimExtras) {
+            for (uint256 i = 0; i < extraRewards.length; i++) {
                 IRewards(extraRewards[i]).getReward(_account);
             }
         }
         return true;
     }
 
-    function getReward() external returns(bool){
-        getReward(msg.sender,true);
+    function getReward() external returns (bool) {
+        getReward(msg.sender, true);
         return true;
     }
 
-    function donate(uint256 _amount) external returns(bool){
+    function donate(uint256 _amount) external returns (bool) {
         revert("Not implemented");
     }
 
-    function queueNewRewards(uint256 _rewards) external returns(bool){
+    function queueNewRewards(uint256 _rewards) external returns (bool) {
         revert("Not implemented");
     }
 
@@ -262,9 +267,7 @@ contract BaseRewardPool {
         uint256 _queuedRewards,
         uint256 _currentRewards,
         uint256 _historicalRewards
-    )
-    external
-    {
+    ) external {
         require(msg.sender == manager, "!authorized");
         periodFinish = _periodFinish;
         rewardRate = _rewardRate;

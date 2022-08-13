@@ -2,7 +2,7 @@ import { Verifier, waitForTransaction } from "@gearbox-protocol/devops";
 import { MAX_INT } from "@gearbox-protocol/sdk";
 import { BigNumber } from "ethers";
 
-import { ERC20Kovan__factory } from "../../types";
+import { ERC20Testnet__factory } from "../../types";
 import { AbstractScript } from "./AbstractScript";
 import { DeployedToken } from "./types";
 
@@ -30,7 +30,7 @@ export abstract class AbstractDeployer extends AbstractScript {
     this.log.debug(`Approving ${token}`);
     const tokenAddr = await this.progress.getOrThrow("normalTokens", token);
 
-    const contract = ERC20Kovan__factory.connect(tokenAddr, this.deployer);
+    const contract = ERC20Testnet__factory.connect(tokenAddr, this.deployer);
 
     await waitForTransaction(contract.approve(to, MAX_INT));
   }
@@ -48,7 +48,7 @@ export abstract class AbstractDeployer extends AbstractScript {
   ) {
     this.log.debug(`Minting ${address}`);
 
-    const contract = ERC20Kovan__factory.connect(address, this.deployer);
+    const contract = ERC20Testnet__factory.connect(address, this.deployer);
 
     const decimals = await contract.decimals();
 
