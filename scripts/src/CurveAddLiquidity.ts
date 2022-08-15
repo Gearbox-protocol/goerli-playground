@@ -3,7 +3,7 @@ import {
   AdapterInterface,
   contractParams,
   MAX_INT,
-  WAD,
+  WAD
 } from "@gearbox-protocol/sdk";
 
 import {
@@ -13,7 +13,7 @@ import {
   CurveSUSDMock__factory,
   CurveToken__factory,
   ERC20Testnet__factory,
-  Lido__factory,
+  Lido__factory
 } from "../../types";
 import { AbstractScript } from "./AbstractScript";
 

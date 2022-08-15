@@ -1,7 +1,7 @@
 import {
   AddressProvider__factory,
   DataCompressor__factory,
-  ERC20__factory,
+  ERC20__factory
 } from "@gearbox-protocol/sdk";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import * as dotenv from "dotenv";
@@ -42,4 +42,4 @@ async function deployTokens() {
 
 deployTokens()
   .then(() => console.log("Ok"))
-  .catch((e) => console.log(e));
+  .catch(e => console.log(e));

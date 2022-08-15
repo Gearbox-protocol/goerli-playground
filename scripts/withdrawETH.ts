@@ -27,7 +27,7 @@ async function withdrawETH(): Promise<void> {
   );
 
   const deployTx = txs
-    .filter((txs) => txs.to === null)
+    .filter(txs => txs.to === null)
     .sort((a, b) => ((a.blockNumber || 0) > (b.blockNumber || 0) ? 1 : -1));
 
   for (let tx of deployTx) {
@@ -58,4 +58,4 @@ async function withdrawETH(): Promise<void> {
 
 withdrawETH()
   .then(() => console.log("Ok"))
-  .catch((e) => console.log(e));
+  .catch(e => console.log(e));

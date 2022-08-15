@@ -35,15 +35,15 @@ const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   solidity: {
-    compilers: [{ version: "0.8.10", settings: {} }],
+    compilers: [{ version: "0.8.10", settings: {} }]
   },
   vyper: {
     compilers: [
       { version: "0.3.0" },
       { version: "0.2.4" },
       { version: "0.2.8" },
-      { version: "0.2.5" },
-    ],
+      { version: "0.2.5" }
+    ]
   },
   networks: {
     hardhat: {
@@ -52,13 +52,13 @@ const config: HardhatUserConfig = {
         // pin block number to have stable addresses every time during local development
         blockNumber: process.env.ETH_TESTNET_BLOCK
           ? parseInt(process.env.ETH_TESTNET_BLOCK, 10)
-          : undefined,
+          : undefined
       },
-      loggingEnabled: true,
+      loggingEnabled: true
     },
     localhost: {
       timeout: 0,
-      accounts: [TESTNET_PRIVATE_KEY, TESTNET2_PRIVATE_KEY],
+      accounts: [TESTNET_PRIVATE_KEY, TESTNET2_PRIVATE_KEY]
     },
     mainnet: {
       url: process.env.ETH_MAINNET_PROVIDER || "",
@@ -67,7 +67,7 @@ const config: HardhatUserConfig = {
       timeout: 0,
       gasMultiplier: 1.15,
       minGasPrice: 1e9,
-      allowUnlimitedContractSize: false,
+      allowUnlimitedContractSize: false
     },
 
     testnet: {
@@ -77,28 +77,28 @@ const config: HardhatUserConfig = {
       gasMultiplier: 1.5,
       minGasPrice: 1e9,
       timeout: 0,
-      allowUnlimitedContractSize: false,
-    },
+      allowUnlimitedContractSize: false
+    }
   },
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
-    apiKey: ETHERSCAN_API_KEY,
+    apiKey: ETHERSCAN_API_KEY
   },
   gasReporter: {
     enabled: false,
     currency: "USD",
-    gasPrice: 21,
+    gasPrice: 21
   },
   typechain: {
     outDir: "types",
-    target: "ethers-v5",
+    target: "ethers-v5"
   },
   contractSizer: {
     alphaSort: false,
     disambiguatePaths: false,
-    runOnCompile: true,
-  },
+    runOnCompile: true
+  }
 };
 
 export default config;

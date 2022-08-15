@@ -14,7 +14,7 @@ export class TradingBotDeployer extends AbstractDeployer {
     if (this.canVerify) {
       await run("verify:verify", {
         address: bot.address,
-        constructorArguments: [this.syncer],
+        constructorArguments: [this.syncer]
       });
     }
   }

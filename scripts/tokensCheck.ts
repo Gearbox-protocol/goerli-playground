@@ -3,7 +3,7 @@ import {
   NetworkType,
   SupportedToken,
   supportedTokens,
-  tokenDataByNetwork,
+  tokenDataByNetwork
 } from "@gearbox-protocol/sdk";
 import * as dotenv from "dotenv";
 import { Logger } from "tslog";
@@ -26,7 +26,7 @@ async function checkTokens(): Promise<void> {
 
     const mCalls: Array<keyof ERC20Interface["functions"]> = [
       "symbol()",
-      "decimals()",
+      "decimals()"
     ];
 
     const getTokenData = async (
@@ -45,12 +45,12 @@ async function checkTokens(): Promise<void> {
           : runtime.testnetProvider
       );
 
-      return tokenMutlicall.call(mCalls.map((method) => ({ method })));
+      return tokenMutlicall.call(mCalls.map(method => ({ method })));
     };
 
     const [mainnetData, testnetData] = await Promise.all([
       getTokenData(t as SupportedToken, "Mainnet"),
-      getTokenData(t as SupportedToken, config.network),
+      getTokenData(t as SupportedToken, config.network)
     ]);
 
     for (let i = 0; i < mCalls.length; i++) {
@@ -65,4 +65,4 @@ async function checkTokens(): Promise<void> {
 
 checkTokens()
   .then(() => console.log("Ok"))
-  .catch((e) => console.log(e));
+  .catch(e => console.log(e));

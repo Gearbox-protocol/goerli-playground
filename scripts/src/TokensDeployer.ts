@@ -37,7 +37,7 @@ const tokensToDeploy: Array<DeployedToken> = [
   "sUSD",
   "GUSD",
   "LUNA",
-  "LQTY",
+  "LQTY"
 ];
 
 // TokensDeployer deploys mock ERC20 contracts for each of provided normal tokens
@@ -98,7 +98,7 @@ export class TokensDeployer extends AbstractScript {
     if (this.canVerify) {
       await run("verify:verify", {
         address: newToken.address,
-        constructorArguments: [name, symbol, decimals],
+        constructorArguments: [name, symbol, decimals]
       });
     }
     return newToken.address;

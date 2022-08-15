@@ -4,7 +4,7 @@ import {
   IYVault__factory,
   tokenDataByNetwork,
   YearnLPToken,
-  yearnTokens,
+  yearnTokens
 } from "@gearbox-protocol/sdk";
 
 import config from "../../../config";
@@ -18,7 +18,7 @@ const yearnTokenList: Array<YearnLPToken> = [
   "yvWETH",
   "yvWBTC",
   "yvCurve_stETH",
-  "yvCurve_FRAX",
+  "yvCurve_FRAX"
 ];
 
 export class YearnDeployer extends AbstractDeployer {
@@ -38,7 +38,7 @@ export class YearnDeployer extends AbstractDeployer {
     const underlying = yearnTokens[yearnToken].underlying;
     const [maybeNormal, maybeCurve] = await Promise.all([
       this.progress.get("normalTokens", underlying as DeployedToken),
-      this.progress.get("curve", underlying as CurveLPToken),
+      this.progress.get("curve", underlying as CurveLPToken)
     ]);
     let underlyingAddress = maybeNormal ?? maybeCurve;
     if (!underlyingAddress) {
@@ -90,7 +90,7 @@ export class YearnDeployer extends AbstractDeployer {
 
     this.verifier.addContract({
       address: vault.address,
-      constructorArguments: [this.syncer, underlyingAddress, symbol],
+      constructorArguments: [this.syncer, underlyingAddress, symbol]
     });
 
     await this.progress.save("yearn", yearnToken, vault.address);

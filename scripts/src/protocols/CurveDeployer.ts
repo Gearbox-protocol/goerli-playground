@@ -9,13 +9,13 @@ import {
   IERC20__factory,
   IERC20Metadata__factory,
   tokenDataByNetwork,
-  WAD,
+  WAD
 } from "@gearbox-protocol/sdk";
 import {
   BigNumber,
   BigNumberish,
   ContractTransaction,
-  Overrides,
+  Overrides
 } from "ethers";
 
 import {
@@ -24,7 +24,7 @@ import {
   CurveMetapoolMock,
   CurveStETHMock__factory,
   CurveSUSDDeposit,
-  CurveToken,
+  CurveToken
 } from "../../../types";
 import { AbstractDeployer } from "../AbstractDeployer";
 import { DeployedToken } from "../types";
@@ -86,7 +86,7 @@ export class CurveDeployer extends AbstractDeployer {
     const coins = await Promise.all([
       this.progress.getOrThrow("normalTokens", "DAI"),
       this.progress.getOrThrow("normalTokens", "USDC"),
-      this.progress.getOrThrow("normalTokens", "USDT"),
+      this.progress.getOrThrow("normalTokens", "USDT")
     ]);
 
     const poolAgrsFn = (lpToken: string) => [
@@ -96,7 +96,7 @@ export class CurveDeployer extends AbstractDeployer {
       lpToken,
       2000,
       1000000,
-      5000000000,
+      5000000000
     ];
 
     const seedFn = async (pool: string) => {
@@ -150,7 +150,7 @@ export class CurveDeployer extends AbstractDeployer {
       lpToken,
       50,
       4000000,
-      5000000000,
+      5000000000
     ];
 
     const seedFn = async (pool: string) => {
@@ -179,7 +179,7 @@ export class CurveDeployer extends AbstractDeployer {
       this.progress.getOrThrow("normalTokens", "DAI"),
       this.progress.getOrThrow("normalTokens", "USDC"),
       this.progress.getOrThrow("normalTokens", "USDT"),
-      this.progress.getOrThrow("normalTokens", "sUSD"),
+      this.progress.getOrThrow("normalTokens", "sUSD")
     ]);
 
     const poolAgrsFn = (lpToken: string) => [
@@ -188,7 +188,7 @@ export class CurveDeployer extends AbstractDeployer {
       coins,
       lpToken,
       100,
-      4000000,
+      4000000
     ];
 
     const seedFn = async (pool: string) => {
@@ -229,7 +229,7 @@ export class CurveDeployer extends AbstractDeployer {
   private async deployGUSD3CRV(): Promise<void> {
     const coins = [
       await this.progress.getOrThrow("normalTokens", "GUSD"),
-      this._3CrvToken,
+      this._3CrvToken
     ];
 
     const poolAgrs = (lpToken: string) => [
@@ -240,7 +240,7 @@ export class CurveDeployer extends AbstractDeployer {
       this._3CrvPool,
       1000,
       4000000,
-      5000000000,
+      5000000000
     ];
 
     const seedFn = async (pool: string) => {
@@ -275,7 +275,7 @@ export class CurveDeployer extends AbstractDeployer {
     const tokenConstructorArgs = [
       await mainnetToken.name(),
       tokenSymbol,
-      await mainnetToken.decimals(),
+      await mainnetToken.decimals()
     ];
 
     this.log.debug(`Deploying ${tokenSymbol}: token mock`);
@@ -367,7 +367,7 @@ export class CurveDeployer extends AbstractDeployer {
       fee,
       this.deployer.address,
       this._3CrvPool,
-      coins[1],
+      coins[1]
     ];
 
     this.log.debug(`Deploying ${lpTokenSymbol}: token mock`);

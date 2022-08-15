@@ -16,14 +16,14 @@ const KOVAN: TestnetConfig = {
   network: "Kovan",
   syncers: ["0xd037ca7a2b62c66b0f01cb2c93b978493dcd06d6"],
   confirmations: 10,
-  progressFileName: "./mock_addresses_kovan.json",
+  progressFileName: "./mock_addresses_kovan.json"
 };
 
 const GOERLY_LOCAL: TestnetConfig = {
   url: "http://localhost:8545",
   network: "Goerli",
   syncers: ["0xd037ca7a2b62c66b0f01cb2c93b978493dcd06d6"],
-  progressFileName: "./progress.goerli.local.json",
+  progressFileName: "./progress.goerli.local.json"
 };
 
 // export one of testnet configs as default

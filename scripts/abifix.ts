@@ -23,4 +23,4 @@ const fixVyperAbis = async function (startDir: string) {
 
 fixVyperAbis("./artifacts")
   .then(() => console.log("Ok"))
-  .catch((e) => console.log(e));
+  .catch(e => console.log(e));

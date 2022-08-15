@@ -8,7 +8,7 @@ import {
   priceFeedsByNetwork,
   SupportedToken,
   tokenDataByNetwork,
-  WAD,
+  WAD
 } from "@gearbox-protocol/sdk";
 import { BigNumber } from "ethers";
 
@@ -17,7 +17,7 @@ import {
   ChainlinkPriceFeed__factory,
   ERC20Testnet__factory,
   IUniswapV2Factory__factory,
-  IUniswapV2Pair__factory,
+  IUniswapV2Pair__factory
 } from "../../types";
 import { formatBN } from "../../utils/formatter";
 import { AbstractScript } from "./AbstractScript";
@@ -52,7 +52,7 @@ export class PairV2Deployer extends AbstractScript {
 
     for (const routerAddr of [
       contractsByNetwork[config.network].UNISWAP_V2_ROUTER,
-      contractsByNetwork[config.network].SUSHISWAP_ROUTER,
+      contractsByNetwork[config.network].SUSHISWAP_ROUTER
     ]) {
       const uniV2Router = IUniswapV2Router02__factory.connect(
         routerAddr,

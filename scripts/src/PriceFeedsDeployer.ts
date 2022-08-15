@@ -3,7 +3,7 @@ import {
   OracleType,
   priceFeedsByNetwork,
   SupportedToken,
-  TokenPriceFeedData,
+  TokenPriceFeedData
 } from "@gearbox-protocol/sdk";
 import { run } from "hardhat";
 
@@ -86,7 +86,7 @@ export class PriceFeedsDeployer extends AbstractDeployer {
     if (this.canVerify) {
       await run("verify:verify", {
         address: testnetPF.address,
-        constructorArguments: [this.syncer, decimals, mainnetAddr],
+        constructorArguments: [this.syncer, decimals, mainnetAddr]
       });
     }
 

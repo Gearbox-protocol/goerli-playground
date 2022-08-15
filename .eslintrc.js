@@ -4,10 +4,10 @@ module.exports = {
     "alloy",
     "alloy/typescript",
     "plugin:import/recommended",
-    "plugin:import/typescript",
+    "plugin:import/typescript"
   ],
   env: {
-    node: true,
+    node: true
   },
   rules: {
     "@typescript-eslint/no-unused-vars": "off",
@@ -22,18 +22,18 @@ module.exports = {
         vars: "all",
         varsIgnorePattern: "^_",
         args: "after-used",
-        argsIgnorePattern: "^_",
-      },
-    ],
+        argsIgnorePattern: "^_"
+      }
+    ]
   },
   settings: {
     "import/resolver": {
       typescript: {
-        alwaysTryTypes: true, // always try to resolve types under `<root>@types` directory even it doesn't contain any source code, like `@types/unist`
-      },
-    },
+        alwaysTryTypes: true // always try to resolve types under `<root>@types` directory even it doesn't contain any source code, like `@types/unist`
+      }
+    }
   },
   parserOptions: {
-    project: "./tsconfig.json",
-  },
+    project: "./tsconfig.json"
+  }
 };

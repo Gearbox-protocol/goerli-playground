@@ -22,7 +22,7 @@ const tokensToDeploy: Array<SupportedToken> = [
   // "SNX",
   // "SUSHI",
   // "UNI",
-  "USDC",
+  "USDC"
   // "USDT",
   // "WBTC",
   // // "WETH",
@@ -75,4 +75,4 @@ async function deployTokens(): Promise<void> {
 
 deployTokens()
   .then(() => console.log("Ok"))
-  .catch((e) => console.log(e));
+  .catch(e => console.log(e));

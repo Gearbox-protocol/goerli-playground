@@ -21,7 +21,7 @@ export class SyncerDeployer extends AbstractScript {
     await this.progress.save("syncer", "address", syncer.address);
     if (this.canVerify) {
       await run("verify:verify", {
-        address: syncer.address,
+        address: syncer.address
       });
     }
   }

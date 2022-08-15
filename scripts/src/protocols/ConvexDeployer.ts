@@ -6,7 +6,7 @@ import {
   ConvexPoolContract,
   convexTokens,
   MultiCallContract,
-  SupportedToken,
+  SupportedToken
 } from "@gearbox-protocol/sdk";
 
 import {
@@ -15,7 +15,7 @@ import {
   ConvexManagerTestnet,
   ConvexManagerTestnet__factory,
   ERC20Testnet__factory,
-  VirtualBalanceRewardPool__factory,
+  VirtualBalanceRewardPool__factory
 } from "../../../types";
 import { BaseRewardPoolInterface } from "../../../types/contracts/convex/ConvexBaseRewardPool.sol/BaseRewardPool";
 import { AbstractDeployer } from "../AbstractDeployer";
@@ -30,7 +30,7 @@ const convexExtraRewardTokens: Record<
   CONVEX_SUSD_POOL: ["SNX"],
   CONVEX_STECRV_POOL: ["LDO"],
   CONVEX_FRAX3CRV_POOL: ["FXS"],
-  CONVEX_LUSD3CRV_POOL: ["LQTY"],
+  CONVEX_LUSD3CRV_POOL: ["LQTY"]
 };
 
 const tokenList: ConvexLPToken[] = [
@@ -39,7 +39,7 @@ const tokenList: ConvexLPToken[] = [
   "cvxcrvPlain3andSUSD",
   "cvxFRAX3CRV",
   "cvxLUSD3CRV",
-  "cvxgusd3CRV",
+  "cvxgusd3CRV"
 ];
 
 export class ConvexDeployer extends AbstractDeployer {
@@ -81,7 +81,7 @@ export class ConvexDeployer extends AbstractDeployer {
 
       this.verifier.addContract({
         address: convexManager.address,
-        constructorArguments: [this.syncer, crv],
+        constructorArguments: [this.syncer, crv]
       });
 
       await this.progress.save(
@@ -99,12 +99,12 @@ export class ConvexDeployer extends AbstractDeployer {
 
       this.verifier.addContract({
         address: boosterAddr,
-        constructorArguments: [cvxAddr, crv],
+        constructorArguments: [cvxAddr, crv]
       });
 
       this.verifier.addContract({
         address: cvxAddr,
-        constructorArguments: [],
+        constructorArguments: []
       });
 
       await this.progress.save("convex", "CONVEX_BOOSTER", boosterAddr);
@@ -253,19 +253,19 @@ export class ConvexDeployer extends AbstractDeployer {
           basePool.address,
           rewardTokenAddr,
           boosterAddr,
-          this.convexManager.address,
-        ],
+          this.convexManager.address
+        ]
       });
     }
 
     this.verifier.addContract({
       address: poolAddress,
-      constructorArguments: [pid, stakingToken, rewardToken, operator, manager],
+      constructorArguments: [pid, stakingToken, rewardToken, operator, manager]
     });
 
     this.verifier.addContract({
       address: stakingToken,
-      constructorArguments: [stakingTokenName, stakingTokenSymbol, 18],
+      constructorArguments: [stakingTokenName, stakingTokenSymbol, 18]
     });
 
     await this.progress.save("convex", poolToken, stakingToken);
@@ -294,7 +294,7 @@ export class ConvexDeployer extends AbstractDeployer {
       "rewardPerTokenStored()",
       "queuedRewards()",
       "currentRewards()",
-      "historicalRewards()",
+      "historicalRewards()"
     ];
 
     const [
@@ -304,10 +304,10 @@ export class ConvexDeployer extends AbstractDeployer {
       rewardPerTokenStored,
       queuedRewards,
       currentRewards,
-      historicalRewards,
+      historicalRewards
     ] = await multiCallContract.call(
-      paramsToSync.map((method) => ({
-        method,
+      paramsToSync.map(method => ({
+        method
       }))
     );
 
@@ -344,7 +344,7 @@ export class ConvexDeployer extends AbstractDeployer {
 
     this.verifier.addContract({
       address: claimZap.address,
-      constructorArguments: [crvAddr, cvxAddr],
+      constructorArguments: [crvAddr, cvxAddr]
     });
 
     this.log.info(`ClaimZap was deployed at ${claimZap.address}`);

@@ -2,14 +2,14 @@ import { deploy, waitForTransaction } from "@gearbox-protocol/devops";
 import {
   contractParams,
   LidoParams,
-  tokenDataByNetwork,
+  tokenDataByNetwork
 } from "@gearbox-protocol/sdk";
 
 import {
   Lido,
   Lido__factory,
   LidoOracle,
-  LidoOracle__factory,
+  LidoOracle__factory
 } from "../../../types";
 import { AbstractDeployer } from "../AbstractDeployer";
 
@@ -72,12 +72,12 @@ export class LidoDeployer extends AbstractDeployer {
 
     this.verifier.addContract({
       address: lidoOracle.address,
-      constructorArguments: [this.syncer],
+      constructorArguments: [this.syncer]
     });
 
     this.verifier.addContract({
       address: lido.address,
-      constructorArguments: [this.syncer],
+      constructorArguments: [this.syncer]
     });
 
     await this.progress.save("lido", "LIDO_ORACLE", lidoOracle.address);

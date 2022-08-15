@@ -1,7 +1,7 @@
 import {
   HARDHAT_NETWORK,
   LOCAL_NETWORK,
-  MAINNET_NETWORK,
+  MAINNET_NETWORK
 } from "@gearbox-protocol/sdk";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { config as dotEnvConfig } from "dotenv";

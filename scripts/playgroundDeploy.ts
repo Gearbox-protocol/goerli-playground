@@ -4,7 +4,7 @@ import {
   PairV2Deployer,
   PriceFeedsDeployer,
   SyncerDeployer,
-  TokensDeployer,
+  TokensDeployer
 } from "./src";
 
 /**

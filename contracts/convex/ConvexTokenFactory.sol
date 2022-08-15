@@ -7,21 +7,21 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "../ERC20Testnet.sol";
 
 interface IConvexTokenFactory {
-    function deployPoolToken(
-        string memory name,
-        string memory symbol,
-        uint8 decimals
-    ) external returns (address);
+  function deployPoolToken(
+    string memory name,
+    string memory symbol,
+    uint8 decimals
+  ) external returns (address);
 }
 
 contract ConvexTokenFactory is IConvexTokenFactory {
-    function deployPoolToken(
-        string memory name,
-        string memory symbol,
-        uint8 decimals
-    ) external returns (address) {
-        address token = address(new ERC20Testnet(name, symbol, decimals));
-        Ownable(token).transferOwnership(msg.sender);
-        return token;
-    }
+  function deployPoolToken(
+    string memory name,
+    string memory symbol,
+    uint8 decimals
+  ) external returns (address) {
+    address token = address(new ERC20Testnet(name, symbol, decimals));
+    Ownable(token).transferOwnership(msg.sender);
+    return token;
+  }
 }
