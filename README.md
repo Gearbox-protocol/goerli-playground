@@ -1,24 +1,22 @@
 # Gearbox testnet playground
 
-TODO: short project description
+This project contains bunch of scripts to deploy gearbox playground, which is collection of peer contracts (tokens, DeFi protocols) that emulate mainnet environment and are automatically synced with mainnet by a robot.
 
 ## Developing
 
 ### Configuring
 
-### Developing on local fork
-
 Configure your `.env` file with testnet provider url. Optionally set fork block number, this helps with getting same addresses every time you restart the fork.
 Run `npx hardhat node` to run hardhard local fork. Switch to another terminal window to run scripts against this network.
 
-### Deploy order
+### Deploying
 
 Prerequisites:
 
 - Well-known address of WETH on target testnet should be set in `@gearbox-protocol/sdk`
 - Addresses of [UNISWAP_V2_ROUTER](https://docs.uniswap.org/protocol/V2/reference/smart-contracts/router-02) and [SUSHISWAP_ROUTER](https://dev.sushi.com/docs/Developers/Deployment%20Addresses#testnets-goerli--kovan--rinkeby--ropsten) must be set for target testnet in `@gearbox-protocol/sdk`
 
-Use `--network localhost` flag to connect to running hardhat fork. Use `--no-compile` to skip contract compilation on every script.
+Use `--network localhost` flag to connect to running hardhat fork. Use `--network goerli` to deploy on goerli. Use `--no-compile` to skip contract compilation on every script.
 
 1. `npx hardhat run scripts/syncerDeploy.ts --network localhost --no-compile`  
    Deploys syncer. This is a contract that is accessed by robots that sync mainnet data with testnet.
@@ -34,3 +32,11 @@ Use `--network localhost` flag to connect to running hardhat fork. Use `--no-com
    Adds uniswap pairs for deployed tokens with deployed USDC, and adds liquidity to these pairs on well-known Uniswap and Sushiswap routers on target testnet.
 
 It's also possible to run `npx hardhat run scripts/playgroundDeploy.ts --network localhost --no-compile` to deploy everything in one go
+
+The deploy progress will be saved in json files (e.g. `.progress.goerli.json`). This file is required to pass data from one script to next. For example, script to deploy yearn vaults will look for deployed DAI and USDC addresses to use as underlying tokens.
+
+### Verification
+
+During deployment, deployed contract addresses and their constructor params are saved in `.verifier.goerli.json` file or similar. To verify contracts run `npx hardhat run scripts/verify.ts --network goerli`. This script might fail, so it is possible that you'll need to run it multiple times. It will delete verified contracts from json file as it progresses.
+
+After verification is done, it's possible to copy deployed contracts addresses from `progress.goerli.json` to `@gearbox-protocol/sdk` to fill missing addresses there.
