@@ -2,6 +2,7 @@ import { waitForTransaction } from "@gearbox-protocol/devops";
 import {
   ADDRESS_0X0,
   contractsByNetwork,
+  formatBN,
   IUniswapV2Router02__factory,
   MAX_INT,
   OracleType,
@@ -19,7 +20,6 @@ import {
   IUniswapV2Factory__factory,
   IUniswapV2Pair__factory
 } from "../../types";
-import { formatBN } from "../../utils/formatter";
 import { AbstractScript } from "./AbstractScript";
 
 const ethUsdPriceFeed = priceFeedsByNetwork.WETH.priceFeedUSD;
