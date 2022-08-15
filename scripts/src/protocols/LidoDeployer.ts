@@ -1,4 +1,4 @@
-import { deploy, waitForTransaction } from "@gearbox-protocol/devops";
+import { waitForTransaction } from "@gearbox-protocol/devops";
 import {
   contractParams,
   LidoParams,
@@ -21,7 +21,7 @@ export class LidoDeployer extends AbstractDeployer {
       return;
     }
 
-    const lido = await deploy<Lido>("Lido", this.log, this.syncer);
+    const lido = await this.deploy<Lido>("Lido", this.syncer);
 
     this.log.info(`Lido mock deployed at: ${lido.address}`);
 
@@ -47,11 +47,7 @@ export class LidoDeployer extends AbstractDeployer {
 
     this.log.debug("Deploying Lido oracle");
 
-    const lidoOracle = await deploy<LidoOracle>(
-      "LidoOracle",
-      this.log,
-      this.syncer
-    );
+    const lidoOracle = await this.deploy<LidoOracle>("LidoOracle", this.syncer);
 
     this.log.info(`Lido mock deployed at: ${lidoOracle.address}`);
 
@@ -69,16 +65,6 @@ export class LidoDeployer extends AbstractDeployer {
         oracleData.timeElapsed
       )
     );
-
-    this.verifier.addContract({
-      address: lidoOracle.address,
-      constructorArguments: [this.syncer]
-    });
-
-    this.verifier.addContract({
-      address: lido.address,
-      constructorArguments: [this.syncer]
-    });
 
     await this.progress.save("lido", "LIDO_ORACLE", lidoOracle.address);
     await this.progress.save("lido", "STETH", lido.address);

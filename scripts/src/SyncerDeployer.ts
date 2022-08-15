@@ -1,5 +1,4 @@
-import { deploy, waitForTransaction } from "@gearbox-protocol/devops";
-import { run } from "hardhat";
+import { waitForTransaction } from "@gearbox-protocol/devops";
 
 import config from "../../config";
 import { Syncer } from "../../types";
@@ -12,17 +11,11 @@ export class SyncerDeployer extends AbstractScript {
     if (!needed) {
       return;
     }
-    const syncer = await deploy<Syncer>("Syncer", this.log);
-    await syncer.deployTransaction.wait(config.confirmations);
+    const syncer = await this.deploy<Syncer>("Syncer");
     for (const syncAddr of config.syncers) {
       await waitForTransaction(syncer.addSyncer(syncAddr));
       this.log.debug(`Added ${syncAddr} to syncer`);
     }
     await this.progress.save("syncer", "address", syncer.address);
-    if (this.canVerify) {
-      await run("verify:verify", {
-        address: syncer.address
-      });
-    }
   }
 }

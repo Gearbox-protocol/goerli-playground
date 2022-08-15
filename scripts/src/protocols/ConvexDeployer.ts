@@ -1,4 +1,4 @@
-import { deploy, waitForTransaction } from "@gearbox-protocol/devops";
+import { waitForTransaction } from "@gearbox-protocol/devops";
 import {
   contractsByNetwork,
   ConvexLPToken,
@@ -72,17 +72,11 @@ export class ConvexDeployer extends AbstractDeployer {
     ) {
       const crv = await this.progress.getOrThrow("normalTokens", "CRV");
 
-      const convexManager = await deploy<ConvexManagerTestnet>(
+      const convexManager = await this.deploy<ConvexManagerTestnet>(
         "ConvexManagerTestnet",
-        this.log,
         this.syncer,
         crv
       );
-
-      this.verifier.addContract({
-        address: convexManager.address,
-        constructorArguments: [this.syncer, crv]
-      });
 
       await this.progress.save(
         "convex",
@@ -335,17 +329,7 @@ export class ConvexDeployer extends AbstractDeployer {
     const cvxAddr = await this.progress.getOrThrow("convex", "CVX");
     const crvAddr = await this.progress.getOrThrow("normalTokens", "CRV");
 
-    const claimZap = await deploy<ClaimZap>(
-      "ClaimZap",
-      this.log,
-      crvAddr,
-      cvxAddr
-    );
-
-    this.verifier.addContract({
-      address: claimZap.address,
-      constructorArguments: [crvAddr, cvxAddr]
-    });
+    const claimZap = await this.deploy<ClaimZap>("ClaimZap", crvAddr, cvxAddr);
 
     this.log.info(`ClaimZap was deployed at ${claimZap.address}`);
 

@@ -1,4 +1,4 @@
-import { deploy, waitForTransaction } from "@gearbox-protocol/devops";
+import { waitForTransaction } from "@gearbox-protocol/devops";
 import {
   contractParams,
   contractsByNetwork,
@@ -213,9 +213,8 @@ export class CurveDeployer extends AbstractDeployer {
 
     this.log.debug("Deploying SUSD wrapper");
 
-    const sCRV_deposit = await deploy<CurveSUSDDeposit>(
+    const sCRV_deposit = await this.deploy<CurveSUSDDeposit>(
       "CurveSUSDDeposit",
-      this.log,
       ...depositConstructorArgs
     );
 
@@ -280,9 +279,8 @@ export class CurveDeployer extends AbstractDeployer {
 
     this.log.debug(`Deploying ${tokenSymbol}: token mock`);
 
-    const lpToken = await deploy<CurveToken>(
+    const lpToken = await this.deploy<CurveToken>(
       "CurveToken",
-      this.log,
       ...tokenConstructorArgs
     );
 
@@ -290,9 +288,8 @@ export class CurveDeployer extends AbstractDeployer {
 
     this.log.debug(`Deploying ${poolType}: contract`);
 
-    const pool = await deploy<Curve3PoolMock>(
+    const pool = await this.deploy<Curve3PoolMock>(
       poolContractName,
-      this.log,
       ...poolConstructorArgs
     );
     this.log.debug(`Deploying ${tokenSymbol}: set as minter`);
@@ -371,9 +368,8 @@ export class CurveDeployer extends AbstractDeployer {
     ];
 
     this.log.debug(`Deploying ${lpTokenSymbol}: token mock`);
-    const pool = await deploy<CurveMetapoolMock>(
+    const pool = await this.deploy<CurveMetapoolMock>(
       "CurveMetapoolMock",
-      this.log,
       ...poolConstructorArgs
     );
 

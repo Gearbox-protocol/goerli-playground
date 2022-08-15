@@ -1,13 +1,10 @@
-import { deploy } from "@gearbox-protocol/devops";
 import {
   OracleType,
   priceFeedsByNetwork,
   SupportedToken,
   TokenPriceFeedData
 } from "@gearbox-protocol/sdk";
-import { run } from "hardhat";
 
-import config from "../../config";
 import { ChainlinkPriceFeed, ChainlinkPriceFeed__factory } from "../../types";
 import { AbstractDeployer } from "./AbstractDeployer";
 import { ChainlinkProgressKey, ChainlinkSuffix } from "./types";
@@ -73,22 +70,12 @@ export class PriceFeedsDeployer extends AbstractDeployer {
     );
 
     const decimals = await mainnetPF.decimals();
-    const testnetPF = await deploy<ChainlinkPriceFeed>(
+    const testnetPF = await this.deploy<ChainlinkPriceFeed>(
       "ChainlinkPriceFeed",
-      this.log,
       this.syncer,
       decimals,
       mainnetAddr
     );
-
-    await testnetPF.deployTransaction.wait(config.confirmations);
-
-    if (this.canVerify) {
-      await run("verify:verify", {
-        address: testnetPF.address,
-        constructorArguments: [this.syncer, decimals, mainnetAddr]
-      });
-    }
 
     return testnetPF.address;
   }

@@ -1,4 +1,4 @@
-import { deploy, waitForTransaction } from "@gearbox-protocol/devops";
+import { waitForTransaction } from "@gearbox-protocol/devops";
 import {
   CurveLPToken,
   IYVault__factory,
@@ -61,9 +61,8 @@ export class YearnDeployer extends AbstractDeployer {
       "symbol",
       symbol
     );
-    const vault = await deploy<YearnMock>(
+    const vault = await this.deploy<YearnMock>(
       "YearnMock",
-      this.log,
       this.syncer,
       underlyingAddress,
       symbol
@@ -87,11 +86,6 @@ export class YearnDeployer extends AbstractDeployer {
     this.log.info(
       `Yearn vault for ${yearnToken} synced - pricePerShare: ${mainnetPPS}`
     );
-
-    this.verifier.addContract({
-      address: vault.address,
-      constructorArguments: [this.syncer, underlyingAddress, symbol]
-    });
 
     await this.progress.save("yearn", yearnToken, vault.address);
   }

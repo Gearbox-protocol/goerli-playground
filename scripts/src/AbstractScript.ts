@@ -1,11 +1,8 @@
-import {
-  HARDHAT_NETWORK,
-  LOCAL_NETWORK,
-  MAINNET_NETWORK
-} from "@gearbox-protocol/sdk";
+import { deploy, Verifier } from "@gearbox-protocol/devops";
+import { MAINNET_NETWORK } from "@gearbox-protocol/sdk";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { config as dotEnvConfig } from "dotenv";
-import { providers } from "ethers";
+import { Contract, providers } from "ethers";
 import { ethers } from "hardhat";
 import { Logger } from "tslog";
 
@@ -14,6 +11,7 @@ import { ProgressTracker } from "./ProgressTracker";
 
 export abstract class AbstractScript {
   protected log: Logger = new Logger();
+  protected verifier: Verifier = new Verifier();
   protected chainId!: number;
   protected deployer!: SignerWithAddress;
   protected mainnetProvider!: providers.JsonRpcProvider;
@@ -47,8 +45,19 @@ export abstract class AbstractScript {
     );
   }
 
-  protected get canVerify(): boolean {
-    return this.chainId !== LOCAL_NETWORK && this.chainId !== HARDHAT_NETWORK;
+  protected async deploy<T extends Contract>(
+    name: string,
+    ...args: any[]
+  ): Promise<T> {
+    return deploy(
+      name,
+      {
+        logger: this.log,
+        verifier: this.verifier,
+        confirmations: config.confirmations
+      },
+      ...args
+    );
   }
 
   protected abstract run(): Promise<void>;

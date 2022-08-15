@@ -1,8 +1,5 @@
-import { deploy } from "@gearbox-protocol/devops";
 import { NormalToken, tokenDataByNetwork } from "@gearbox-protocol/sdk";
-import { run } from "hardhat";
 
-import config from "../../config";
 import { ERC20__factory, ERC20Testnet } from "../../types";
 import { AbstractScript } from "./AbstractScript";
 import { DeployedToken } from "./types";
@@ -86,21 +83,13 @@ export class TokensDeployer extends AbstractScript {
       `Token ${symbol} at ${mainnetAddress}, ${decimals} decimals, Name = ${name}`
     );
 
-    const newToken = await deploy<ERC20Testnet>(
+    const newToken = await this.deploy<ERC20Testnet>(
       "ERC20Testnet",
-      this.log,
       name,
       symbol,
       decimals
     );
 
-    await newToken.deployTransaction.wait(config.confirmations);
-    if (this.canVerify) {
-      await run("verify:verify", {
-        address: newToken.address,
-        constructorArguments: [name, symbol, decimals]
-      });
-    }
     return newToken.address;
   }
 }

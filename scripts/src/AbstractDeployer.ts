@@ -1,4 +1,4 @@
-import { Verifier, waitForTransaction } from "@gearbox-protocol/devops";
+import { waitForTransaction } from "@gearbox-protocol/devops";
 import { MAX_INT } from "@gearbox-protocol/sdk";
 import { BigNumber } from "ethers";
 
@@ -7,7 +7,6 @@ import { AbstractScript } from "./AbstractScript";
 import { DeployedToken } from "./types";
 
 export abstract class AbstractDeployer extends AbstractScript {
-  protected verifier: Verifier = new Verifier();
   // syncer address
   protected syncer!: string;
 
