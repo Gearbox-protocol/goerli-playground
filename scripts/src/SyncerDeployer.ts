@@ -1,6 +1,5 @@
 import { waitForTransaction } from "@gearbox-protocol/devops";
 
-import config from "../../config";
 import { Syncer } from "../../types";
 import { AbstractScript } from "./AbstractScript";
 
@@ -12,7 +11,12 @@ export class SyncerDeployer extends AbstractScript {
       return;
     }
     const syncer = await this.deploy<Syncer>("Syncer");
-    for (const syncAddr of config.syncers) {
+    const syncers = process.env.TESNET_SYNCERS?.split(",").map(s => s.trim());
+    if (!syncers || !syncers?.[0]) {
+      throw new Error("syncers are not provided");
+    }
+
+    for (const syncAddr of syncers) {
       await waitForTransaction(syncer.addSyncer(syncAddr));
       this.log.debug(`Added ${syncAddr} to syncer`);
     }

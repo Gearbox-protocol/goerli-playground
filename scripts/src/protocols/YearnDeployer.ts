@@ -7,7 +7,6 @@ import {
   yearnTokens
 } from "@gearbox-protocol/sdk";
 
-import config from "../../../config";
 import { YearnMock } from "../../../types";
 import { AbstractDeployer } from "../AbstractDeployer";
 import { DeployedToken } from "../types";
@@ -43,7 +42,7 @@ export class YearnDeployer extends AbstractDeployer {
     let underlyingAddress = maybeNormal ?? maybeCurve;
     if (!underlyingAddress) {
       if (underlying === "WETH") {
-        underlyingAddress = tokenDataByNetwork[config.network].WETH;
+        underlyingAddress = tokenDataByNetwork[this.network].WETH;
       } else {
         throw new Error(
           `underlying ${underlying} for ${yearnToken} is not deployed`

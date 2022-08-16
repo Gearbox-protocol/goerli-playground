@@ -1,22 +1,10 @@
-import { deploy, Verifier } from "@gearbox-protocol/devops";
-import { MAINNET_NETWORK } from "@gearbox-protocol/sdk";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { config as dotEnvConfig } from "dotenv";
-import { Contract, providers } from "ethers";
-import { ethers } from "hardhat";
-import { Logger } from "tslog";
+import { deploy } from "@gearbox-protocol/devops";
+import { Contract } from "ethers";
 
-import config from "../../config";
-import { ProgressTracker } from "./ProgressTracker";
+import RuntimeEnvironment from "./RuntimeEnvironment";
 
-export abstract class AbstractScript {
-  protected log: Logger = new Logger();
-  protected verifier: Verifier = new Verifier();
-  protected chainId!: number;
-  protected deployer!: SignerWithAddress;
-  protected mainnetProvider!: providers.JsonRpcProvider;
-  protected testnetProvider!: providers.JsonRpcProvider;
-  protected progress = new ProgressTracker(config.progressFileName);
+export abstract class AbstractScript extends RuntimeEnvironment {
+  protected runtime!: RuntimeEnvironment;
 
   public async exec(): Promise<void> {
     await this.setup();
@@ -24,25 +12,8 @@ export abstract class AbstractScript {
   }
 
   protected async setup(): Promise<void> {
-    dotEnvConfig();
-    const mainnetRpc = process.env.ETH_MAINNET_PROVIDER;
-    if (!mainnetRpc) {
-      throw new Error("ETH_MAINNET_PROVIDER is not defined");
-    }
-
-    const accounts = await ethers.getSigners();
-    this.deployer = accounts[0];
-    this.chainId = await this.deployer.getChainId();
-    if (this.chainId === MAINNET_NETWORK) {
-      throw new Error("Switch to test network");
-    }
-
-    this.mainnetProvider = new providers.JsonRpcProvider(mainnetRpc);
-    this.testnetProvider = new providers.JsonRpcProvider(config.url);
-
-    this.log.info(
-      `Script setup complete. ChainID = ${this.chainId} Deployer = ${this.deployer.address}`
-    );
+    const runtime = await RuntimeEnvironment.setup();
+    this.from(runtime);
   }
 
   protected async deploy<T extends Contract>(
@@ -53,8 +24,7 @@ export abstract class AbstractScript {
       name,
       {
         logger: this.log,
-        verifier: this.verifier,
-        confirmations: config.confirmations
+        verifier: this.verifier
       },
       ...args
     );

@@ -10,10 +10,6 @@ export abstract class AbstractDeployer extends AbstractScript {
   // syncer address
   protected syncer!: string;
 
-  public constructor() {
-    super();
-  }
-
   protected override async setup(): Promise<void> {
     await super.setup();
     this.syncer = await this.progress.getOrThrow("syncer", "address");

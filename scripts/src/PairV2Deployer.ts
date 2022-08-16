@@ -13,7 +13,6 @@ import {
 } from "@gearbox-protocol/sdk";
 import { BigNumber } from "ethers";
 
-import config from "../../config";
 import {
   ChainlinkPriceFeed__factory,
   ERC20Testnet__factory,
@@ -51,8 +50,8 @@ export class PairV2Deployer extends AbstractScript {
     const usdcAmount = usdcDecimalMult.mul(100e6);
 
     for (const routerAddr of [
-      contractsByNetwork[config.network].UNISWAP_V2_ROUTER,
-      contractsByNetwork[config.network].SUSHISWAP_ROUTER
+      contractsByNetwork[this.network].UNISWAP_V2_ROUTER,
+      contractsByNetwork[this.network].SUSHISWAP_ROUTER
     ]) {
       const uniV2Router = IUniswapV2Router02__factory.connect(
         routerAddr,
@@ -196,7 +195,7 @@ export class PairV2Deployer extends AbstractScript {
   ): Promise<string | undefined> {
     let addr = await this.progress.getSupportedToken(symbol);
     if (!addr) {
-      addr = tokenDataByNetwork[config.network][symbol];
+      addr = tokenDataByNetwork[this.network][symbol];
     }
     return addr;
   }

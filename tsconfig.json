@@ -8,5 +8,5 @@
     "declaration": true
   },
   "include": ["scripts/**/*", "test/**/*", "typechain/**/*", "types/**/*"],
-  "files": ["./hardhat.config.ts", "./config.ts"]
+  "files": ["./hardhat.config.ts"]
 }
