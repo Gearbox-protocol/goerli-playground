@@ -18,13 +18,10 @@ const WPK =
   "0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3"; // well known private key
 
 const TESTNET_PRIVATE_KEY = process.env.TESTNET_PRIVATE_KEY ?? WPK;
-const TESTNET2_PRIVATE_KEY = process.env.TESTNET2_PRIVATE_KEY ?? WPK;
 const BOXCODE_PRIVATE_KEY = process.env.BOXCODE_PRIVATE_KEY ?? WPK;
 const BVI_PRIVATE_KEY = process.env.BVI_PRIVATE_KEY ?? WPK;
 const KOVAN_PRIVATE_KEY = process.env.KOVAN_PRIVATE_KEY ?? WPK;
-const KOVAN2_PRIVATE_KEY = process.env.KOVAN2_PRIVATE_KEY ?? WPK;
 const GOERLI_PRIVATE_KEY = process.env.GOERLI_PRIVATE_KEY ?? WPK;
-const GOERLI2_PRIVATE_KEY = process.env.GOERLI2_PRIVATE_KEY ?? WPK;
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 
 const config: HardhatUserConfig = {
@@ -54,7 +51,7 @@ const config: HardhatUserConfig = {
 
     localhost: {
       timeout: 0,
-      accounts: [TESTNET_PRIVATE_KEY, TESTNET2_PRIVATE_KEY]
+      accounts: [TESTNET_PRIVATE_KEY]
     },
 
     mainnet: {
@@ -69,7 +66,7 @@ const config: HardhatUserConfig = {
 
     kovan: {
       url: `${process.env.ETH_KOVAN_PROVIDER}`,
-      accounts: [KOVAN_PRIVATE_KEY, KOVAN2_PRIVATE_KEY],
+      accounts: [KOVAN_PRIVATE_KEY],
       gasPrice: 2e9,
       gasMultiplier: 1.5,
       minGasPrice: 1e9,
@@ -79,7 +76,7 @@ const config: HardhatUserConfig = {
 
     goerli: {
       url: `${process.env.ETH_GOERLI_PROVIDER}`,
-      accounts: [GOERLI_PRIVATE_KEY, GOERLI2_PRIVATE_KEY],
+      accounts: [GOERLI_PRIVATE_KEY],
       gasPrice: 2e9,
       gasMultiplier: 1.5,
       minGasPrice: 1e9,

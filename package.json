@@ -1,14 +1,12 @@
 {
-  "name": "hardhat-project",
+  "name": "@gearbox-protocol/testnet-playground",
   "scripts": {
     "build": "yarn clean && yarn compile --no-typechain && yarn abifix && yarn typegen",
     "clean": "npx hardhat clean",
     "compile": "npx hardhat compile",
     "test": "npx hardhat test",
     "typegen": "npx typechain --target=ethers-v5 './artifacts/!(build-info)/**/+([a-zA-Z0-9_]).json' --out-dir types",
-    "abifix": "npx ts-node scripts/abifix.ts",
-    "verify": "npx hardhat run node_modules/@gearbox-protocol/devops/lib/verifier/verify.js",
-    "deploy-curve": "yarn build && npx hardhat run --network kovan scripts/curveDeploy.ts --no-compile"
+    "abifix": "npx ts-node scripts/abifix.ts"
   },
   "dependencies": {
     "@chainlink/contracts": "^0.4.2",

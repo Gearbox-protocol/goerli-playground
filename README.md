@@ -4,10 +4,26 @@ This project contains bunch of scripts to deploy gearbox playground, which is co
 
 ## Developing
 
+Playground can be deployed on testnet or on a local fork. Testnets (e.g. `kovan` and `goerli`) are configured in `hardhat.config.ts`. Environemt variables are required to make it work. Local fork is configured in `hardhat` network settings.
+
+To deploy on fork run `npx hardhat node` to run hardhard local fork. Switch to another terminal window to run scripts against this network. Do not forget that your progress is not saved when you stop and restart the fork, so `.progress.<testnet>.local.json` should be deleted.
+
 ### Configuring
 
-Configure your `.env` file with testnet provider url. Optionally set fork block number, this helps with getting same addresses every time you restart the fork.
-Run `npx hardhat node` to run hardhard local fork. Switch to another terminal window to run scripts against this network.
+Set following environment variables your `.env` file (git-ignored).
+
+| Name                 | Example                                    | Description                                                                                               |
+| -------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| ETHERSCAN_API_KEY    | `<api key>`                                | Etherscan API key, required to verify contracts                                                           |
+| ETH_GOERLI_PROVIDER  | `https://goerli.infura.io/v3/<api key>`    | Node url for goerli network                                                                               |
+| GOERLI_PRIVATE_KEY   | `<private key>`                            | Deployer private key for goerli network                                                                   |
+| ETH_KOVAN_PROVIDER   | `https://kovan.infura.io/v3/<api key>`     | Node url for kovan network                                                                                |
+| KOVAN_PRIVATE_KEY    | `<private key>`                            | Deployer private key for kovan network                                                                    |
+| ETH_MAINNET_PROVIDER | `https://mainnet.infura.io/v3/<api key>`   | Node url for main network                                                                                 |
+| ETH_TESTNET_PROVIDER | `https://<testnet>.infura.io/v3/<api key>` | Node to fork local hardhat network from                                                                   |
+| ETH_TESTNET_BLOCK    | 7373000                                    | Optionally set fork block number, this helps with getting same addresses every time you restart the fork. |
+| TESTNET_PRIVATE_KEY  | `<private key>`                            | Deployer private key for local hardhat fork                                                               |
+| TESNET_SYNCERS       | `<address>,<address>`                      | Comma-separated addresses that will be allowed to use Syncer                                              |
 
 ### Deploying
 
@@ -33,7 +49,7 @@ Use `--network localhost` flag to connect to running hardhat fork. Use `--networ
 
 It's also possible to run `npx hardhat run scripts/playgroundDeploy.ts --network localhost --no-compile` to deploy everything in one go
 
-The deploy progress will be saved in json files (e.g. `.progress.goerli.json`). This file is required to pass data from one script to next. For example, script to deploy yearn vaults will look for deployed DAI and USDC addresses to use as underlying tokens.
+The deploy progress will be saved in json files (e.g. `.progress.goerli.json`). This file is required to pass data from one script to the next. For example, script to deploy yearn vaults will look for deployed DAI and USDC addresses to use as underlying tokens.
 
 ### Verification
 
