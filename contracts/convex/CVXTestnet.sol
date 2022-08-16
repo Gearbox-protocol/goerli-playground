@@ -14,7 +14,7 @@ contract CVXTestnet is ERC20, Ownable {
 
   uint8 public immutable _decimals;
 
-  address public operator;
+  mapping(address => bool) public operators;
 
   uint256 public maxSupply = 100 * 1000000 * 1e18; //100mil
   uint256 public totalCliffs = 1000;
@@ -25,8 +25,12 @@ contract CVXTestnet is ERC20, Ownable {
     reductionPerCliff = maxSupply.div(totalCliffs);
   }
 
-  function setOperator(address operator_) external onlyOwner {
-    operator = operator_;
+  function addOperator(address operator) public onlyOwner {
+    operators[operator] = true;
+  }
+
+  function removeOperator(address operator) external onlyOwner {
+    operators[operator] = false;
   }
 
   function mintExact(uint256 _amount) external onlyOwner {
@@ -34,7 +38,7 @@ contract CVXTestnet is ERC20, Ownable {
   }
 
   function mint(address _to, uint256 _amount) external {
-    if (msg.sender != operator) {
+    if (!operators[msg.sender]) {
       revert("Unauthorized CVX mint");
     }
 

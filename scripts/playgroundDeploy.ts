@@ -4,7 +4,8 @@ import {
   PairV2Deployer,
   PriceFeedsDeployer,
   SyncerDeployer,
-  TokensDeployer
+  TokensDeployer,
+  TradingBotDeployer
 } from "./src";
 
 /**
@@ -28,6 +29,9 @@ async function playgroundDeploy(): Promise<void> {
 
   const pairs = new PairV2Deployer();
   await pairs.exec();
+
+  const bot = new TradingBotDeployer();
+  await bot.exec();
 }
 
 playgroundDeploy().catch(console.error);

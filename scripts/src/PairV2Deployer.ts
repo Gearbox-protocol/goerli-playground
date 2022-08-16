@@ -89,6 +89,7 @@ export class PairV2Deployer extends AbstractScript {
         if (pf.priceFeedUSD?.type === OracleType.CHAINLINK_ORACLE) {
           if (!pf.priceFeedUSD.address.Mainnet) {
             this.log.warn(`Prices feed ${sym}/USD is not found on mainnet`);
+            continue;
           }
           const pfeed = ChainlinkPriceFeed__factory.connect(
             pf.priceFeedUSD.address.Mainnet,
@@ -99,6 +100,7 @@ export class PairV2Deployer extends AbstractScript {
         } else if (pf.priceFeedETH?.type === OracleType.CHAINLINK_ORACLE) {
           if (!pf.priceFeedETH.address.Mainnet) {
             this.log.warn(`Prices feed ${sym}/ETH is not found on mainnet`);
+            continue;
           }
           const pfeed = ChainlinkPriceFeed__factory.connect(
             pf.priceFeedETH.address.Mainnet,
@@ -139,7 +141,6 @@ export class PairV2Deployer extends AbstractScript {
 
         this.log.debug("Pair address: ", pairAddr);
         this.log.debug(`USDC to pool: ${formatBN(usdcAmount, usdcDecimals)}`);
-        this.log.debug(sym, tokenAmount, tokenDecimals);
         this.log.debug(
           `${sym} to pool: ${formatBN(tokenAmount, tokenDecimals)}`
         );

@@ -54,7 +54,8 @@ contract ConvexManagerTestnet is Ownable {
 
     booster = address(new Booster(cvx, crv));
     Booster(booster).setFactories(poolFactory, tokenFactory);
-    CVXTestnet(cvx).setOperator(booster);
+    CVXTestnet(cvx).addOperator(booster);
+    CVXTestnet(cvx).addOperator(msg.sender);
   }
 
   // dev: This function assumes that RAY=1e27 of CRV is allowed to this contract per pool
