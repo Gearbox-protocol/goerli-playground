@@ -24,9 +24,9 @@ export abstract class AbstractScript extends RuntimeEnvironment {
       name,
       {
         logger: this.log,
-        verifier: this.verifier
+        verifier: this.verifier,
       },
-      ...args
+      ...args,
     );
   }
 

@@ -581,9 +581,9 @@
   dependencies:
     axios "^0.27.2"
 
-"@gearbox-protocol/eslint-config@https://github.com/doomsower/gearbox-eslint-config.git":
-  version "1.0.0"
-  resolved "https://github.com/doomsower/gearbox-eslint-config.git#ae74dc0f20274f3d4c747c1ef58618c94837f7a9"
+"@gearbox-protocol/eslint-config@https://gitpkg.now.sh/Gearbox-protocol/style-guide/packages/eslint-config?44ac6862eb947169e650c3ec7e7954c6ee0a8c8e":
+  version "0.0.0-semantic-release"
+  resolved "https://gitpkg.now.sh/Gearbox-protocol/style-guide/packages/eslint-config?44ac6862eb947169e650c3ec7e7954c6ee0a8c8e#cfb6dc3ebbcf7c146141ce6e0da1380523f7dc10"
   dependencies:
     "@typescript-eslint/eslint-plugin" "^5.33.0"
     "@typescript-eslint/parser" "^5.33.0"
@@ -592,6 +592,10 @@
     eslint-plugin-import "^2.26.0"
     eslint-plugin-simple-import-sort "^7.0.0"
     eslint-plugin-unused-imports "^2.0.0"
+
+"@gearbox-protocol/prettier-config@https://gitpkg.now.sh/Gearbox-protocol/style-guide/packages/prettier-config?44ac6862eb947169e650c3ec7e7954c6ee0a8c8e":
+  version "0.0.0-semantic-release"
+  resolved "https://gitpkg.now.sh/Gearbox-protocol/style-guide/packages/prettier-config?44ac6862eb947169e650c3ec7e7954c6ee0a8c8e#1ab03d97a85f9364d4de9312e05ca875aee904c5"
 
 "@gearbox-protocol/sdk@^0.0.109":
   version "0.0.109"
@@ -1325,6 +1329,11 @@ acorn@^8.4.1, acorn@^8.8.0:
   version "8.8.0"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.8.0.tgz#88c0187620435c7f6015803f5539dae05a9dbea8"
   integrity sha512-QOxyigPVrpZ2GXT+PFyZTl6TtOFc5egxHIP9IlQ+RbupQuX4RkT/Bee4/kQuC02Xkzg84JcT7oLYtDIQxp+v7w==
+
+add@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/add/-/add-2.0.6.tgz#248f0a9f6e5a528ef2295dbeec30532130ae2235"
+  integrity sha512-j5QzrmsokwWWp6kUcJQySpbG+xfOBqqKnup3OIk1pz+kB/80SLorZ9V8zHFLO92Lcd+hbvq8bT+zOGoPkmBV0Q==
 
 address@^1.0.1:
   version "1.2.0"
@@ -10749,6 +10758,11 @@ yargs@^4.7.1:
     window-size "^0.2.0"
     y18n "^3.2.1"
     yargs-parser "^2.4.1"
+
+yarn@^1.22.19:
+  version "1.22.19"
+  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.22.19.tgz#4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447"
+  integrity sha512-/0V5q0WbslqnwP91tirOvldvYISzaqhClxzyUKXYxs07yUILIs5jx/k6CFe8bvKSkds5w+eiOqta39Wk3WxdcQ==
 
 yn@3.1.1:
   version "3.1.1"

@@ -34,7 +34,7 @@ const tokensToDeploy: Array<DeployedToken> = [
   "sUSD",
   "GUSD",
   "LUNA",
-  "LQTY"
+  "LQTY",
 ];
 
 // TokensDeployer deploys mock ERC20 contracts for each of provided normal tokens
@@ -72,7 +72,7 @@ export class TokensDeployer extends AbstractScript {
 
     const mainnetToken = ERC20__factory.connect(
       mainnetAddress,
-      this.mainnetProvider
+      this.mainnetProvider,
     );
 
     const symbol = await mainnetToken.symbol();
@@ -80,14 +80,14 @@ export class TokensDeployer extends AbstractScript {
     const decimals = await mainnetToken.decimals();
 
     this.log.debug(
-      `Token ${symbol} at ${mainnetAddress}, ${decimals} decimals, Name = ${name}`
+      `Token ${symbol} at ${mainnetAddress}, ${decimals} decimals, Name = ${name}`,
     );
 
     const newToken = await this.deploy<ERC20Testnet>(
       "ERC20Testnet",
       name,
       symbol,
-      decimals
+      decimals,
     );
 
     return newToken.address;

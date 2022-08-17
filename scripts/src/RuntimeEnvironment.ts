@@ -5,7 +5,7 @@ import {
   KOVAN_NETWORK,
   LOCAL_NETWORK,
   MAINNET_NETWORK,
-  NetworkType
+  NetworkType,
 } from "@gearbox-protocol/sdk";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { providers } from "ethers";
@@ -51,7 +51,7 @@ export default class RuntimeEnvironment {
     if (chainId === HARDHAT_NETWORK) {
       progressFileSuffix = ".local";
       const originProvider = new providers.JsonRpcProvider(
-        hre.config.networks.hardhat.forking.url
+        hre.config.networks.hardhat.forking.url,
       );
       const originNetwork = await originProvider.getNetwork();
       originChainId = originNetwork.chainId;
@@ -70,7 +70,7 @@ export default class RuntimeEnvironment {
     instance.mainnetProvider = new providers.JsonRpcProvider(mainnetRpc);
     instance.testnetProvider = hre.network.provider;
     instance.progress = new ProgressTracker(
-      `.progress.${instance.network.toLowerCase()}${progressFileSuffix}.json`
+      `.progress.${instance.network.toLowerCase()}${progressFileSuffix}.json`,
     );
 
     instance.log.info(`Script setup complete. 

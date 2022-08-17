@@ -9,7 +9,7 @@ import {
   priceFeedsByNetwork,
   SupportedToken,
   tokenDataByNetwork,
-  WAD
+  WAD,
 } from "@gearbox-protocol/sdk";
 import { BigNumber } from "ethers";
 
@@ -17,7 +17,7 @@ import {
   ChainlinkPriceFeed__factory,
   ERC20Testnet__factory,
   IUniswapV2Factory__factory,
-  IUniswapV2Pair__factory
+  IUniswapV2Pair__factory,
 } from "../../types";
 import { AbstractScript } from "./AbstractScript";
 
@@ -35,7 +35,7 @@ export class PairV2Deployer extends AbstractScript {
 
     const ethUsdPf = ChainlinkPriceFeed__factory.connect(
       ethUsdPriceFeed.address.Mainnet,
-      this.mainnetProvider
+      this.mainnetProvider,
     );
     const ethUsdPrice = (await ethUsdPf.latestRoundData()).answer;
 
@@ -51,23 +51,23 @@ export class PairV2Deployer extends AbstractScript {
 
     for (const routerAddr of [
       contractsByNetwork[this.network].UNISWAP_V2_ROUTER,
-      contractsByNetwork[this.network].SUSHISWAP_ROUTER
+      contractsByNetwork[this.network].SUSHISWAP_ROUTER,
     ]) {
       const uniV2Router = IUniswapV2Router02__factory.connect(
         routerAddr,
-        this.deployer
+        this.deployer,
       );
 
       await waitForTransaction(
         ERC20Testnet__factory.connect(usdcAddr, this.deployer).approve(
           routerAddr,
-          MAX_INT
-        )
+          MAX_INT,
+        ),
       );
 
       const uniV2factory = IUniswapV2Factory__factory.connect(
         await uniV2Router.factory(),
-        this.deployer
+        this.deployer,
       );
 
       for (const [s, pf] of Object.entries(priceFeedsByNetwork)) {
@@ -93,7 +93,7 @@ export class PairV2Deployer extends AbstractScript {
           }
           const pfeed = ChainlinkPriceFeed__factory.connect(
             pf.priceFeedUSD.address.Mainnet,
-            this.mainnetProvider
+            this.mainnetProvider,
           );
           const data = await pfeed.latestRoundData();
           usdPrice = data.answer;
@@ -104,7 +104,7 @@ export class PairV2Deployer extends AbstractScript {
           }
           const pfeed = ChainlinkPriceFeed__factory.connect(
             pf.priceFeedETH.address.Mainnet,
-            this.mainnetProvider
+            this.mainnetProvider,
           );
           const data = await pfeed.latestRoundData();
 
@@ -128,7 +128,7 @@ export class PairV2Deployer extends AbstractScript {
 
         const tokenContract = ERC20Testnet__factory.connect(
           token,
-          this.deployer
+          this.deployer,
         );
 
         const tokenDecimals = await tokenContract.decimals();
@@ -142,12 +142,12 @@ export class PairV2Deployer extends AbstractScript {
         this.log.debug("Pair address: ", pairAddr);
         this.log.debug(`USDC to pool: ${formatBN(usdcAmount, usdcDecimals)}`);
         this.log.debug(
-          `${sym} to pool: ${formatBN(tokenAmount, tokenDecimals)}`
+          `${sym} to pool: ${formatBN(tokenAmount, tokenDecimals)}`,
         );
 
         const lpTokenBalance = await IUniswapV2Pair__factory.connect(
           pairAddr,
-          this.deployer
+          this.deployer,
         ).balanceOf(this.deployer.address);
         this.log.debug(`Deployer balance: ${lpTokenBalance}`);
 
@@ -155,10 +155,10 @@ export class PairV2Deployer extends AbstractScript {
           await waitForTransaction(tokenContract.approve(routerAddr, MAX_INT));
 
           await waitForTransaction(
-            tokenContract.mint(this.deployer.address, tokenAmount)
+            tokenContract.mint(this.deployer.address, tokenAmount),
           );
           await waitForTransaction(
-            usdcToken.mint(this.deployer.address, usdcAmount)
+            usdcToken.mint(this.deployer.address, usdcAmount),
           );
 
           await waitForTransaction(
@@ -170,13 +170,13 @@ export class PairV2Deployer extends AbstractScript {
               tokenAmount,
               usdcAmount,
               this.deployer.address,
-              Math.floor(Date.now() / 1000 + 24 * 3600)
-            )
+              Math.floor(Date.now() / 1000 + 24 * 3600),
+            ),
           );
 
           const lpTokenBalance = await IUniswapV2Pair__factory.connect(
             pairAddr,
-            this.deployer
+            this.deployer,
           ).balanceOf(this.deployer.address);
 
           this.log.debug(`Deployer balance: ${lpTokenBalance}`);
@@ -192,7 +192,7 @@ export class PairV2Deployer extends AbstractScript {
    * @param symbol
    */
   private async getSupportedTokenAddress(
-    symbol: SupportedToken
+    symbol: SupportedToken,
   ): Promise<string | undefined> {
     let addr = await this.progress.getSupportedToken(symbol);
     if (!addr) {

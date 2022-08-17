@@ -2,7 +2,7 @@ import {
   OracleType,
   priceFeedsByNetwork,
   SupportedToken,
-  TokenPriceFeedData
+  TokenPriceFeedData,
 } from "@gearbox-protocol/sdk";
 
 import { ChainlinkPriceFeed, ChainlinkPriceFeed__factory } from "../../types";
@@ -32,7 +32,7 @@ export class PriceFeedsDeployer extends AbstractDeployer {
   private async maybeDeployPF(
     token: SupportedToken,
     data: TokenPriceFeedData,
-    kind: keyof TokenPriceFeedData
+    kind: keyof TokenPriceFeedData,
   ): Promise<void> {
     const pf = data[kind];
     const suffix: ChainlinkSuffix = kind === "priceFeedETH" ? "ETH" : "USD";
@@ -55,7 +55,7 @@ export class PriceFeedsDeployer extends AbstractDeployer {
       this.log.debug(`Already deployed ${name} at ${testnetAddr}`);
       const pfeed = ChainlinkPriceFeed__factory.connect(
         testnetAddr,
-        this.deployer
+        this.deployer,
       );
       try {
         await pfeed.mainnetOracle();
@@ -66,7 +66,7 @@ export class PriceFeedsDeployer extends AbstractDeployer {
   private async deployPF(mainnetAddr: string): Promise<string> {
     const mainnetPF = ChainlinkPriceFeed__factory.connect(
       mainnetAddr,
-      this.mainnetProvider
+      this.mainnetProvider,
     );
 
     const decimals = await mainnetPF.decimals();
@@ -74,7 +74,7 @@ export class PriceFeedsDeployer extends AbstractDeployer {
       "ChainlinkPriceFeed",
       this.syncer,
       decimals,
-      mainnetAddr
+      mainnetAddr,
     );
 
     return testnetPF.address;

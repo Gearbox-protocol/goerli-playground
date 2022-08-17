@@ -16,7 +16,7 @@ export class ProgressTracker {
 
   public async save<
     S extends keyof Progress,
-    E extends keyof NonNullable<Progress[S]>
+    E extends keyof NonNullable<Progress[S]>,
   >(script: S, entity: E, address: NonNullable<Progress[S]>[E]): Promise<void> {
     const progress = await this.loadProgress();
     if (!progress[script]) {
@@ -29,7 +29,7 @@ export class ProgressTracker {
 
   public async get<
     S extends keyof Progress,
-    E extends keyof NonNullable<Progress[S]>
+    E extends keyof NonNullable<Progress[S]>,
   >(script: S, entity: E): Promise<NonNullable<Progress[S]>[E]> {
     const progress = await this.loadProgress();
     const p = progress[script];
@@ -39,7 +39,7 @@ export class ProgressTracker {
 
   public async getOrThrow<
     S extends keyof Progress,
-    E extends keyof NonNullable<Progress[S]>
+    E extends keyof NonNullable<Progress[S]>,
   >(script: S, entity: E): Promise<NonNullable<NonNullable<Progress[S]>[E]>> {
     const result = await this.get(script, entity);
     if (!result) {
@@ -50,7 +50,7 @@ export class ProgressTracker {
 
   public async isDeployNeeded<S extends keyof Progress>(
     script: S,
-    entity: keyof NonNullable<Progress[S]>
+    entity: keyof NonNullable<Progress[S]>,
   ): Promise<boolean> {
     const addr = await this.get(script, entity);
     if (addr) {
@@ -65,7 +65,7 @@ export class ProgressTracker {
    * @param symbol
    */
   public async getSupportedToken(
-    symbol: SupportedToken
+    symbol: SupportedToken,
   ): Promise<string | undefined> {
     const progress = await this.loadProgress();
     for (const script of Object.values(progress)) {

@@ -22,7 +22,7 @@ const tokensToDeploy: Array<SupportedToken> = [
   // "SNX",
   // "SUSHI",
   // "UNI",
-  "USDC"
+  "USDC",
   // "USDT",
   // "WBTC",
   // // "WETH",
@@ -62,13 +62,13 @@ async function deployTokens(): Promise<void> {
     log.info(`Sending ${t} to ${addressToSend}`);
 
     const tx = await waitForTransaction(
-      token.mint(addressToSend, BigNumber.from(10).pow(decimals).mul(100000))
+      token.mint(addressToSend, BigNumber.from(10).pow(decimals).mul(100000)),
     );
 
     console.log(
       `https://${config.network.toLowerCase()}.etherscan.io/tx/${
         tx.transactionHash
-      }`
+      }`,
     );
   }
 }

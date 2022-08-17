@@ -6,7 +6,7 @@ import {
   ConvexPoolContract,
   convexTokens,
   MultiCallContract,
-  SupportedToken
+  SupportedToken,
 } from "@gearbox-protocol/sdk";
 
 import {
@@ -15,7 +15,7 @@ import {
   ConvexManagerTestnet,
   ConvexManagerTestnet__factory,
   ERC20Testnet__factory,
-  VirtualBalanceRewardPool__factory
+  VirtualBalanceRewardPool__factory,
 } from "../../../types";
 import { BaseRewardPoolInterface } from "../../../types/contracts/convex/ConvexBaseRewardPool.sol/BaseRewardPool";
 import { AbstractDeployer } from "../AbstractDeployer";
@@ -30,7 +30,7 @@ const convexExtraRewardTokens: Record<
   CONVEX_SUSD_POOL: ["SNX"],
   CONVEX_STECRV_POOL: ["LDO"],
   CONVEX_FRAX3CRV_POOL: ["FXS"],
-  CONVEX_LUSD3CRV_POOL: ["LQTY"]
+  CONVEX_LUSD3CRV_POOL: ["LQTY"],
 };
 
 const tokenList: ConvexLPToken[] = [
@@ -39,7 +39,7 @@ const tokenList: ConvexLPToken[] = [
   "cvxcrvPlain3andSUSD",
   "cvxFRAX3CRV",
   "cvxLUSD3CRV",
-  "cvxgusd3CRV"
+  "cvxgusd3CRV",
 ];
 
 export class ConvexDeployer extends AbstractDeployer {
@@ -52,11 +52,11 @@ export class ConvexDeployer extends AbstractDeployer {
 
     const convexMgrAddr = await this.progress.getOrThrow(
       "convex",
-      "TESTNET_CONVEX_MANAGER"
+      "TESTNET_CONVEX_MANAGER",
     );
     this._convexManager = ConvexManagerTestnet__factory.connect(
       convexMgrAddr,
-      this.deployer
+      this.deployer,
     );
 
     this.log.info("Adding pools");
@@ -75,17 +75,17 @@ export class ConvexDeployer extends AbstractDeployer {
       const convexManager = await this.deploy<ConvexManagerTestnet>(
         "ConvexManagerTestnet",
         this.syncer,
-        crv
+        crv,
       );
 
       await this.progress.save(
         "convex",
         "TESTNET_CONVEX_MANAGER",
-        convexManager.address
+        convexManager.address,
       );
 
       this.log.info(
-        `ConvexManagerTestnet was deployed at ${convexManager.address}`
+        `ConvexManagerTestnet was deployed at ${convexManager.address}`,
       );
 
       const boosterAddr = await convexManager.booster();
@@ -93,12 +93,12 @@ export class ConvexDeployer extends AbstractDeployer {
 
       this.verifier.addContract({
         address: boosterAddr,
-        constructorArguments: [cvxAddr, crv]
+        constructorArguments: [cvxAddr, crv],
       });
 
       this.verifier.addContract({
         address: cvxAddr,
-        constructorArguments: []
+        constructorArguments: [],
       });
 
       await this.progress.save("convex", "CONVEX_BOOSTER", boosterAddr);
@@ -125,14 +125,14 @@ export class ConvexDeployer extends AbstractDeployer {
 
     const curveUnderlyingTokenAddress = await this.progress.getOrThrow(
       "curve",
-      convexData.underlying
+      convexData.underlying,
     );
 
     const crvToken = ERC20Testnet__factory.connect(crv, this.deployer);
 
     const curveUnderlyingToken = ERC20Testnet__factory.connect(
       curveUnderlyingTokenAddress,
-      this.deployer
+      this.deployer,
     );
 
     await this.mintToken("CRV", this.deployer.address, 10 ** 9);
@@ -142,8 +142,8 @@ export class ConvexDeployer extends AbstractDeployer {
     await waitForTransaction(
       this.convexManager.addBasePool(
         curveUnderlyingToken.address,
-        convexData.pid
-      )
+        convexData.pid,
+      ),
     );
 
     const numPools = await this.convexManager.deployedPoolsLength();
@@ -151,7 +151,7 @@ export class ConvexDeployer extends AbstractDeployer {
 
     const basePool = BaseRewardPool__factory.connect(
       poolAddress,
-      this.deployer
+      this.deployer,
     );
 
     const pid = convexData.pid;
@@ -167,14 +167,14 @@ export class ConvexDeployer extends AbstractDeployer {
 
     const mainnetPool = BaseRewardPool__factory.connect(
       contractsByNetwork.Mainnet[convexData.pool],
-      this.mainnetProvider
+      this.mainnetProvider,
     );
 
     await this.syncPool(
       poolAddress,
       contractsByNetwork.Mainnet[convexData.pool],
       poolToken,
-      false
+      false,
     );
 
     // DEPLOY AND SYNC EXTRA REWARDS
@@ -182,7 +182,7 @@ export class ConvexDeployer extends AbstractDeployer {
     for (const extraRewardToken of convexExtraRewardTokens[convexData.pool]) {
       const rewardTokenAddr = await this.progress.getOrThrow(
         "normalTokens",
-        extraRewardToken
+        extraRewardToken,
       );
 
       await this.mintToken(extraRewardToken, this.deployer.address, 10 ** 9);
@@ -190,7 +190,7 @@ export class ConvexDeployer extends AbstractDeployer {
 
       this.log.debug(`Adding extra pool ${rewardTokenAddr}`);
       await waitForTransaction(
-        this.convexManager.addExtraPool(rewardTokenAddr, basePool.address)
+        this.convexManager.addExtraPool(rewardTokenAddr, basePool.address),
       );
 
       const numRewards = await basePool.extraRewardsLength();
@@ -205,32 +205,32 @@ export class ConvexDeployer extends AbstractDeployer {
       await this.progress.save(
         "convex",
         `${convexData.pool}_EXTRA_${extraRewardToken}`,
-        extraPoolAddr
+        extraPoolAddr,
       );
 
       const boosterAddr = await this.convexManager.booster();
 
       const mainnetExtraPoolAddr = await mainnetPool.extraRewards(
-        numRewards.sub(1)
+        numRewards.sub(1),
       );
 
       const mainnetExtraPool = VirtualBalanceRewardPool__factory.connect(
         mainnetExtraPoolAddr,
-        this.mainnetProvider
+        this.mainnetProvider,
       );
 
       const mainnetExtraRewardAddr = await mainnetExtraPool.rewardToken();
 
       const mainnetExtraReward = ERC20Testnet__factory.connect(
         mainnetExtraRewardAddr,
-        this.mainnetProvider
+        this.mainnetProvider,
       );
 
       const mainnetExtraRewardSymbol = await mainnetExtraReward.symbol();
 
       if (mainnetExtraRewardSymbol !== extraRewardToken) {
         throw new Error(
-          `Mainnet and testnet extra reward tokens inconsistent: ${mainnetExtraRewardSymbol} and ${extraRewardToken}`
+          `Mainnet and testnet extra reward tokens inconsistent: ${mainnetExtraRewardSymbol} and ${extraRewardToken}`,
         );
       }
 
@@ -238,7 +238,7 @@ export class ConvexDeployer extends AbstractDeployer {
         extraPoolAddr,
         mainnetExtraPoolAddr,
         extraRewardToken,
-        true
+        true,
       );
 
       this.verifier.addContract({
@@ -247,19 +247,19 @@ export class ConvexDeployer extends AbstractDeployer {
           basePool.address,
           rewardTokenAddr,
           boosterAddr,
-          this.convexManager.address
-        ]
+          this.convexManager.address,
+        ],
       });
     }
 
     this.verifier.addContract({
       address: poolAddress,
-      constructorArguments: [pid, stakingToken, rewardToken, operator, manager]
+      constructorArguments: [pid, stakingToken, rewardToken, operator, manager],
     });
 
     this.verifier.addContract({
       address: stakingToken,
-      constructorArguments: [stakingTokenName, stakingTokenSymbol, 18]
+      constructorArguments: [stakingTokenName, stakingTokenSymbol, 18],
     });
 
     await this.progress.save("convex", poolToken, stakingToken);
@@ -273,12 +273,12 @@ export class ConvexDeployer extends AbstractDeployer {
     rewardPool: string,
     mainnetAddress: string,
     token: SupportedToken,
-    isExtra: boolean
+    isExtra: boolean,
   ): Promise<void> {
     const multiCallContract = new MultiCallContract(
       mainnetAddress,
       BaseRewardPool__factory.createInterface(),
-      this.mainnetProvider
+      this.mainnetProvider,
     );
 
     const paramsToSync: Array<keyof BaseRewardPoolInterface["functions"]> = [
@@ -288,7 +288,7 @@ export class ConvexDeployer extends AbstractDeployer {
       "rewardPerTokenStored()",
       "queuedRewards()",
       "currentRewards()",
-      "historicalRewards()"
+      "historicalRewards()",
     ];
 
     const [
@@ -298,11 +298,11 @@ export class ConvexDeployer extends AbstractDeployer {
       rewardPerTokenStored,
       queuedRewards,
       currentRewards,
-      historicalRewards
+      historicalRewards,
     ] = await multiCallContract.call(
       paramsToSync.map(method => ({
-        method
-      }))
+        method,
+      })),
     );
 
     await waitForTransaction(
@@ -314,14 +314,14 @@ export class ConvexDeployer extends AbstractDeployer {
         rewardPerTokenStored,
         queuedRewards,
         currentRewards,
-        historicalRewards
-      )
+        historicalRewards,
+      ),
     );
 
     this.log.info(
       `Sync: Convex ${
         isExtra ? "ExtraRewardPool" : "Pool"
-      } for ${token} - rewardPerTokenStored: ${rewardPerTokenStored}`
+      } for ${token} - rewardPerTokenStored: ${rewardPerTokenStored}`,
     );
   }
 

@@ -3,7 +3,7 @@ import {
   NetworkType,
   SupportedToken,
   supportedTokens,
-  tokenDataByNetwork
+  tokenDataByNetwork,
 } from "@gearbox-protocol/sdk";
 
 import config from "../config";
@@ -13,7 +13,7 @@ import { AbstractScript } from "./src/AbstractScript";
 
 const mCalls: Array<keyof ERC20Interface["functions"]> = [
   "symbol()",
-  "decimals()"
+  "decimals()",
 ];
 
 class TokensChecker extends AbstractScript {
@@ -23,7 +23,7 @@ class TokensChecker extends AbstractScript {
 
       const [mainnetData, testnetData] = await Promise.all([
         this.getTokenData(t as SupportedToken, "Mainnet"),
-        this.getTokenData(t as SupportedToken, config.network)
+        this.getTokenData(t as SupportedToken, config.network),
       ]);
 
       for (let i = 0; i < mCalls.length; i++) {
@@ -44,7 +44,7 @@ class TokensChecker extends AbstractScript {
     const tokenMutlicall = new MultiCallContract(
       tokenDataByNetwork[networkType][t],
       ERC20__factory.createInterface(),
-      networkType === "Mainnet" ? this.mainnetProvider : this.testnetProvider
+      networkType === "Mainnet" ? this.mainnetProvider : this.testnetProvider,
     );
 
     return tokenMutlicall.call(mCalls.map(method => ({ method })));

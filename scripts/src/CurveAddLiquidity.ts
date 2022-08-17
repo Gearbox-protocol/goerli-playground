@@ -3,7 +3,7 @@ import {
   AdapterInterface,
   contractParams,
   MAX_INT,
-  WAD
+  WAD,
 } from "@gearbox-protocol/sdk";
 
 import {
@@ -13,7 +13,7 @@ import {
   CurveSUSDMock__factory,
   CurveToken__factory,
   ERC20Testnet__factory,
-  Lido__factory
+  Lido__factory,
 } from "../../types";
 import { AbstractScript } from "./AbstractScript";
 
@@ -29,47 +29,47 @@ export class CurveAddLiquidity extends AbstractScript {
     //
     const dai = ERC20Testnet__factory.connect(
       await this.progress.getOrThrow("normalTokens", "DAI"),
-      this.deployer
+      this.deployer,
     );
 
     const usdc = ERC20Testnet__factory.connect(
       await this.progress.getOrThrow("normalTokens", "USDC"),
-      this.deployer
+      this.deployer,
     );
 
     const usdt = ERC20Testnet__factory.connect(
       await this.progress.getOrThrow("normalTokens", "USDT"),
-      this.deployer
+      this.deployer,
     );
 
     const susd = ERC20Testnet__factory.connect(
       await this.progress.getOrThrow("normalTokens", "sUSD"),
-      this.deployer
+      this.deployer,
     );
 
     const gusd = ERC20Testnet__factory.connect(
       await this.progress.getOrThrow("normalTokens", "GUSD"),
-      this.deployer
+      this.deployer,
     );
 
     const frax = ERC20Testnet__factory.connect(
       await this.progress.getOrThrow("normalTokens", "FRAX"),
-      this.deployer
+      this.deployer,
     );
 
     const lusd = ERC20Testnet__factory.connect(
       await this.progress.getOrThrow("normalTokens", "LUSD"),
-      this.deployer
+      this.deployer,
     );
 
     const _3crv = CurveToken__factory.connect(
       await this.progress.getOrThrow("curve", "3Crv"),
-      this.deployer
+      this.deployer,
     );
 
     const steth = Lido__factory.connect(
       await this.progress.getOrThrow("lido", "STETH"),
-      this.deployer
+      this.deployer,
     );
 
     //
@@ -86,12 +86,12 @@ export class CurveAddLiquidity extends AbstractScript {
 
     const steCRVPoolAddr = await this.progress.getOrThrow(
       "curve",
-      "CURVE_STECRV_POOL"
+      "CURVE_STECRV_POOL",
     );
 
     const steCRV = CurveStETHMock__factory.connect(
       steCRVPoolAddr,
-      this.deployer
+      this.deployer,
     );
 
     this.log.info("Approving stETH");
@@ -102,13 +102,13 @@ export class CurveAddLiquidity extends AbstractScript {
     this.log.info("Adding liquidity to steCRV");
 
     await waitForTransaction(
-      steCRV.add_liquidity([WAD, WAD], 0, { value: WAD })
+      steCRV.add_liquidity([WAD, WAD], 0, { value: WAD }),
     );
 
     this.log.info(
       `ETH balance: ${await steCRV.balances(
-        0
-      )}, stETH balance: ${await steCRV.balances(1)}`
+        0,
+      )}, stETH balance: ${await steCRV.balances(1)}`,
     );
 
     //
@@ -119,7 +119,7 @@ export class CurveAddLiquidity extends AbstractScript {
 
     const sCRVAddress = await this.progress.getOrThrow(
       "curve",
-      "CURVE_SUSD_POOL"
+      "CURVE_SUSD_POOL",
     );
 
     this.log.info("Approving tokens");
@@ -134,7 +134,7 @@ export class CurveAddLiquidity extends AbstractScript {
     const sCRV = CurveSUSDMock__factory.connect(sCRVAddress, this.deployer);
 
     await waitForTransaction(
-      sCRV.add_liquidity([WAD, 10 ** 6, 10 ** 6, WAD], 0)
+      sCRV.add_liquidity([WAD, 10 ** 6, 10 ** 6, WAD], 0),
     );
 
     this.log.info(`
@@ -152,7 +152,7 @@ export class CurveAddLiquidity extends AbstractScript {
 
     const gusdAddress = await this.progress.getOrThrow(
       "curve",
-      "CURVE_GUSD_POOL"
+      "CURVE_GUSD_POOL",
     );
 
     this.log.info("Approving tokens");
@@ -192,11 +192,11 @@ export class CurveAddLiquidity extends AbstractScript {
 
     const frax3crv = CurveMetapoolMock__factory.connect(
       frax3crvAddress,
-      this.deployer
+      this.deployer,
     );
 
     await waitForTransaction(
-      frax3crv["add_liquidity(uint256[2],uint256)"]([WAD, WAD], 0)
+      frax3crv["add_liquidity(uint256[2],uint256)"]([WAD, WAD], 0),
     );
 
     this.log.info(`
@@ -223,11 +223,11 @@ export class CurveAddLiquidity extends AbstractScript {
 
     const lusd3crv = CurveMetapoolMock__factory.connect(
       lusd3crvAddress,
-      this.deployer
+      this.deployer,
     );
 
     await waitForTransaction(
-      lusd3crv["add_liquidity(uint256[2],uint256)"]([WAD, WAD], 0)
+      lusd3crv["add_liquidity(uint256[2],uint256)"]([WAD, WAD], 0),
     );
 
     this.log.info(`

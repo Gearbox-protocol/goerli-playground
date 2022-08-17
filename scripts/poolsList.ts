@@ -1,7 +1,7 @@
 import {
   AddressProvider__factory,
   DataCompressor__factory,
-  ERC20__factory
+  ERC20__factory,
 } from "@gearbox-protocol/sdk";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import * as dotenv from "dotenv";
@@ -17,7 +17,7 @@ async function deployTokens() {
 
   const addressProvider = AddressProvider__factory.connect(
     process.env.REACT_APP_ADDRESS_PROVIDER || "",
-    deployer
+    deployer,
   );
 
   const chainId = await deployer.getChainId();
@@ -25,7 +25,7 @@ async function deployTokens() {
 
   const dc = DataCompressor__factory.connect(
     await addressProvider.getDataCompressor(),
-    deployer
+    deployer,
   );
 
   const pools = await dc.getPoolsList();

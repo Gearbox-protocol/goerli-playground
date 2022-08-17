@@ -16,14 +16,14 @@ async function withdrawETH(): Promise<void> {
 
   const ethProvider = new providers.EtherscanProvider(
     42,
-    process.env.ETHERSCAN_API_KEY
+    process.env.ETHERSCAN_API_KEY,
   );
 
   console.log("getting history", await deployer.getAddress());
 
   const txs = await ethProvider.getHistory(
     await deployer.getAddress(),
-    32058875
+    32058875,
   );
 
   const deployTx = txs
@@ -43,7 +43,7 @@ async function withdrawETH(): Promise<void> {
     if (balance?.gt(1)) {
       try {
         await waitForTransaction(
-          IStETHMock__factory.connect(contract, deployer).retrieve_eth()
+          IStETHMock__factory.connect(contract, deployer).retrieve_eth(),
         );
 
         console.log("Withdraw", balance.toString());

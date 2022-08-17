@@ -5,7 +5,7 @@ import {
   PriceFeedsDeployer,
   SyncerDeployer,
   TokensDeployer,
-  TradingBotDeployer
+  TradingBotDeployer,
 } from "./src";
 
 /**

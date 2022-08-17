@@ -39,7 +39,7 @@ export abstract class AbstractDeployer extends AbstractScript {
   protected async mintTokenByAddress(
     address: string,
     to: string,
-    amount: number
+    amount: number,
   ) {
     this.log.debug(`Minting ${address}`);
 
@@ -48,7 +48,7 @@ export abstract class AbstractDeployer extends AbstractScript {
     const decimals = await contract.decimals();
 
     await waitForTransaction(
-      contract.mint(to, BigNumber.from(10).pow(decimals).mul(amount))
+      contract.mint(to, BigNumber.from(10).pow(decimals).mul(amount)),
     );
   }
 }

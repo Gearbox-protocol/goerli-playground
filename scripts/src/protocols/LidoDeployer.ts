@@ -2,14 +2,14 @@ import { waitForTransaction } from "@gearbox-protocol/devops";
 import {
   contractParams,
   LidoParams,
-  tokenDataByNetwork
+  tokenDataByNetwork,
 } from "@gearbox-protocol/sdk";
 
 import {
   Lido,
   Lido__factory,
   LidoOracle,
-  LidoOracle__factory
+  LidoOracle__factory,
 } from "../../../types";
 import { AbstractDeployer } from "../AbstractDeployer";
 
@@ -27,7 +27,7 @@ export class LidoDeployer extends AbstractDeployer {
 
     const mainnetLido = Lido__factory.connect(
       tokenDataByNetwork.Mainnet.STETH,
-      this.mainnetProvider
+      this.mainnetProvider,
     );
 
     const LIDO_MAINNET_ORACLE = (
@@ -38,11 +38,11 @@ export class LidoDeployer extends AbstractDeployer {
     const totalShares = await mainnetLido.getTotalShares();
 
     await waitForTransaction(
-      lido.syncExchangeRate(totalPooledEther, totalShares)
+      lido.syncExchangeRate(totalPooledEther, totalShares),
     );
 
     this.log.info(
-      `Lido mock synced - totalPooledEther: ${totalPooledEther}, totalShares: ${totalShares}`
+      `Lido mock synced - totalPooledEther: ${totalPooledEther}, totalShares: ${totalShares}`,
     );
 
     this.log.debug("Deploying Lido oracle");
@@ -53,7 +53,7 @@ export class LidoDeployer extends AbstractDeployer {
 
     const mainnetLidoOracle = LidoOracle__factory.connect(
       LIDO_MAINNET_ORACLE,
-      this.mainnetProvider
+      this.mainnetProvider,
     );
 
     const oracleData = await mainnetLidoOracle.getLastCompletedReportDelta();
@@ -62,8 +62,8 @@ export class LidoDeployer extends AbstractDeployer {
       lidoOracle.syncOracle(
         oracleData.postTotalPooledEther,
         oracleData.preTotalPooledEther,
-        oracleData.timeElapsed
-      )
+        oracleData.timeElapsed,
+      ),
     );
 
     await this.progress.save("lido", "LIDO_ORACLE", lidoOracle.address);
@@ -73,7 +73,7 @@ export class LidoDeployer extends AbstractDeployer {
       `Testnet Lido oracle synced -
         postTotalPooledEther: ${oracleData.postTotalPooledEther},
         preTotalPooledEther: ${oracleData.preTotalPooledEther},
-        timeElapsed: ${oracleData.timeElapsed}`
+        timeElapsed: ${oracleData.timeElapsed}`,
     );
   }
 }

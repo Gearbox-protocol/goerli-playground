@@ -15,7 +15,7 @@ import {
   ERC20Testnet,
   ERC20Testnet__factory,
   CurveStETHMock__factory,
-  CurveSUSDDeposit
+  CurveSUSDDeposit,
 } from "../types";
 import { Verifier, deploy, expect } from "@gearbox-protocol/devops";
 import {
@@ -23,7 +23,7 @@ import {
   WAD,
   RAY,
   MAX_INT,
-  tokenDataByNetwork
+  tokenDataByNetwork,
 } from "@gearbox-protocol/sdk";
 
 const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
@@ -34,7 +34,7 @@ const GUSD_UNIT = BigNumber.from(10 ** 2);
 const seedCoins = async function (
   coins: string[],
   poolAddress: string,
-  signer: SignerWithAddress
+  signer: SignerWithAddress,
 ) {
   for (let coin of coins) {
     if (coin == ETH_ADDRESS) {
@@ -59,7 +59,7 @@ describe("Curve mocks tests", async function () {
       log,
       name,
       name,
-      decimals
+      decimals,
     );
   };
 
@@ -82,7 +82,7 @@ describe("Curve mocks tests", async function () {
     const _3pool_token = await deploy<CurveToken>(
       "CurveToken",
       log,
-      ...tokenConstructorArgs
+      ...tokenConstructorArgs,
     );
 
     let poolConstructorArgs = [
@@ -92,13 +92,13 @@ describe("Curve mocks tests", async function () {
       _3pool_token.address,
       2000,
       1000000,
-      5000000000
+      5000000000,
     ];
 
     const _3pool = await deploy<Curve3PoolMock>(
       "Curve3PoolMock",
       log,
-      ...poolConstructorArgs
+      ...poolConstructorArgs,
     );
 
     await seedCoins(coins, _3pool.address, deployer);
@@ -115,7 +115,7 @@ describe("Curve mocks tests", async function () {
     console.log("Adding liquidity");
     await _3pool.add_liquidity(
       [WAD.mul(100), USDC_UNIT.mul(100), USDC_UNIT.mul(100)],
-      0
+      0,
     );
 
     expect(await _3pool.balances(0)).to.be.eq(WAD.mul(100));
@@ -143,12 +143,12 @@ describe("Curve mocks tests", async function () {
 
     expect(dai_balance_before.sub(dai_balance_after)).to.be.eq(WAD.div(100));
     expect(usdc_balance_after.sub(usdc_balance_before)).to.be.gt(
-      USDC_UNIT.div(110)
+      USDC_UNIT.div(110),
     );
 
     expect(await _3pool.balances(0)).to.be.eq(WAD.mul(200).add(WAD.div(100)));
     expect(await _3pool.balances(1)).to.be.lt(
-      USDC_UNIT.mul(200).sub(USDC_UNIT.div(110))
+      USDC_UNIT.mul(200).sub(USDC_UNIT.div(110)),
     );
     expect(await _3pool.get_virtual_price()).to.be.gt(WAD.mul(2));
 
@@ -160,7 +160,7 @@ describe("Curve mocks tests", async function () {
     await _3pool.remove_liquidity(WAD.div(100), [
       WAD.div(330),
       USDC_UNIT.div(330),
-      USDC_UNIT.div(330)
+      USDC_UNIT.div(330),
     ]);
 
     dai_balance_after = await dai.balanceOf(deployer.address);
@@ -169,10 +169,10 @@ describe("Curve mocks tests", async function () {
 
     expect(dai_balance_after.sub(dai_balance_before)).to.be.gt(WAD.div(330));
     expect(usdc_balance_after.sub(usdc_balance_before)).to.be.gt(
-      USDC_UNIT.div(330)
+      USDC_UNIT.div(330),
     );
     expect(usdt_balance_after.sub(usdt_balance_before)).to.be.gt(
-      USDC_UNIT.div(330)
+      USDC_UNIT.div(330),
     );
 
     dai_balance_before = await dai.balanceOf(deployer.address);
@@ -182,7 +182,7 @@ describe("Curve mocks tests", async function () {
     console.log("Removing liquidity imbalanced");
     await _3pool.remove_liquidity_imbalance(
       [WAD, USDC_UNIT, USDC_UNIT.mul(2)],
-      WAD.mul(9).div(2)
+      WAD.mul(9).div(2),
     );
 
     dai_balance_after = await dai.balanceOf(deployer.address);
@@ -192,7 +192,7 @@ describe("Curve mocks tests", async function () {
     expect(dai_balance_after.sub(dai_balance_before)).to.be.eq(WAD);
     expect(usdc_balance_after.sub(usdc_balance_before)).to.be.eq(USDC_UNIT);
     expect(usdt_balance_after.sub(usdt_balance_before)).to.be.eq(
-      USDC_UNIT.mul(2)
+      USDC_UNIT.mul(2),
     );
 
     dai_balance_before = await dai.balanceOf(deployer.address);
@@ -211,7 +211,7 @@ describe("Curve mocks tests", async function () {
     await _3pool.remove_liquidity(lp_balance, [
       await _3pool.balances(0),
       await _3pool.balances(1),
-      await _3pool.balances(2)
+      await _3pool.balances(2),
     ]);
 
     expect(await _3pool.balances(0)).to.be.eq(0);
@@ -231,7 +231,7 @@ describe("Curve mocks tests", async function () {
     const _3pool_token = await deploy<CurveToken>(
       "CurveToken",
       log,
-      ...tokenConstructorArgs
+      ...tokenConstructorArgs,
     );
 
     let poolConstructorArgs = [
@@ -241,13 +241,13 @@ describe("Curve mocks tests", async function () {
       _3pool_token.address,
       2000,
       1000000,
-      5000000000
+      5000000000,
     ];
 
     const _3pool = await deploy<Curve3PoolMock>(
       "Curve3PoolMock",
       log,
-      ...poolConstructorArgs
+      ...poolConstructorArgs,
     );
 
     await seedCoins(coins, _3pool.address, deployer);
@@ -264,7 +264,7 @@ describe("Curve mocks tests", async function () {
     console.log("Adding liquidity to 3CRV");
     await _3pool.add_liquidity(
       [WAD.mul(100000), USDC_UNIT.mul(100000), USDC_UNIT.mul(100000)],
-      0
+      0,
     );
 
     console.log("Deploying gusd3CRV pool");
@@ -278,7 +278,7 @@ describe("Curve mocks tests", async function () {
     const gusd3crv_token = await deploy<CurveToken>(
       "CurveToken",
       log,
-      ...tokenConstructorArgs
+      ...tokenConstructorArgs,
     );
 
     poolConstructorArgs = [
@@ -289,13 +289,13 @@ describe("Curve mocks tests", async function () {
       _3pool.address,
       1000,
       4000000,
-      5000000000
+      5000000000,
     ];
 
     const gusd3crv = await deploy<CurveGUSDMock>(
       "CurveGUSDMock",
       log,
-      ...poolConstructorArgs
+      ...poolConstructorArgs,
     );
 
     gusd3crv_token.set_minter(gusd3crv.address);
@@ -314,11 +314,11 @@ describe("Curve mocks tests", async function () {
     console.log("Adding liquidity");
     await gusd3crv.add_liquidity(
       [GUSD_UNIT.mul(100), WAD.mul(100)],
-      WAD.mul(199)
+      WAD.mul(199),
     );
 
     expect(await gusd3crv_token.balanceOf(deployer.address)).to.be.gt(
-      WAD.mul(199)
+      WAD.mul(199),
     );
 
     expect(await gusd3crv.balances(0)).to.be.eq(GUSD_UNIT.mul(100));
@@ -345,7 +345,7 @@ describe("Curve mocks tests", async function () {
 
     expect(gusd_balance_before.sub(gusd_balance_after)).to.be.eq(GUSD_UNIT);
     expect(_3crv_balance_after.sub(_3crv_balance_before)).to.be.gt(
-      WAD.mul(9).div(10)
+      WAD.mul(9).div(10),
     );
 
     console.log("Performing exchange_underlying");
@@ -360,36 +360,36 @@ describe("Curve mocks tests", async function () {
 
     expect(gusd_balance_before.sub(gusd_balance_after)).to.be.eq(GUSD_UNIT);
     expect(dai_balance_after.sub(dai_balance_before)).to.be.gt(
-      WAD.mul(9).div(10)
+      WAD.mul(9).div(10),
     );
 
     console.log("Removing liquidity");
 
     let gusd3crv_balance_before = await gusd3crv_token.balanceOf(
-      deployer.address
+      deployer.address,
     );
     gusd_balance_before = await gusd.balanceOf(deployer.address);
     _3crv_balance_before = await _3pool_token.balanceOf(deployer.address);
 
     await gusd3crv.remove_liquidity(WAD.div(100), [
       GUSD_UNIT.div(110),
-      WAD.div(110)
+      WAD.div(110),
     ]);
 
     let gusd3crv_balance_after = await gusd3crv_token.balanceOf(
-      deployer.address
+      deployer.address,
     );
     gusd_balance_after = await gusd.balanceOf(deployer.address);
     _3crv_balance_after = await _3pool_token.balanceOf(deployer.address);
 
     expect(gusd_balance_after.sub(gusd_balance_before)).to.be.gt(
-      GUSD_UNIT.div(110)
+      GUSD_UNIT.div(110),
     );
     expect(_3crv_balance_after.sub(_3crv_balance_before)).to.be.gt(
-      WAD.div(110)
+      WAD.div(110),
     );
     expect(gusd3crv_balance_before.sub(gusd3crv_balance_after)).to.be.eq(
-      WAD.div(100)
+      WAD.div(100),
     );
 
     console.log("Removing liquidity imbalanced");
@@ -400,7 +400,7 @@ describe("Curve mocks tests", async function () {
 
     await gusd3crv.remove_liquidity_imbalance(
       [GUSD_UNIT, WAD.mul(2)],
-      WAD.mul(7).div(4)
+      WAD.mul(7).div(4),
     );
 
     gusd_balance_after = await gusd.balanceOf(deployer.address);
@@ -410,7 +410,7 @@ describe("Curve mocks tests", async function () {
     expect(gusd_balance_after.sub(gusd_balance_before)).to.be.eq(GUSD_UNIT);
     expect(_3crv_balance_after.sub(_3crv_balance_before)).to.be.eq(WAD.mul(2));
     expect(gusd3crv_balance_before.sub(gusd3crv_balance_after)).to.be.lt(
-      WAD.mul(7).div(4)
+      WAD.mul(7).div(4),
     );
 
     console.log("Removing liquidity one coin");
@@ -424,7 +424,7 @@ describe("Curve mocks tests", async function () {
     gusd3crv_balance_after = await gusd3crv_token.balanceOf(deployer.address);
 
     expect(gusd_balance_after.sub(gusd_balance_before)).to.be.gt(
-      GUSD_UNIT.mul(18).div(10)
+      GUSD_UNIT.mul(18).div(10),
     );
     expect(gusd3crv_balance_before.sub(gusd3crv_balance_after)).to.be.eq(WAD);
   });
@@ -441,7 +441,7 @@ describe("Curve mocks tests", async function () {
     const _3pool_token = await deploy<CurveToken>(
       "CurveToken",
       log,
-      ...tokenConstructorArgs
+      ...tokenConstructorArgs,
     );
 
     let poolConstructorArgs = [
@@ -451,13 +451,13 @@ describe("Curve mocks tests", async function () {
       _3pool_token.address,
       2000,
       1000000,
-      5000000000
+      5000000000,
     ];
 
     const _3pool = await deploy<Curve3PoolMock>(
       "Curve3PoolMock",
       log,
-      ...poolConstructorArgs
+      ...poolConstructorArgs,
     );
 
     await seedCoins(coins, _3pool.address, deployer);
@@ -474,7 +474,7 @@ describe("Curve mocks tests", async function () {
     console.log("Adding liquidity to 3CRV");
     await _3pool.add_liquidity(
       [WAD.mul(100000), USDC_UNIT.mul(100000), USDC_UNIT.mul(100000)],
-      0
+      0,
     );
 
     console.log("Deploying frax3CRV pool");
@@ -493,13 +493,13 @@ describe("Curve mocks tests", async function () {
       4000000,
       deployer.address,
       _3pool.address,
-      coins[1]
+      coins[1],
     ];
 
     const frax3crv = await deploy<CurveMetapoolMock>(
       "CurveMetapoolMock",
       log,
-      ...poolConstructorArgs
+      ...poolConstructorArgs,
     );
 
     console.log("Seeding frax3Crv pool");
@@ -515,7 +515,7 @@ describe("Curve mocks tests", async function () {
 
     await frax3crv["add_liquidity(uint256[2],uint256)"](
       [WAD.mul(100), WAD.mul(100)],
-      WAD.mul(199)
+      WAD.mul(199),
     );
 
     expect(await frax3crv.balanceOf(deployer.address)).to.be.gt(WAD.mul(199));
@@ -541,7 +541,7 @@ describe("Curve mocks tests", async function () {
       0,
       1,
       WAD,
-      WAD.mul(9).div(10)
+      WAD.mul(9).div(10),
     );
 
     let frax_balance_after = await frax.balanceOf(deployer.address);
@@ -549,7 +549,7 @@ describe("Curve mocks tests", async function () {
 
     expect(frax_balance_before.sub(frax_balance_after)).to.be.eq(WAD);
     expect(_3crv_balance_after.sub(_3crv_balance_before)).to.be.gt(
-      WAD.mul(9).div(10)
+      WAD.mul(9).div(10),
     );
 
     console.log("Performing exchange_underlying");
@@ -561,7 +561,7 @@ describe("Curve mocks tests", async function () {
       0,
       1,
       WAD,
-      WAD.mul(9).div(10)
+      WAD.mul(9).div(10),
     );
 
     frax_balance_after = await frax.balanceOf(deployer.address);
@@ -569,7 +569,7 @@ describe("Curve mocks tests", async function () {
 
     expect(frax_balance_before.sub(frax_balance_after)).to.be.eq(WAD);
     expect(dai_balance_after.sub(dai_balance_before)).to.be.gt(
-      WAD.mul(9).div(10)
+      WAD.mul(9).div(10),
     );
 
     console.log("Removing liquidity");
@@ -580,7 +580,7 @@ describe("Curve mocks tests", async function () {
 
     await frax3crv["remove_liquidity(uint256,uint256[2])"](WAD.div(100), [
       WAD.div(110),
-      WAD.div(110)
+      WAD.div(110),
     ]);
 
     let frax3crv_balance_after = await frax3crv.balanceOf(deployer.address);
@@ -589,10 +589,10 @@ describe("Curve mocks tests", async function () {
 
     expect(frax_balance_after.sub(frax_balance_before)).to.be.gt(WAD.div(110));
     expect(_3crv_balance_after.sub(_3crv_balance_before)).to.be.gt(
-      WAD.div(110)
+      WAD.div(110),
     );
     expect(frax3crv_balance_before.sub(frax3crv_balance_after)).to.be.eq(
-      WAD.div(100)
+      WAD.div(100),
     );
 
     console.log("Removing liquidity imbalanced");
@@ -603,7 +603,7 @@ describe("Curve mocks tests", async function () {
 
     await frax3crv["remove_liquidity_imbalance(uint256[2],uint256)"](
       [WAD, WAD.mul(2)],
-      WAD.mul(7).div(4)
+      WAD.mul(7).div(4),
     );
 
     frax_balance_after = await frax.balanceOf(deployer.address);
@@ -613,7 +613,7 @@ describe("Curve mocks tests", async function () {
     expect(frax_balance_after.sub(frax_balance_before)).to.be.eq(WAD);
     expect(_3crv_balance_after.sub(_3crv_balance_before)).to.be.eq(WAD.mul(2));
     expect(frax3crv_balance_before.sub(frax3crv_balance_after)).to.be.lt(
-      WAD.mul(7).div(4)
+      WAD.mul(7).div(4),
     );
 
     console.log("Removing liquidity one coin");
@@ -624,14 +624,14 @@ describe("Curve mocks tests", async function () {
     await frax3crv["remove_liquidity_one_coin(uint256,int128,uint256)"](
       WAD,
       0,
-      WAD.mul(18).div(10)
+      WAD.mul(18).div(10),
     );
 
     frax_balance_after = await frax.balanceOf(deployer.address);
     frax3crv_balance_after = await frax3crv.balanceOf(deployer.address);
 
     expect(frax_balance_after.sub(frax_balance_before)).to.be.gt(
-      WAD.mul(18).div(10)
+      WAD.mul(18).div(10),
     );
     expect(frax3crv_balance_before.sub(frax3crv_balance_after)).to.be.eq(WAD);
   });
@@ -646,7 +646,7 @@ describe("Curve mocks tests", async function () {
     const steCRV_token = await deploy<CurveToken>(
       "CurveToken",
       log,
-      ...tokenConstructorArgs
+      ...tokenConstructorArgs,
     );
 
     let poolConstructorArgs = [
@@ -656,13 +656,13 @@ describe("Curve mocks tests", async function () {
       steCRV_token.address,
       50,
       4000000,
-      5000000000
+      5000000000,
     ];
 
     const steCRV = await deploy<CurveStETHMock>(
       "CurveStETHMock",
       log,
-      ...poolConstructorArgs
+      ...poolConstructorArgs,
     );
 
     await seedCoins(coins, steCRV.address, deployer);
@@ -677,11 +677,11 @@ describe("Curve mocks tests", async function () {
     console.log("Adding liquidity");
 
     await steCRV.add_liquidity([WAD.mul(100), WAD.mul(100)], WAD.mul(199), {
-      value: WAD.mul(100)
+      value: WAD.mul(100),
     });
 
     expect(await steCRV_token.balanceOf(deployer.address)).to.be.gt(
-      WAD.mul(199)
+      WAD.mul(199),
     );
 
     expect(await steCRV.balances(0)).to.be.eq(WAD.mul(100));
@@ -708,7 +708,7 @@ describe("Curve mocks tests", async function () {
 
     expect(eth_balance_after.sub(eth_balance_before)).to.be.eq(WAD);
     expect(steth_balance_after.sub(steth_balance_before)).to.be.gt(
-      WAD.mul(9).div(10)
+      WAD.mul(9).div(10),
     );
 
     console.log("Removing liquidity");
@@ -725,10 +725,10 @@ describe("Curve mocks tests", async function () {
 
     expect(eth_balance_before.sub(eth_balance_after)).to.be.gt(WAD.div(110));
     expect(steth_balance_after.sub(steth_balance_before)).to.be.gt(
-      WAD.div(110)
+      WAD.div(110),
     );
     expect(steCRV_balance_before.sub(steCRV_balance_after)).to.be.eq(
-      WAD.div(100)
+      WAD.div(100),
     );
 
     console.log("Removing liquidity imbalanced");
@@ -739,7 +739,7 @@ describe("Curve mocks tests", async function () {
 
     await steCRV.remove_liquidity_imbalance(
       [WAD, WAD.mul(2)],
-      WAD.mul(16).div(10)
+      WAD.mul(16).div(10),
     );
 
     steCRV_balance_after = await steCRV_token.balanceOf(deployer.address);
@@ -749,7 +749,7 @@ describe("Curve mocks tests", async function () {
     expect(eth_balance_before.sub(eth_balance_after)).to.be.eq(WAD);
     expect(steth_balance_after.sub(steth_balance_before)).to.be.eq(WAD.mul(2));
     expect(steCRV_balance_before.sub(steCRV_balance_after)).to.be.lt(
-      WAD.mul(16).div(10)
+      WAD.mul(16).div(10),
     );
 
     console.log("Removing liquidity one coin");
@@ -777,13 +777,13 @@ describe("Curve mocks tests", async function () {
     let tokenConstructorArgs = [
       "Curve DAI/USDC/USDC/SUSD LP Token",
       "sCRV",
-      18
+      18,
     ];
 
     const sCRV_token = await deploy<CurveToken>(
       "CurveToken",
       log,
-      ...tokenConstructorArgs
+      ...tokenConstructorArgs,
     );
 
     let poolConstructorArgs = [
@@ -792,13 +792,13 @@ describe("Curve mocks tests", async function () {
       coins,
       sCRV_token.address,
       100,
-      4000000
+      4000000,
     ];
 
     const sCRV = await deploy<CurveSUSDMock>(
       "CurveSUSDMock",
       log,
-      ...poolConstructorArgs
+      ...poolConstructorArgs,
     );
 
     const sCRV_deposit = await deploy<CurveSUSDDeposit>(
@@ -807,7 +807,7 @@ describe("Curve mocks tests", async function () {
       coins,
       coins,
       sCRV.address,
-      sCRV_token.address
+      sCRV_token.address,
     );
 
     await seedCoins(coins, sCRV.address, deployer);
@@ -827,7 +827,7 @@ describe("Curve mocks tests", async function () {
     console.log("Adding liquidity");
     await sCRV.add_liquidity(
       [WAD.mul(100), USDC_UNIT.mul(100), USDC_UNIT.mul(100), WAD.mul(100)],
-      0
+      0,
     );
 
     expect(await sCRV.balances(0)).to.be.eq(WAD.mul(100));
@@ -874,7 +874,7 @@ describe("Curve mocks tests", async function () {
       WAD.div(220),
       USDC_UNIT.div(220),
       USDC_UNIT.div(220),
-      WAD.div(220)
+      WAD.div(220),
     ]);
 
     let scrv_balance_after = await sCRV_token.balanceOf(deployer.address);
@@ -885,10 +885,10 @@ describe("Curve mocks tests", async function () {
 
     expect(dai_balance_after.sub(dai_balance_before)).to.be.gt(WAD.div(220));
     expect(usdc_balance_after.sub(usdc_balance_before)).to.be.gt(
-      USDC_UNIT.div(220)
+      USDC_UNIT.div(220),
     );
     expect(usdt_balance_after.sub(usdt_balance_before)).to.be.gt(
-      USDC_UNIT.div(220)
+      USDC_UNIT.div(220),
     );
     expect(susd_balance_after.sub(susd_balance_before)).to.be.gt(WAD.div(220));
     expect(scrv_balance_before.sub(scrv_balance_after)).to.be.eq(WAD.div(100));
@@ -903,7 +903,7 @@ describe("Curve mocks tests", async function () {
 
     await sCRV.remove_liquidity_imbalance(
       [WAD, USDC_UNIT, USDC_UNIT.mul(2), WAD.mul(2)],
-      WAD.mul(7)
+      WAD.mul(7),
     );
 
     scrv_balance_after = await sCRV_token.balanceOf(deployer.address);
@@ -915,7 +915,7 @@ describe("Curve mocks tests", async function () {
     expect(dai_balance_after.sub(dai_balance_before)).to.be.eq(WAD);
     expect(usdc_balance_after.sub(usdc_balance_before)).to.be.eq(USDC_UNIT);
     expect(usdt_balance_after.sub(usdt_balance_before)).to.be.eq(
-      USDC_UNIT.mul(2)
+      USDC_UNIT.mul(2),
     );
     expect(susd_balance_after.sub(susd_balance_before)).to.be.eq(WAD.mul(2));
     expect(scrv_balance_before.sub(susd_balance_after)).to.be.lt(WAD.mul(7));
@@ -928,7 +928,7 @@ describe("Curve mocks tests", async function () {
     await sCRV_deposit["remove_liquidity_one_coin(uint256,int128,uint256)"](
       WAD.div(100),
       0,
-      WAD.div(110)
+      WAD.div(110),
     );
 
     dai_balance_after = await dai.balanceOf(deployer.address);
@@ -947,7 +947,7 @@ describe("Curve mocks tests", async function () {
       await sCRV.balances(0),
       await sCRV.balances(1),
       await sCRV.balances(2),
-      await sCRV.balances(3)
+      await sCRV.balances(3),
     ]);
 
     expect(await sCRV.balances(0)).to.be.eq(0);

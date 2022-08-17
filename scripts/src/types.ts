@@ -5,7 +5,7 @@ import {
   CurvePoolContract,
   NormalToken,
   SupportedToken,
-  YearnLPToken
+  YearnLPToken,
 } from "@gearbox-protocol/sdk";
 
 export type CurveProgressKey =

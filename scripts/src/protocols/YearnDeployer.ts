@@ -4,7 +4,7 @@ import {
   IYVault__factory,
   tokenDataByNetwork,
   YearnLPToken,
-  yearnTokens
+  yearnTokens,
 } from "@gearbox-protocol/sdk";
 
 import { YearnMock } from "../../../types";
@@ -17,7 +17,7 @@ const yearnTokenList: Array<YearnLPToken> = [
   "yvWETH",
   "yvWBTC",
   "yvCurve_stETH",
-  "yvCurve_FRAX"
+  "yvCurve_FRAX",
 ];
 
 export class YearnDeployer extends AbstractDeployer {
@@ -37,7 +37,7 @@ export class YearnDeployer extends AbstractDeployer {
     const underlying = yearnTokens[yearnToken].underlying;
     const [maybeNormal, maybeCurve] = await Promise.all([
       this.progress.get("normalTokens", underlying as DeployedToken),
-      this.progress.get("curve", underlying as CurveLPToken)
+      this.progress.get("curve", underlying as CurveLPToken),
     ]);
     let underlyingAddress = maybeNormal ?? maybeCurve;
     if (!underlyingAddress) {
@@ -45,7 +45,7 @@ export class YearnDeployer extends AbstractDeployer {
         underlyingAddress = tokenDataByNetwork[this.network].WETH;
       } else {
         throw new Error(
-          `underlying ${underlying} for ${yearnToken} is not deployed`
+          `underlying ${underlying} for ${yearnToken} is not deployed`,
         );
       }
     }
@@ -58,24 +58,24 @@ export class YearnDeployer extends AbstractDeployer {
       "underlying",
       underlying,
       "symbol",
-      symbol
+      symbol,
     );
     const vault = await this.deploy<YearnMock>(
       "YearnMock",
       this.syncer,
       underlyingAddress,
-      symbol
+      symbol,
     );
 
     this.log.info(
-      `Yearn vault for ${underlying} deployed at: ${vault.address}`
+      `Yearn vault for ${underlying} deployed at: ${vault.address}`,
     );
 
     this.log.debug(`Syncing the Yearn vault mock for ${yearnToken}`);
 
     const mainnetVault = IYVault__factory.connect(
       tokenDataByNetwork.Mainnet[yearnToken],
-      this.mainnetProvider
+      this.mainnetProvider,
     );
 
     const mainnetPPS = await mainnetVault.pricePerShare();
@@ -83,7 +83,7 @@ export class YearnDeployer extends AbstractDeployer {
     await waitForTransaction(vault.setPricePerShare(mainnetPPS));
 
     this.log.info(
-      `Yearn vault for ${yearnToken} synced - pricePerShare: ${mainnetPPS}`
+      `Yearn vault for ${yearnToken} synced - pricePerShare: ${mainnetPPS}`,
     );
 
     await this.progress.save("yearn", yearnToken, vault.address);

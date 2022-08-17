@@ -3,7 +3,7 @@ import {
   ConvexDeployer,
   CurveDeployer,
   LidoDeployer,
-  YearnDeployer
+  YearnDeployer,
 } from "./protocols";
 
 /**

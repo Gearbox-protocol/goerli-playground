@@ -9,13 +9,13 @@ import {
   IERC20__factory,
   IERC20Metadata__factory,
   tokenDataByNetwork,
-  WAD
+  WAD,
 } from "@gearbox-protocol/sdk";
 import {
   BigNumber,
   BigNumberish,
   ContractTransaction,
-  Overrides
+  Overrides,
 } from "ethers";
 
 import {
@@ -24,7 +24,7 @@ import {
   CurveMetapoolMock,
   CurveStETHMock__factory,
   CurveSUSDDeposit,
-  CurveToken
+  CurveToken,
 } from "../../../types";
 import { AbstractDeployer } from "../AbstractDeployer";
 import { DeployedToken } from "../types";
@@ -39,7 +39,7 @@ interface SyncedPool {
   sync_pool: (
     new_mainnet_virtual_price: BigNumberish,
     _a: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
+    overrides?: Overrides & { from?: string | Promise<string> },
   ) => Promise<ContractTransaction>;
 }
 
@@ -86,7 +86,7 @@ export class CurveDeployer extends AbstractDeployer {
     const coins = await Promise.all([
       this.progress.getOrThrow("normalTokens", "DAI"),
       this.progress.getOrThrow("normalTokens", "USDC"),
-      this.progress.getOrThrow("normalTokens", "USDT")
+      this.progress.getOrThrow("normalTokens", "USDT"),
     ]);
 
     const poolAgrsFn = (lpToken: string) => [
@@ -96,7 +96,7 @@ export class CurveDeployer extends AbstractDeployer {
       lpToken,
       2000,
       1000000,
-      5000000000
+      5000000000,
     ];
 
     const seedFn = async (pool: string) => {
@@ -121,8 +121,8 @@ export class CurveDeployer extends AbstractDeployer {
       await waitForTransaction(
         _3pool.add_liquidity(
           [WAD.mul(10 ** 7), USDC_UNIT.mul(10 ** 7), USDC_UNIT.mul(10 ** 7)],
-          0
-        )
+          0,
+        ),
       );
 
       this.log.info("Seeded 3CRV and added liquidity");
@@ -134,7 +134,7 @@ export class CurveDeployer extends AbstractDeployer {
       "CURVE_3CRV_POOL",
       poolAgrsFn,
       seedFn,
-      contractsByNetwork.Mainnet.CURVE_3CRV_POOL
+      contractsByNetwork.Mainnet.CURVE_3CRV_POOL,
     );
   }
 
@@ -150,7 +150,7 @@ export class CurveDeployer extends AbstractDeployer {
       lpToken,
       50,
       4000000,
-      5000000000
+      5000000000,
     ];
 
     const seedFn = async (pool: string) => {
@@ -170,7 +170,7 @@ export class CurveDeployer extends AbstractDeployer {
       "CURVE_STECRV_POOL",
       poolAgrsFn,
       seedFn,
-      mainnetSteCRV_address
+      mainnetSteCRV_address,
     );
   }
 
@@ -179,7 +179,7 @@ export class CurveDeployer extends AbstractDeployer {
       this.progress.getOrThrow("normalTokens", "DAI"),
       this.progress.getOrThrow("normalTokens", "USDC"),
       this.progress.getOrThrow("normalTokens", "USDT"),
-      this.progress.getOrThrow("normalTokens", "sUSD")
+      this.progress.getOrThrow("normalTokens", "sUSD"),
     ]);
 
     const poolAgrsFn = (lpToken: string) => [
@@ -188,7 +188,7 @@ export class CurveDeployer extends AbstractDeployer {
       coins,
       lpToken,
       100,
-      4000000
+      4000000,
     ];
 
     const seedFn = async (pool: string) => {
@@ -203,7 +203,7 @@ export class CurveDeployer extends AbstractDeployer {
       "CurveSUSDMock",
       "CURVE_SUSD_POOL",
       poolAgrsFn,
-      seedFn
+      seedFn,
     );
 
     const lpToken = this.progress.get("curve", "crvPlain3andSUSD");
@@ -215,20 +215,20 @@ export class CurveDeployer extends AbstractDeployer {
 
     const sCRV_deposit = await this.deploy<CurveSUSDDeposit>(
       "CurveSUSDDeposit",
-      ...depositConstructorArgs
+      ...depositConstructorArgs,
     );
 
     await this.progress.save(
       "curve",
       "CURVE_SUSD_DEPOSIT",
-      sCRV_deposit.address
+      sCRV_deposit.address,
     );
   }
 
   private async deployGUSD3CRV(): Promise<void> {
     const coins = [
       await this.progress.getOrThrow("normalTokens", "GUSD"),
-      this._3CrvToken
+      this._3CrvToken,
     ];
 
     const poolAgrs = (lpToken: string) => [
@@ -239,7 +239,7 @@ export class CurveDeployer extends AbstractDeployer {
       this._3CrvPool,
       1000,
       4000000,
-      5000000000
+      5000000000,
     ];
 
     const seedFn = async (pool: string) => {
@@ -254,7 +254,7 @@ export class CurveDeployer extends AbstractDeployer {
       "CurveGUSDMock",
       "CURVE_GUSD_POOL",
       poolAgrs,
-      seedFn
+      seedFn,
     );
   }
 
@@ -264,24 +264,24 @@ export class CurveDeployer extends AbstractDeployer {
     poolType: CurvePoolContract | "CURVE_STECRV_POOL",
     poolAgrs: CurvePoolArgs,
     seedFn: SeedFn,
-    mainnetAddress?: string
+    mainnetAddress?: string,
   ): Promise<void> {
     const mainnetToken = IERC20Metadata__factory.connect(
       tokenDataByNetwork.Mainnet[tokenSymbol],
-      this.mainnetProvider
+      this.mainnetProvider,
     );
 
     const tokenConstructorArgs = [
       await mainnetToken.name(),
       tokenSymbol,
-      await mainnetToken.decimals()
+      await mainnetToken.decimals(),
     ];
 
     this.log.debug(`Deploying ${tokenSymbol}: token mock`);
 
     const lpToken = await this.deploy<CurveToken>(
       "CurveToken",
-      ...tokenConstructorArgs
+      ...tokenConstructorArgs,
     );
 
     const poolConstructorArgs = poolAgrs(lpToken.address);
@@ -290,14 +290,14 @@ export class CurveDeployer extends AbstractDeployer {
 
     const pool = await this.deploy<Curve3PoolMock>(
       poolContractName,
-      ...poolConstructorArgs
+      ...poolConstructorArgs,
     );
     this.log.debug(`Deploying ${tokenSymbol}: set as minter`);
 
     await waitForTransaction(lpToken.set_minter(pool.address));
 
     this.log.info(
-      `${tokenSymbol} token mock was deployed at at ${lpToken.address}`
+      `${tokenSymbol} token mock was deployed at at ${lpToken.address}`,
     );
     this.log.info(`${poolType} was deployed at at ${pool.address}`);
 
@@ -321,11 +321,11 @@ export class CurveDeployer extends AbstractDeployer {
   private async syncVirtualPrice(
     address: string,
     pool: SyncedPool,
-    symbol: string
+    symbol: string,
   ): Promise<void> {
     const mainnetSteCRV = ICurvePool__factory.connect(
       address,
-      this.mainnetProvider
+      this.mainnetProvider,
     );
 
     const virtualPrice = await mainnetSteCRV.get_virtual_price();
@@ -336,7 +336,7 @@ export class CurveDeployer extends AbstractDeployer {
     await waitForTransaction(pool.sync_pool(virtualPrice, a));
 
     this.log.info(
-      `${symbol} pool synced with params - virtualPrice: ${virtualPrice}, A: ${a}`
+      `${symbol} pool synced with params - virtualPrice: ${virtualPrice}, A: ${a}`,
     );
   }
 
@@ -344,14 +344,14 @@ export class CurveDeployer extends AbstractDeployer {
     lpTokenSymbol: CurveLPToken,
     token: DeployedToken,
     A: number,
-    fee: number
+    fee: number,
   ): Promise<void> {
     const tokenAddr = await this.progress.getOrThrow("normalTokens", token);
     const coins = [tokenAddr, this._3CrvToken];
 
     const mainnetToken = IERC20Metadata__factory.connect(
       tokenDataByNetwork.Mainnet[token],
-      this.mainnetProvider
+      this.mainnetProvider,
     );
 
     const poolConstructorArgs = [
@@ -364,31 +364,31 @@ export class CurveDeployer extends AbstractDeployer {
       fee,
       this.deployer.address,
       this._3CrvPool,
-      coins[1]
+      coins[1],
     ];
 
     this.log.debug(`Deploying ${lpTokenSymbol}: token mock`);
     const pool = await this.deploy<CurveMetapoolMock>(
       "CurveMetapoolMock",
-      ...poolConstructorArgs
+      ...poolConstructorArgs,
     );
 
     const symbol = await pool.symbol();
 
     if (symbol !== `${lpTokenSymbol}-f`) {
       throw new Error(
-        `Incorrect metapool symbol: ${symbol} should be ${`${lpTokenSymbol}-f`}`
+        `Incorrect metapool symbol: ${symbol} should be ${`${lpTokenSymbol}-f`}`,
       );
     }
 
     this.log.info(
-      `Curve ${lpTokenSymbol} mock (implements ERC20) was deployed at at ${pool.address}`
+      `Curve ${lpTokenSymbol} mock (implements ERC20) was deployed at at ${pool.address}`,
     );
 
     await this.syncVirtualPrice(
       tokenDataByNetwork.Mainnet[lpTokenSymbol],
       pool,
-      lpTokenSymbol
+      lpTokenSymbol,
     );
 
     await this.mintToken(token, pool.address, 10 ** 6);
