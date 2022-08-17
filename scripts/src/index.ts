@@ -1,3 +1,4 @@
+export * from "./AbstractScript";
 export * from "./CurveAddLiquidity";
 export * from "./MocksDeployer";
 export * from "./PairV2Deployer";

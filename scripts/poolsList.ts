@@ -3,43 +3,32 @@ import {
   DataCompressor__factory,
   ERC20__factory,
 } from "@gearbox-protocol/sdk";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import * as dotenv from "dotenv";
-import { ethers } from "hardhat";
-import { Logger } from "tslog";
 
-async function deployTokens() {
-  dotenv.config({ path: ".env.kovan" });
-  const log: Logger = new Logger();
+import { AbstractScript } from "./src";
 
-  const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
-  const deployer = accounts[0];
+export class ListPools extends AbstractScript {
+  protected async run(): Promise<void> {
+    const addressProvider = AddressProvider__factory.connect(
+      process.env.REACT_APP_ADDRESS_PROVIDER || "",
+      this.deployer,
+    );
 
-  const addressProvider = AddressProvider__factory.connect(
-    process.env.REACT_APP_ADDRESS_PROVIDER || "",
-    deployer,
-  );
+    const dc = DataCompressor__factory.connect(
+      await addressProvider.getDataCompressor(),
+      this.deployer,
+    );
 
-  const chainId = await deployer.getChainId();
-  if (chainId !== 42) throw new Error("Switch to test network");
+    const pools = await dc.getPoolsList();
 
-  const dc = DataCompressor__factory.connect(
-    await addressProvider.getDataCompressor(),
-    deployer,
-  );
-
-  const pools = await dc.getPoolsList();
-
-  for (let p of pools) {
-    const { addr, underlying, dieselToken } = p;
-    const token = ERC20__factory.connect(underlying, deployer);
-    const sym = await token.symbol();
-    console.log(`${sym}: `);
-    console.log(`addr: ${addr} `);
-    console.log(`diesel: ${dieselToken} `);
+    for (const p of pools) {
+      const { addr, underlying, dieselToken } = p;
+      const token = ERC20__factory.connect(underlying, this.deployer);
+      const sym = await token.symbol();
+      console.log(`${sym}: `);
+      console.log(`addr: ${addr} `);
+      console.log(`diesel: ${dieselToken} `);
+    }
   }
 }
 
-deployTokens()
-  .then(() => console.log("Ok"))
-  .catch(e => console.log(e));
+new ListPools().exec().catch(console.error);

@@ -1,30 +1,22 @@
-// @ts-ignore
-import { ethers } from "hardhat";
-// @ts-ignore
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
+import { deploy, expect } from "@gearbox-protocol/devops";
+import { MAX_INT, RAY, WAD } from "@gearbox-protocol/sdk";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from "ethers";
-import * as dotenv from "dotenv";
+import { ethers } from "hardhat";
 import { Logger } from "tslog";
+
 import {
   Curve3PoolMock,
   CurveGUSDMock,
   CurveMetapoolMock,
   CurveStETHMock,
+  CurveStETHMock__factory,
+  CurveSUSDDeposit,
   CurveSUSDMock,
   CurveToken,
   ERC20Testnet,
   ERC20Testnet__factory,
-  CurveStETHMock__factory,
-  CurveSUSDDeposit,
 } from "../types";
-import { Verifier, deploy, expect } from "@gearbox-protocol/devops";
-import {
-  ERC20__factory,
-  WAD,
-  RAY,
-  MAX_INT,
-  tokenDataByNetwork,
-} from "@gearbox-protocol/sdk";
 
 const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
@@ -37,7 +29,7 @@ const seedCoins = async function (
   signer: SignerWithAddress,
 ) {
   for (let coin of coins) {
-    if (coin == ETH_ADDRESS) {
+    if (coin === ETH_ADDRESS) {
       let pool = CurveStETHMock__factory.connect(poolAddress, signer);
       await pool.donate_eth({ value: WAD.mul(300) });
     } else {
@@ -48,15 +40,16 @@ const seedCoins = async function (
 };
 
 describe("Curve mocks tests", async function () {
+  // eslint-disable-next-line @typescript-eslint/no-invalid-this
   this.timeout(0);
 
   let deployer: SignerWithAddress;
-  let log: Logger;
+  let logger: Logger;
 
   const deployToken = async function (name: string, decimals: number) {
     return await deploy<ERC20Testnet>(
       "ERC20Testnet",
-      log,
+      { logger },
       name,
       name,
       decimals,
@@ -64,13 +57,12 @@ describe("Curve mocks tests", async function () {
   };
 
   beforeEach(async () => {
-    log = new Logger();
-
-    const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
+    logger = new Logger();
+    const accounts = await ethers.getSigners();
     deployer = accounts[0];
   });
 
-  it("Curve 3CRV mock test", async function () {
+  it.only("Curve 3CRV mock test", async () => {
     const dai = await deployToken("DAI", 18);
     const usdc = await deployToken("USDC", 6);
     const usdt = await deployToken("USDT", 6);
@@ -81,7 +73,7 @@ describe("Curve mocks tests", async function () {
 
     const _3pool_token = await deploy<CurveToken>(
       "CurveToken",
-      log,
+      { logger },
       ...tokenConstructorArgs,
     );
 
@@ -97,7 +89,7 @@ describe("Curve mocks tests", async function () {
 
     const _3pool = await deploy<Curve3PoolMock>(
       "Curve3PoolMock",
-      log,
+      { logger },
       ...poolConstructorArgs,
     );
 
@@ -219,7 +211,7 @@ describe("Curve mocks tests", async function () {
     expect(await _3pool.balances(2)).to.be.eq(0);
   });
 
-  it("Curve GUSD mock test", async function () {
+  it("Curve GUSD mock test", async () => {
     const dai = await deployToken("DAI", 18);
     const usdc = await deployToken("USDC", 6);
     const usdt = await deployToken("USDT", 6);
@@ -230,7 +222,7 @@ describe("Curve mocks tests", async function () {
 
     const _3pool_token = await deploy<CurveToken>(
       "CurveToken",
-      log,
+      { logger },
       ...tokenConstructorArgs,
     );
 
@@ -246,7 +238,7 @@ describe("Curve mocks tests", async function () {
 
     const _3pool = await deploy<Curve3PoolMock>(
       "Curve3PoolMock",
-      log,
+      { logger },
       ...poolConstructorArgs,
     );
 
@@ -277,7 +269,7 @@ describe("Curve mocks tests", async function () {
 
     const gusd3crv_token = await deploy<CurveToken>(
       "CurveToken",
-      log,
+      { logger },
       ...tokenConstructorArgs,
     );
 
@@ -294,11 +286,11 @@ describe("Curve mocks tests", async function () {
 
     const gusd3crv = await deploy<CurveGUSDMock>(
       "CurveGUSDMock",
-      log,
+      { logger },
       ...poolConstructorArgs,
     );
 
-    gusd3crv_token.set_minter(gusd3crv.address);
+    await gusd3crv_token.set_minter(gusd3crv.address);
 
     console.log("Seeding gusd3Crv pool");
     await gusd.mint(gusd3crv.address, WAD.mul(10000));
@@ -429,7 +421,7 @@ describe("Curve mocks tests", async function () {
     expect(gusd3crv_balance_before.sub(gusd3crv_balance_after)).to.be.eq(WAD);
   });
 
-  it("Curve metapool mock test", async function () {
+  it("Curve metapool mock test", async () => {
     const dai = await deployToken("DAI", 18);
     const usdc = await deployToken("USDC", 6);
     const usdt = await deployToken("USDT", 6);
@@ -440,7 +432,7 @@ describe("Curve mocks tests", async function () {
 
     const _3pool_token = await deploy<CurveToken>(
       "CurveToken",
-      log,
+      { logger },
       ...tokenConstructorArgs,
     );
 
@@ -456,7 +448,7 @@ describe("Curve mocks tests", async function () {
 
     const _3pool = await deploy<Curve3PoolMock>(
       "Curve3PoolMock",
-      log,
+      { logger },
       ...poolConstructorArgs,
     );
 
@@ -498,7 +490,7 @@ describe("Curve mocks tests", async function () {
 
     const frax3crv = await deploy<CurveMetapoolMock>(
       "CurveMetapoolMock",
-      log,
+      { logger },
       ...poolConstructorArgs,
     );
 
@@ -636,7 +628,7 @@ describe("Curve mocks tests", async function () {
     expect(frax3crv_balance_before.sub(frax3crv_balance_after)).to.be.eq(WAD);
   });
 
-  it("Curve stETH mock test", async function () {
+  it("Curve stETH mock test", async () => {
     const steth = await deployToken("STETH", 18);
 
     let coins = [ETH_ADDRESS, steth.address];
@@ -645,7 +637,7 @@ describe("Curve mocks tests", async function () {
 
     const steCRV_token = await deploy<CurveToken>(
       "CurveToken",
-      log,
+      { logger },
       ...tokenConstructorArgs,
     );
 
@@ -661,7 +653,7 @@ describe("Curve mocks tests", async function () {
 
     const steCRV = await deploy<CurveStETHMock>(
       "CurveStETHMock",
-      log,
+      { logger },
       ...poolConstructorArgs,
     );
 
@@ -698,15 +690,17 @@ describe("Curve mocks tests", async function () {
 
     console.log("Performing exchange");
 
-    let eth_balance_before = await deployer.provider.getBalance(steCRV.address);
+    let eth_balance_before = await deployer.provider?.getBalance(
+      steCRV.address,
+    );
     let steth_balance_before = await steth.balanceOf(deployer.address);
 
     await steCRV.exchange(0, 1, WAD, WAD.mul(9).div(10), { value: WAD });
 
-    let eth_balance_after = await deployer.provider.getBalance(steCRV.address);
+    let eth_balance_after = await deployer.provider?.getBalance(steCRV.address);
     let steth_balance_after = await steth.balanceOf(deployer.address);
 
-    expect(eth_balance_after.sub(eth_balance_before)).to.be.eq(WAD);
+    expect(eth_balance_after?.sub(eth_balance_before!)).to.be.eq(WAD);
     expect(steth_balance_after.sub(steth_balance_before)).to.be.gt(
       WAD.mul(9).div(10),
     );
@@ -714,16 +708,16 @@ describe("Curve mocks tests", async function () {
     console.log("Removing liquidity");
 
     let steCRV_balance_before = await steCRV_token.balanceOf(deployer.address);
-    eth_balance_before = await deployer.provider.getBalance(steCRV.address);
+    eth_balance_before = await deployer.provider?.getBalance(steCRV.address);
     steth_balance_before = await steth.balanceOf(deployer.address);
 
     await steCRV.remove_liquidity(WAD.div(100), [WAD.div(110), WAD.div(110)]);
 
     let steCRV_balance_after = await steCRV_token.balanceOf(deployer.address);
-    eth_balance_after = await deployer.provider.getBalance(steCRV.address);
+    eth_balance_after = await deployer.provider?.getBalance(steCRV.address);
     steth_balance_after = await steth.balanceOf(deployer.address);
 
-    expect(eth_balance_before.sub(eth_balance_after)).to.be.gt(WAD.div(110));
+    expect(eth_balance_before?.sub(eth_balance_after!)).to.be.gt(WAD.div(110));
     expect(steth_balance_after.sub(steth_balance_before)).to.be.gt(
       WAD.div(110),
     );
@@ -734,7 +728,7 @@ describe("Curve mocks tests", async function () {
     console.log("Removing liquidity imbalanced");
 
     steCRV_balance_before = await steCRV_token.balanceOf(deployer.address);
-    eth_balance_before = await deployer.provider.getBalance(steCRV.address);
+    eth_balance_before = await deployer.provider?.getBalance(steCRV.address);
     steth_balance_before = await steth.balanceOf(deployer.address);
 
     await steCRV.remove_liquidity_imbalance(
@@ -743,10 +737,10 @@ describe("Curve mocks tests", async function () {
     );
 
     steCRV_balance_after = await steCRV_token.balanceOf(deployer.address);
-    eth_balance_after = await deployer.provider.getBalance(steCRV.address);
+    eth_balance_after = await deployer.provider?.getBalance(steCRV.address);
     steth_balance_after = await steth.balanceOf(deployer.address);
 
-    expect(eth_balance_before.sub(eth_balance_after)).to.be.eq(WAD);
+    expect(eth_balance_before?.sub(eth_balance_after!)).to.be.eq(WAD);
     expect(steth_balance_after.sub(steth_balance_before)).to.be.eq(WAD.mul(2));
     expect(steCRV_balance_before.sub(steCRV_balance_after)).to.be.lt(
       WAD.mul(16).div(10),
@@ -755,18 +749,18 @@ describe("Curve mocks tests", async function () {
     console.log("Removing liquidity one coin");
 
     steCRV_balance_before = await steCRV_token.balanceOf(deployer.address);
-    eth_balance_before = await deployer.provider.getBalance(steCRV.address);
+    eth_balance_before = await deployer.provider?.getBalance(steCRV.address);
 
     await steCRV.remove_liquidity_one_coin(WAD, 0, WAD.mul(9).div(10));
 
     steCRV_balance_after = await steCRV_token.balanceOf(deployer.address);
-    eth_balance_after = await deployer.provider.getBalance(steCRV.address);
+    eth_balance_after = await deployer.provider?.getBalance(steCRV.address);
 
-    expect(eth_balance_before.sub(eth_balance_after)).to.be.gt(WAD);
+    expect(eth_balance_before?.sub(eth_balance_after!)).to.be.gt(WAD);
     expect(steCRV_balance_before.sub(steCRV_balance_after)).to.be.eq(WAD);
   });
 
-  it("Curve SUSD mock test", async function () {
+  it("Curve SUSD mock test", async () => {
     const dai = await deployToken("DAI", 18);
     const usdc = await deployToken("USDC", 6);
     const usdt = await deployToken("USDT", 6);
@@ -782,7 +776,7 @@ describe("Curve mocks tests", async function () {
 
     const sCRV_token = await deploy<CurveToken>(
       "CurveToken",
-      log,
+      { logger },
       ...tokenConstructorArgs,
     );
 
@@ -797,13 +791,13 @@ describe("Curve mocks tests", async function () {
 
     const sCRV = await deploy<CurveSUSDMock>(
       "CurveSUSDMock",
-      log,
+      { logger },
       ...poolConstructorArgs,
     );
 
     const sCRV_deposit = await deploy<CurveSUSDDeposit>(
       "CurveSUSDDeposit",
-      log,
+      { logger },
       coins,
       coins,
       sCRV.address,

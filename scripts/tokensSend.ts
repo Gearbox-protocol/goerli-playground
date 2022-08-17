@@ -1,78 +1,69 @@
-import { SupportedToken, tokenDataByNetwork } from "@gearbox-protocol/sdk";
-import * as dotenv from "dotenv";
+import { waitForTransaction } from "@gearbox-protocol/devops";
+import { NormalToken, normalTokens } from "@gearbox-protocol/sdk";
 import { BigNumber } from "ethers";
-import { ethers } from "hardhat";
-import { Logger } from "tslog";
+import inquirer from "inquirer";
 
-import config from "../config";
 import { ERC20Testnet__factory } from "../types";
-import { waitForTransaction } from "../utils/transaction";
+import { AbstractScript } from "./src/AbstractScript";
 
-const log: Logger = new Logger();
+interface Answers {
+  address: string;
+  tokens: NormalToken[];
+}
 
-const tokensToDeploy: Array<SupportedToken> = [
-  // "1INCH",
-  // "AAVE",
-  // "COMP",
-  // "CRV",
-  // "DAI",
-  // "DPI",
-  // "FEI",
-  // "LINK",
-  // "SNX",
-  // "SUSHI",
-  // "UNI",
-  "USDC",
-  // "USDT",
-  // "WBTC",
-  // // "WETH",
-  // "YFI",
-  // "STETH",
-  // "FTM",
-  // "CVX",
-  // "FRAX",
-  // "FXS",
-  // "LDO",
-  // "SPELL",
-  // "LUSD",
-  // "sUSD",
-  // "GUSD",
-  // "LUNA",
-  // "LQTY",
-];
+export class SendTokens extends AbstractScript {
+  protected async run(): Promise<void> {
+    const opts = await inquirer.prompt<Answers>([
+      {
+        type: "input",
+        name: "address",
+        message: "Address to mint tokens to",
+        validate: value => {
+          if (value.match(/^0x[a-fA-F0-9]{40}$/)) {
+            return true;
+          }
+          return "Please enter a valid address";
+        },
+      },
+      {
+        type: "checkbox",
+        message: "Select tokens",
+        name: "tokens",
+        choices: Object.keys(normalTokens)
+          .filter(n => n !== "WETH")
+          .map(name => ({ name })),
+        validate: answer => {
+          if (answer.length < 1) {
+            return "You must choose at least one token";
+          }
+          return true;
+        },
+      },
+    ]);
 
-const addressToSend = "0x8002e5D8cA10e2b0e7d1bd98C367fE08FA555A71";
+    for (const t of opts.tokens) {
+      const tokenAddr = await this.getSupportedTokenAddress(t);
+      if (!tokenAddr) {
+        this.log.warn(`Token %${t} is not deployed`);
+        continue;
+      }
 
-async function deployTokens(): Promise<void> {
-  dotenv.config({ path: ".env.local" });
-  const log: Logger = new Logger();
+      const token = ERC20Testnet__factory.connect(tokenAddr, this.deployer);
+      const decimals = await token.decimals();
 
-  const accounts = await ethers.getSigners();
-  const deployer = accounts[0];
+      this.log.info(`Sending ${t} to ${opts.address}`);
 
-  const chainId = await deployer.getChainId();
-  if (chainId !== 42) throw new Error("Switch to test network");
+      const tx = await waitForTransaction(
+        token.mint(opts.address, BigNumber.from(10).pow(decimals).mul(100000)),
+      );
 
-  for (const t of tokensToDeploy) {
-    const tokenAddr = tokenDataByNetwork[config.network][t];
-
-    const token = ERC20Testnet__factory.connect(tokenAddr, deployer);
-    const decimals = await token.decimals();
-
-    log.info(`Sending ${t} to ${addressToSend}`);
-
-    const tx = await waitForTransaction(
-      token.mint(addressToSend, BigNumber.from(10).pow(decimals).mul(100000)),
-    );
-
-    console.log(
-      `https://${config.network.toLowerCase()}.etherscan.io/tx/${
-        tx.transactionHash
-      }`,
-    );
+      console.log(
+        `https://${this.network.toLowerCase()}.etherscan.io/tx/${
+          tx.transactionHash
+        }`,
+      );
+    }
   }
 }
 
-deployTokens()
-  .then(() => console.log("Ok"))
-  .catch(e => console.log(e));
+new SendTokens().exec().catch(console.error);

@@ -8,7 +8,6 @@ import {
   OracleType,
   priceFeedsByNetwork,
   SupportedToken,
-  tokenDataByNetwork,
   WAD,
 } from "@gearbox-protocol/sdk";
 import { BigNumber } from "ethers";
@@ -183,21 +182,5 @@ export class PairV2Deployer extends AbstractScript {
         }
       }
     }
-  }
-
-  /**
-   * Returns the address of supported token on testnet
-   * If it's tracked in deployment progress, takes it from there
-   * Otherwise, tries to take it from @gearbox-protocol/sdk
-   * @param symbol
-   */
-  private async getSupportedTokenAddress(
-    symbol: SupportedToken,
-  ): Promise<string | undefined> {
-    let addr = await this.progress.getSupportedToken(symbol);
-    if (!addr) {
-      addr = tokenDataByNetwork[this.network][symbol];
-    }
-    return addr;
   }
 }

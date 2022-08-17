@@ -10,7 +10,6 @@ import {
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { providers } from "ethers";
 import hre, { ethers } from "hardhat";
-import { EthereumProvider } from "hardhat/types";
 import { Logger } from "tslog";
 
 import { ProgressTracker } from "./ProgressTracker";
@@ -66,9 +65,13 @@ export default class RuntimeEnvironment {
       default:
         throw new Error(`unsupported chain id: ${originChainId}`);
     }
-
+    if (!("url" in hre.network.config)) {
+      throw new Error("url not found in network config");
+    }
     instance.mainnetProvider = new providers.JsonRpcProvider(mainnetRpc);
-    instance.testnetProvider = hre.network.provider;
+    instance.testnetProvider = new providers.JsonRpcProvider(
+      hre.network.config.url,
+    );
     instance.progress = new ProgressTracker(
       `.progress.${instance.network.toLowerCase()}${progressFileSuffix}.json`,
     );
@@ -87,7 +90,7 @@ export default class RuntimeEnvironment {
   public verifier: Verifier = new Verifier();
   public deployer!: SignerWithAddress;
   public mainnetProvider!: providers.JsonRpcProvider;
-  public testnetProvider!: EthereumProvider;
+  public testnetProvider!: providers.JsonRpcProvider;
   public progress!: ProgressTracker;
   public network!: NetworkType;
 

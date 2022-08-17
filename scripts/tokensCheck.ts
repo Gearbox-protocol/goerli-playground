@@ -6,7 +6,6 @@ import {
   tokenDataByNetwork,
 } from "@gearbox-protocol/sdk";
 
-import config from "../config";
 import { ERC20__factory } from "../types";
 import { ERC20Interface } from "../types/@openzeppelin/contracts/token/ERC20/ERC20";
 import { AbstractScript } from "./src/AbstractScript";
@@ -23,7 +22,7 @@ class TokensChecker extends AbstractScript {
 
       const [mainnetData, testnetData] = await Promise.all([
         this.getTokenData(t as SupportedToken, "Mainnet"),
-        this.getTokenData(t as SupportedToken, config.network),
+        this.getTokenData(t as SupportedToken, this.network),
       ]);
 
       for (let i = 0; i < mCalls.length; i++) {

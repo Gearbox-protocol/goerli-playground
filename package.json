@@ -6,7 +6,10 @@
     "compile": "npx hardhat compile",
     "test": "npx hardhat test",
     "typegen": "npx typechain --target=ethers-v5 './artifacts/!(build-info)/**/+([a-zA-Z0-9_]).json' --out-dir types",
-    "abifix": "npx ts-node scripts/abifix.ts"
+    "abifix": "npx ts-node scripts/abifix.ts",
+    "prepare": "husky install",
+    "prettier": "prettier --write .",
+    "lint": "eslint \"**/*.ts\" --fix"
   },
   "dependencies": {
     "@chainlink/contracts": "^0.4.2",
@@ -16,12 +19,13 @@
     "add": "^2.0.6",
     "fs-extra": "^10.1.0",
     "hardhat-contract-sizer": "^2.6.1",
+    "inquirer": "^9.1.0",
     "tslog": "^3.3.3",
     "yarn": "^1.22.19"
   },
   "devDependencies": {
-    "@gearbox-protocol/eslint-config": "https://gitpkg.now.sh/Gearbox-protocol/style-guide/packages/eslint-config?44ac6862eb947169e650c3ec7e7954c6ee0a8c8e",
-    "@gearbox-protocol/prettier-config": "https://gitpkg.now.sh/Gearbox-protocol/style-guide/packages/prettier-config?44ac6862eb947169e650c3ec7e7954c6ee0a8c8e",
+    "@gearbox-protocol/eslint-config": "^1.4.0",
+    "@gearbox-protocol/prettier-config": "^1.4.0",
     "@nomiclabs/hardhat-ethers": "^2.1.0",
     "@nomiclabs/hardhat-etherscan": "^3.1.0",
     "@nomiclabs/hardhat-vyper": "^3.0.0",
@@ -30,6 +34,7 @@
     "@typechain/hardhat": "^6.1.2",
     "@types/chai": "^4.3.3",
     "@types/fs-extra": "^9.0.13",
+    "@types/inquirer": "^9.0.1",
     "@types/mocha": "^9.1.1",
     "@types/node": "^18.7.1",
     "chai": "^4.3.6",
@@ -39,6 +44,8 @@
     "ethers": "^5.6.9",
     "hardhat": "^2.10.1",
     "hardhat-gas-reporter": "^1.0.8",
+    "husky": ">=6",
+    "lint-staged": ">=10",
     "prettier": "^2.7.1",
     "prettier-plugin-solidity": "^1.0.0-beta.24",
     "solhint": "^3.3.7",
@@ -47,5 +54,12 @@
     "typechain": "^8.1.0",
     "typescript": "^4.7.4"
   },
-  "prettier": "@gearbox-protocol/prettier-config"
+  "prettier": "@gearbox-protocol/prettier-config",
+  "lint-staged": {
+    "*.{ts,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{sol,json,md}": "prettier --write"
+  }
 }
