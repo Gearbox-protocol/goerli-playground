@@ -58,4 +58,7 @@ export interface Progress {
   chainlink?: {
     [key in ChainlinkProgressKey]?: string;
   };
+  tradingBot?: {
+    address?: string;
+  };
 }
