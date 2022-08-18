@@ -155,9 +155,13 @@ export class CurveDeployer extends AbstractDeployer {
 
     const seedFn = async (pool: string) => {
       const steCRV = CurveStETHMock__factory.connect(pool, this.deployer);
-
-      await this.mintTokenByAddress(stETH, pool, 10 ** 9);
-      await waitForTransaction(steCRV.donate_eth({ value: WAD.mul(1500) }));
+      // Note: on Goerli we don't have virtually unliminted GoerliETH
+      // so I had to decrease x100 from what was on Kovan:
+      // - stETH: from 10 ** 9 --> 10 ** 7
+      // - ETH: from 1500 ETH --> 15 ETH
+      await this.mintTokenByAddress(stETH, pool, 10 ** 7);
+      this.log.debug("donating ETH");
+      await waitForTransaction(steCRV.donate_eth({ value: WAD.mul(15) }));
     };
 
     const mainnetSteCRV_address = (
