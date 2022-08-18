@@ -98,7 +98,7 @@ export class ConvexDeployer extends AbstractDeployer {
 
       this.verifier.addContract({
         address: cvxAddr,
-        constructorArguments: [],
+        constructorArguments: [this.syncer],
       });
 
       await this.progress.save("convex", "CONVEX_BOOSTER", boosterAddr);
