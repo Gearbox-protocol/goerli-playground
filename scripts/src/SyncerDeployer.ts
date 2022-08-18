@@ -1,16 +1,20 @@
 import { waitForTransaction } from "@gearbox-protocol/devops";
 
-import { Syncer } from "../../types";
+import { Syncer, Syncer__factory } from "../../types";
 import { AbstractScript } from "./AbstractScript";
 
 export class SyncerDeployer extends AbstractScript {
   protected async run(): Promise<void> {
-    const needed = await this.progress.isDeployNeeded("syncer", "address");
+    const syncerAddr = await this.progress.get("syncer", "address");
 
-    if (!needed) {
-      return;
+    let syncer: Syncer;
+    if (syncerAddr) {
+      syncer = Syncer__factory.connect(syncerAddr, this.deployer);
+    } else {
+      syncer = await this.deploy<Syncer>("Syncer");
+      await this.progress.save("syncer", "address", syncer.address);
     }
-    const syncer = await this.deploy<Syncer>("Syncer");
+
     const syncers = process.env.TESNET_SYNCERS?.split(",").map(s => s.trim());
     if (!syncers || !syncers?.[0]) {
       throw new Error("syncers are not provided");
@@ -20,6 +24,5 @@ export class SyncerDeployer extends AbstractScript {
       await waitForTransaction(syncer.addSyncer(syncAddr));
       this.log.debug(`Added ${syncAddr} to syncer`);
     }
-    await this.progress.save("syncer", "address", syncer.address);
   }
 }
