@@ -13,7 +13,7 @@ export type CurveProgressKey =
   | CurvePoolContract
   | "CURVE_STECRV_POOL";
 
-export type DeployedToken = Exclude<NormalToken, "STETH" | "CVX">;
+export type DeployedToken = Exclude<NormalToken, "WETH" | "STETH" | "CVX">;
 
 export type ConvexExtraRewardPool =
   `${ConvexPoolContract}_EXTRA_${DeployedToken}`;

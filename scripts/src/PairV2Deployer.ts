@@ -14,6 +14,7 @@ import { BigNumber } from "ethers";
 
 import {
   ChainlinkPriceFeed__factory,
+  CVXTestnet__factory,
   ERC20Testnet__factory,
   IUniswapV2Factory__factory,
   IUniswapV2Pair__factory,
@@ -153,9 +154,7 @@ export class PairV2Deployer extends AbstractScript {
         if (lpTokenBalance.isZero()) {
           await waitForTransaction(tokenContract.approve(routerAddr, MAX_INT));
 
-          await waitForTransaction(
-            tokenContract.mint(this.deployer.address, tokenAmount),
-          );
+          await this.mintTokenToDeployer(sym, token, tokenAmount);
           await waitForTransaction(
             usdcToken.mint(this.deployer.address, usdcAmount),
           );
@@ -181,6 +180,26 @@ export class PairV2Deployer extends AbstractScript {
           this.log.debug(`Deployer balance: ${lpTokenBalance}`);
         }
       }
+    }
+  }
+
+  private async mintTokenToDeployer(
+    symbol: SupportedToken,
+    address: string,
+    amount: BigNumber,
+  ): Promise<void> {
+    if (symbol === "CVX") {
+      // CVX is a special case, have to call mintExact instead and call it from syncer (deployer is syncer)
+      const cvxContract = CVXTestnet__factory.connect(address, this.deployer);
+      await waitForTransaction(cvxContract.mintExact(amount));
+    } else {
+      const tokenContract = ERC20Testnet__factory.connect(
+        address,
+        this.deployer,
+      );
+      await waitForTransaction(
+        tokenContract.mint(this.deployer.address, amount),
+      );
     }
   }
 }

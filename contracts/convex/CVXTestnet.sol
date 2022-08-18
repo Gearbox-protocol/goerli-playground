@@ -8,37 +8,38 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract CVXTestnet is ERC20, Ownable {
+import { SyncerTrait } from "../SyncerTrait.sol";
+
+contract CVXTestnet is ERC20, Ownable, SyncerTrait {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
   uint8 public immutable _decimals;
 
-  mapping(address => bool) public operators;
+  address public operator;
 
   uint256 public maxSupply = 100 * 1000000 * 1e18; //100mil
   uint256 public totalCliffs = 1000;
   uint256 public reductionPerCliff;
 
-  constructor() ERC20("Convex Token", "CVX") {
+  constructor(address _syncer)
+    ERC20("Convex Token", "CVX")
+    SyncerTrait(_syncer)
+  {
     _decimals = 18;
     reductionPerCliff = maxSupply.div(totalCliffs);
   }
 
-  function addOperator(address operator) public onlyOwner {
-    operators[operator] = true;
+  function setOperator(address operator_) external onlyOwner {
+    operator = operator_;
   }
 
-  function removeOperator(address operator) external onlyOwner {
-    operators[operator] = false;
-  }
-
-  function mintExact(uint256 _amount) external onlyOwner {
+  function mintExact(uint256 _amount) external syncerOnly {
     _mint(msg.sender, _amount);
   }
 
   function mint(address _to, uint256 _amount) external {
-    if (!operators[msg.sender]) {
+    if (msg.sender != operator) {
       revert("Unauthorized CVX mint");
     }
 
