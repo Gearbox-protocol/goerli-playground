@@ -34,7 +34,10 @@ contract CVXTestnet is ERC20, Ownable, SyncerTrait {
     operator = operator_;
   }
 
-  function mintExact(uint256 _amount) external syncerOnly {
+  function mintExact(uint256 _amount) external {
+    if (!syncer.isSyncer(msg.sender) && msg.sender != owner()) {
+      revert("Only owner or syncer can mintExact");
+    }
     _mint(msg.sender, _amount);
   }
 
