@@ -56,3 +56,7 @@ The deploy progress will be saved in json files (e.g. `.progress.goerli.json`). 
 During deployment, deployed contract addresses and their constructor params are saved in `.verifier.goerli.json` file or similar. To verify contracts run `npx hardhat run scripts/verify.ts --network goerli`. This script might fail, so it is possible that you'll need to run it multiple times. It will delete verified contracts from json file as it progresses.
 
 After verification is done, it's possible to copy deployed contracts addresses from `progress.goerli.json` to `@gearbox-protocol/sdk` to fill missing addresses there.
+
+### Further steps
+
+In order to make syncer work, `CURVE_STETH_GATEWAY` is needed to be deployed. This can be done using `deployStethGateway` script from main contracts.
