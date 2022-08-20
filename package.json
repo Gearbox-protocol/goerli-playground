@@ -23,7 +23,7 @@
     "add": "^2.0.6",
     "fs-extra": "^10.1.0",
     "hardhat-contract-sizer": "^2.6.1",
-    "inquirer": "^9.1.0",
+    "inquirer": "^8.2.3",
     "tslog": "^3.3.3",
     "yarn": "^1.22.19"
   },

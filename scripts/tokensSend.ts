@@ -1,9 +1,15 @@
+import { TransactionReceipt } from "@ethersproject/providers";
 import { waitForTransaction } from "@gearbox-protocol/devops";
-import { NormalToken, normalTokens } from "@gearbox-protocol/sdk";
+import {
+  NormalToken,
+  normalTokens,
+  SupportedToken,
+  WETHMock__factory,
+} from "@gearbox-protocol/sdk";
 import { BigNumber } from "ethers";
 import inquirer from "inquirer";
 
-import { ERC20Testnet__factory } from "../types";
+import { CVXTestnet__factory, ERC20Testnet__factory } from "../types";
 import { AbstractScript } from "./src/AbstractScript";
 
 interface Answers {
@@ -52,17 +58,41 @@ export class SendTokens extends AbstractScript {
       const decimals = await token.decimals();
 
       this.log.info(`Sending ${t} to ${opts.address}`);
-
-      const tx = await waitForTransaction(
-        token.mint(opts.address, BigNumber.from(10).pow(decimals).mul(100000)),
-      );
-
-      console.log(
-        `https://${this.network.toLowerCase()}.etherscan.io/tx/${
-          tx.transactionHash
-        }`,
+      await this.mintToken(
+        t,
+        tokenAddr,
+        opts.address,
+        BigNumber.from(10).pow(decimals).mul(100000),
       );
     }
+  }
+
+  private async mintToken(
+    symbol: SupportedToken,
+    token: string,
+    address: string,
+    amount: BigNumber,
+  ): Promise<void> {
+    let tx: TransactionReceipt;
+    this.log.debug(`Minting ${amount} ${symbol} to ${address}`);
+    if (symbol === "CVX") {
+      // CVX is a special case, have to call mintExact instead and call it from syncer (deployer is syncer)
+      const cvxContract = CVXTestnet__factory.connect(token, this.deployer);
+      await waitForTransaction(cvxContract.mintExact(amount));
+      tx = await waitForTransaction(cvxContract.transfer(address, amount));
+    } else if (symbol === "WETH") {
+      const weth = WETHMock__factory.connect(token, this.deployer);
+      await waitForTransaction(weth.deposit({ value: amount }));
+      tx = await waitForTransaction(weth.transfer(address, amount));
+    } else {
+      const tokenContract = ERC20Testnet__factory.connect(token, this.deployer);
+      tx = await waitForTransaction(tokenContract.mint(address, amount));
+    }
+    console.log(
+      `https://${this.network.toLowerCase()}.etherscan.io/tx/${
+        tx.transactionHash
+      }`,
+    );
   }
 }
 
