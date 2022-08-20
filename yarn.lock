@@ -574,12 +574,13 @@
     "@ethersproject/properties" "^5.6.0"
     "@ethersproject/strings" "^5.6.1"
 
-"@gearbox-protocol/devops@0.0.16":
-  version "0.0.16"
-  resolved "https://registry.yarnpkg.com/@gearbox-protocol/devops/-/devops-0.0.16.tgz#513d04674dd0acd841595e6353b657d93253d1f4"
-  integrity sha512-PaLjARqrSalosiBKEs+mwW+fHkh7NtuAgzkHXY20lm6LDE3Yq3Ty7IfAB+lMWIBhbDq5oxLdoyJJmqN2eWagmg==
+"@gearbox-protocol/devops@^1.0.0-next.1":
+  version "1.0.0-next.1"
+  resolved "https://registry.yarnpkg.com/@gearbox-protocol/devops/-/devops-1.0.0-next.1.tgz#75799f5e01f758ae70b12bda187a6c8984688a4b"
+  integrity sha512-c3QAbanBTYo/4QjrZ1V8ZR6VM3e3aM0cx+Z71u2niSBBz/chzUx0eQ4vcKG+WKeRLbtKBPa5Mj49t6iUDJ7bCA==
   dependencies:
     axios "^0.27.2"
+    chai "^4.3.6"
 
 "@gearbox-protocol/eslint-config@^1.4.0":
   version "1.4.0"

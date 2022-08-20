@@ -9,12 +9,14 @@ import {
   priceFeedsByNetwork,
   SupportedToken,
   WAD,
+  WETHMock__factory,
 } from "@gearbox-protocol/sdk";
 import { BigNumber } from "ethers";
 
 import {
   ChainlinkPriceFeed__factory,
   CVXTestnet__factory,
+  ERC20Testnet,
   ERC20Testnet__factory,
   IUniswapV2Factory__factory,
   IUniswapV2Pair__factory,
@@ -28,6 +30,8 @@ const ethUsdPriceFeed = priceFeedsByNetwork.WETH.priceFeedUSD;
  * and also provides liquidity to these pairs
  */
 export class PairV2Deployer extends AbstractScript {
+  private usdcDecimalMult!: BigNumber;
+
   protected async run(): Promise<void> {
     if (ethUsdPriceFeed?.type !== OracleType.CHAINLINK_ORACLE) {
       throw new Error("Incorrect ETH/USD pricefeed");
@@ -46,8 +50,7 @@ export class PairV2Deployer extends AbstractScript {
     const usdcToken = ERC20Testnet__factory.connect(usdcAddr, this.deployer);
     const usdcDecimals = await usdcToken.decimals();
 
-    const usdcDecimalMult = BigNumber.from(10).pow(usdcDecimals);
-    const usdcAmount = usdcDecimalMult.mul(100e6);
+    this.usdcDecimalMult = BigNumber.from(10).pow(usdcDecimals);
 
     for (const routerAddr of [
       contractsByNetwork[this.network].UNISWAP_V2_ROUTER,
@@ -73,7 +76,7 @@ export class PairV2Deployer extends AbstractScript {
       for (const [s, pf] of Object.entries(priceFeedsByNetwork)) {
         const sym = s as SupportedToken;
 
-        if (sym === "WETH" || sym === "USDC") {
+        if (sym === "USDC") {
           continue;
         }
 
@@ -113,7 +116,9 @@ export class PairV2Deployer extends AbstractScript {
           throw Error(`Incorrect price feed data for ${sym}`);
         }
 
-        this.log.debug(`${sym}: ${usdPrice.div(1e4).toNumber() / 10000}`);
+        this.log.debug(
+          `${sym} price: ${usdPrice.div(1e4).toNumber() / 10000} USD`,
+        );
         const token = await this.getSupportedTokenAddress(sym);
         if (!token) {
           this.log.warn(`Cannot find testnet address for token ${sym}`);
@@ -124,26 +129,20 @@ export class PairV2Deployer extends AbstractScript {
         if (pairAddr === ADDRESS_0X0) {
           await waitForTransaction(uniV2factory.createPair(token, usdcAddr));
           pairAddr = await uniV2factory.getPair(token, usdcAddr);
+          this.log.info(`Created ${sym}/USDC pair`);
         }
 
         const tokenContract = ERC20Testnet__factory.connect(
           token,
           this.deployer,
         );
-
-        const tokenDecimals = await tokenContract.decimals();
-
-        const tokenAmount = usdcAmount
-          .mul(1e8)
-          .div(usdPrice)
-          .mul(BigNumber.from(10).pow(tokenDecimals))
-          .div(usdcDecimalMult);
-
-        this.log.debug("Pair address: ", pairAddr);
-        this.log.debug(`USDC to pool: ${formatBN(usdcAmount, usdcDecimals)}`);
-        this.log.debug(
-          `${sym} to pool: ${formatBN(tokenAmount, tokenDecimals)}`,
+        this.log.debug(`${sym}/USDC pair address: ${pairAddr}`);
+        const [tokenAmount, usdcAmount] = await this.determineTokensAmount(
+          sym,
+          tokenContract,
+          usdPrice,
         );
+        this.log.debug(`USDC to pool: ${formatBN(usdcAmount, usdcDecimals)}`);
 
         const lpTokenBalance = await IUniswapV2Pair__factory.connect(
           pairAddr,
@@ -183,15 +182,51 @@ export class PairV2Deployer extends AbstractScript {
     }
   }
 
+  private async determineTokensAmount(
+    symbol: string,
+    contract: ERC20Testnet,
+    usdPrice: BigNumber,
+  ): Promise<[BigNumber, BigNumber]> {
+    let usdcAmount: BigNumber;
+    let tokenAmount: BigNumber;
+    const tokenDecimals = await contract.decimals();
+    // We dont have so many WETH here, so we can only afford 10 WETH
+    if (symbol === "WETH") {
+      tokenAmount = BigNumber.from(10).mul(
+        BigNumber.from(10).pow(tokenDecimals),
+      );
+      usdcAmount = tokenAmount
+        .mul(usdPrice)
+        .div(BigNumber.from(10).pow(tokenDecimals));
+    } else {
+      usdcAmount = this.usdcDecimalMult.mul(100e6);
+
+      tokenAmount = usdcAmount
+        .mul(1e8)
+        .div(usdPrice)
+        .mul(BigNumber.from(10).pow(tokenDecimals))
+        .div(this.usdcDecimalMult);
+    }
+
+    this.log.debug(
+      `${symbol} to pool: ${formatBN(tokenAmount, tokenDecimals)}`,
+    );
+    return [tokenAmount, usdcAmount];
+  }
+
   private async mintTokenToDeployer(
     symbol: SupportedToken,
     address: string,
     amount: BigNumber,
   ): Promise<void> {
+    this.log.debug(`Minting ${amount} ${symbol}`);
     if (symbol === "CVX") {
       // CVX is a special case, have to call mintExact instead and call it from syncer (deployer is syncer)
       const cvxContract = CVXTestnet__factory.connect(address, this.deployer);
       await waitForTransaction(cvxContract.mintExact(amount));
+    } else if (symbol === "WETH") {
+      const weth = WETHMock__factory.connect(address, this.deployer);
+      await waitForTransaction(weth.deposit({ value: amount }));
     } else {
       const tokenContract = ERC20Testnet__factory.connect(
         address,

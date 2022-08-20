@@ -1,5 +1,6 @@
 {
   "name": "@gearbox-protocol/testnet-playground",
+  "version": "1.0.0",
   "scripts": {
     "build": "yarn clean && yarn compile --no-typechain && yarn abifix && yarn typegen",
     "clean": "npx hardhat clean",
@@ -9,11 +10,14 @@
     "abifix": "npx ts-node scripts/abifix.ts",
     "prepare": "husky install",
     "prettier": "prettier --write .",
-    "lint": "eslint \"**/*.ts\" --fix"
+    "prettier:ci": "npx prettier --check .",
+    "lint": "eslint \"**/*.ts\" --fix",
+    "lint:ci": "eslint \"**/*.ts\"",
+    "typecheck:ci": "tsc --noEmit"
   },
   "dependencies": {
     "@chainlink/contracts": "^0.4.2",
-    "@gearbox-protocol/devops": "0.0.16",
+    "@gearbox-protocol/devops": "^1.0.0-next.1",
     "@gearbox-protocol/sdk": "^0.0.109",
     "@openzeppelin/contracts": "^4.7.3",
     "add": "^2.0.6",
