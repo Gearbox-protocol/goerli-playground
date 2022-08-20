@@ -1,7 +1,14 @@
-import { deploy } from "@gearbox-protocol/devops";
-import { SupportedToken, tokenDataByNetwork } from "@gearbox-protocol/sdk";
-import { Contract } from "ethers";
+import { TransactionReceipt } from "@ethersproject/providers";
+import { deploy, waitForTransaction } from "@gearbox-protocol/devops";
+import {
+  MAX_INT,
+  SupportedToken,
+  tokenDataByNetwork,
+  WETHMock__factory,
+} from "@gearbox-protocol/sdk";
+import { BigNumber, BigNumberish, Contract } from "ethers";
 
+import { CVXTestnet__factory, ERC20Testnet__factory } from "../../types";
 import RuntimeEnvironment from "./RuntimeEnvironment";
 
 export abstract class AbstractScript extends RuntimeEnvironment {
@@ -17,6 +24,12 @@ export abstract class AbstractScript extends RuntimeEnvironment {
     this.from(runtime);
   }
 
+  /**
+   * Deploys contract
+   * @param name
+   * @param args
+   * @returns
+   */
   protected async deploy<T extends Contract>(
     name: string,
     ...args: any[]
@@ -28,6 +41,72 @@ export abstract class AbstractScript extends RuntimeEnvironment {
         verifier: this.verifier,
       },
       ...args,
+    );
+  }
+
+  /**
+   * Approves (ERC20) transfer of MAX_INT normal tokens to some addres
+   * @param token ERC20 token to call approve on
+   * @param to Address to approve transfer to
+   */
+  protected async approve(token: SupportedToken, to: string): Promise<void> {
+    this.log.debug(`Approving ${token}`);
+    const tokenAddr = await this.getSupportedTokenAddress(token);
+    if (!tokenAddr) {
+      throw new Error(`Could not find address of ${token}`);
+    }
+    const contract = ERC20Testnet__factory.connect(tokenAddr, this.deployer);
+    await waitForTransaction(contract.approve(to, MAX_INT));
+  }
+
+  /**
+   * Mints given amount of testnet token
+   * CVX is a special case, mintExact is used
+   * WETH is a special case, it's deposited from deployer's balance
+   * @param token
+   * @param to
+   * @param amount
+   */
+  protected async mintToken(
+    token: SupportedToken,
+    to: string,
+    amount: BigNumberish,
+  ): Promise<TransactionReceipt> {
+    const tokenAddr = await this.getSupportedTokenAddress(token);
+    if (!tokenAddr) {
+      throw new Error(`Could not find address of ${token}`);
+    }
+    this.log.debug(`Minting ${amount} ${token} to ${to}`);
+    let tx: TransactionReceipt;
+    if (token === "CVX") {
+      // CVX is a special case, have to call mintExact instead and call it from syncer (deployer is syncer)
+      this.log.debug("Minting CVX");
+      const cvxContract = CVXTestnet__factory.connect(tokenAddr, this.deployer);
+      tx = await waitForTransaction(cvxContract.mintExact(amount));
+      if (to !== this.deployer.address) {
+        tx = await waitForTransaction(cvxContract.transfer(to, amount));
+      }
+    } else if (token === "WETH") {
+      const weth = WETHMock__factory.connect(tokenAddr, this.deployer);
+      tx = await waitForTransaction(weth.deposit({ value: amount }));
+      if (to !== this.deployer.address) {
+        tx = await waitForTransaction(weth.transfer(to, amount));
+      }
+    } else {
+      tx = await this.mintTokenByAddress(tokenAddr, to, amount);
+    }
+    return tx;
+  }
+
+  protected async mintTokenByAddress(
+    address: string,
+    to: string,
+    amount: BigNumberish,
+  ): Promise<TransactionReceipt> {
+    const contract = ERC20Testnet__factory.connect(address, this.deployer);
+    const decimals = await contract.decimals();
+    return waitForTransaction(
+      contract.mint(to, BigNumber.from(10).pow(decimals).mul(amount)),
     );
   }
 

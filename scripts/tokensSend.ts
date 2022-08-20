@@ -1,19 +1,13 @@
-import { TransactionReceipt } from "@ethersproject/providers";
-import { waitForTransaction } from "@gearbox-protocol/devops";
-import {
-  NormalToken,
-  normalTokens,
-  SupportedToken,
-  WETHMock__factory,
-} from "@gearbox-protocol/sdk";
-import { BigNumber } from "ethers";
+import { NormalToken, normalTokens } from "@gearbox-protocol/sdk";
+import { BigNumber, BigNumberish } from "ethers";
 import inquirer from "inquirer";
 
-import { CVXTestnet__factory, ERC20Testnet__factory } from "../types";
+import { ERC20Testnet__factory } from "../types";
 import { AbstractScript } from "./src/AbstractScript";
 
 interface Answers {
   address: string;
+  amount: BigNumberish;
   tokens: NormalToken[];
 }
 
@@ -29,6 +23,19 @@ export class SendTokens extends AbstractScript {
             return true;
           }
           return "Please enter a valid address";
+        },
+      },
+      {
+        type: "input",
+        name: "amount",
+        default: "100000000", // 10**8
+        message: "Amount of tokens to mint (without decimals)",
+        validate: value => {
+          try {
+            BigNumber.from(value);
+            return true;
+          } catch {}
+          return "Please enter a valid amount";
         },
       },
       {
@@ -58,41 +65,13 @@ export class SendTokens extends AbstractScript {
       const decimals = await token.decimals();
 
       this.log.info(`Sending ${t} to ${opts.address}`);
+
       await this.mintToken(
         t,
-        tokenAddr,
         opts.address,
-        BigNumber.from(10).pow(decimals).mul(100000),
+        BigNumber.from(10).pow(decimals).mul(opts.amount),
       );
     }
-  }
-
-  private async mintToken(
-    symbol: SupportedToken,
-    token: string,
-    address: string,
-    amount: BigNumber,
-  ): Promise<void> {
-    let tx: TransactionReceipt;
-    this.log.debug(`Minting ${amount} ${symbol} to ${address}`);
-    if (symbol === "CVX") {
-      // CVX is a special case, have to call mintExact instead and call it from syncer (deployer is syncer)
-      const cvxContract = CVXTestnet__factory.connect(token, this.deployer);
-      await waitForTransaction(cvxContract.mintExact(amount));
-      tx = await waitForTransaction(cvxContract.transfer(address, amount));
-    } else if (symbol === "WETH") {
-      const weth = WETHMock__factory.connect(token, this.deployer);
-      await waitForTransaction(weth.deposit({ value: amount }));
-      tx = await waitForTransaction(weth.transfer(address, amount));
-    } else {
-      const tokenContract = ERC20Testnet__factory.connect(token, this.deployer);
-      tx = await waitForTransaction(tokenContract.mint(address, amount));
-    }
-    console.log(
-      `https://${this.network.toLowerCase()}.etherscan.io/tx/${
-        tx.transactionHash
-      }`,
-    );
   }
 }
 

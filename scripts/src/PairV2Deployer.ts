@@ -9,13 +9,11 @@ import {
   priceFeedsByNetwork,
   SupportedToken,
   WAD,
-  WETHMock__factory,
 } from "@gearbox-protocol/sdk";
 import { BigNumber } from "ethers";
 
 import {
   ChainlinkPriceFeed__factory,
-  CVXTestnet__factory,
   ERC20Testnet,
   ERC20Testnet__factory,
   IUniswapV2Factory__factory,
@@ -151,9 +149,8 @@ export class PairV2Deployer extends AbstractScript {
         this.log.debug(`Deployer balance: ${lpTokenBalance}`);
 
         if (lpTokenBalance.isZero()) {
-          await waitForTransaction(tokenContract.approve(routerAddr, MAX_INT));
-
-          await this.mintTokenToDeployer(sym, token, tokenAmount);
+          await this.approve(sym, routerAddr);
+          await this.mintToken(sym, this.deployer.address, tokenAmount);
           await waitForTransaction(
             usdcToken.mint(this.deployer.address, usdcAmount),
           );
@@ -212,29 +209,5 @@ export class PairV2Deployer extends AbstractScript {
       `${symbol} to pool: ${formatBN(tokenAmount, tokenDecimals)}`,
     );
     return [tokenAmount, usdcAmount];
-  }
-
-  private async mintTokenToDeployer(
-    symbol: SupportedToken,
-    address: string,
-    amount: BigNumber,
-  ): Promise<void> {
-    this.log.debug(`Minting ${amount} ${symbol}`);
-    if (symbol === "CVX") {
-      // CVX is a special case, have to call mintExact instead and call it from syncer (deployer is syncer)
-      const cvxContract = CVXTestnet__factory.connect(address, this.deployer);
-      await waitForTransaction(cvxContract.mintExact(amount));
-    } else if (symbol === "WETH") {
-      const weth = WETHMock__factory.connect(address, this.deployer);
-      await waitForTransaction(weth.deposit({ value: amount }));
-    } else {
-      const tokenContract = ERC20Testnet__factory.connect(
-        address,
-        this.deployer,
-      );
-      await waitForTransaction(
-        tokenContract.mint(this.deployer.address, amount),
-      );
-    }
   }
 }
