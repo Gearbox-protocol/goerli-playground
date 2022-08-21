@@ -8,7 +8,7 @@ import {
 } from "@gearbox-protocol/sdk";
 
 import { YearnMock } from "../../../types";
-import { AbstractDeployer } from "../AbstractDeployer";
+import { AbstractScript } from "../AbstractScript";
 import { DeployedToken } from "../types";
 
 const yearnTokenList: Array<YearnLPToken> = [
@@ -20,7 +20,7 @@ const yearnTokenList: Array<YearnLPToken> = [
   "yvCurve_FRAX",
 ];
 
-export class YearnDeployer extends AbstractDeployer {
+export class YearnDeployer extends AbstractScript {
   protected async run(): Promise<void> {
     this.log.info("Deploying Yearn");
 

@@ -11,9 +11,9 @@ import {
   LidoOracle,
   LidoOracle__factory,
 } from "../../../types";
-import { AbstractDeployer } from "../AbstractDeployer";
+import { AbstractScript } from "../AbstractScript";
 
-export class LidoDeployer extends AbstractDeployer {
+export class LidoDeployer extends AbstractScript {
   protected async run(): Promise<void> {
     this.log.info("Deploying Lido");
     const needed = await this.progress.isDeployNeeded("lido", "STETH");

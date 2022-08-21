@@ -13,6 +13,7 @@ import RuntimeEnvironment from "./RuntimeEnvironment";
 
 export abstract class AbstractScript extends RuntimeEnvironment {
   protected runtime!: RuntimeEnvironment;
+  private _syncer?: string;
 
   public async exec(): Promise<void> {
     await this.setup();
@@ -22,6 +23,7 @@ export abstract class AbstractScript extends RuntimeEnvironment {
   protected async setup(): Promise<void> {
     const runtime = await RuntimeEnvironment.setup();
     this.from(runtime);
+    this._syncer = await this.progress.get("syncer", "address");
   }
 
   /**
@@ -63,7 +65,7 @@ export abstract class AbstractScript extends RuntimeEnvironment {
    * Mints given amount of testnet token
    * CVX is a special case, mintExact is used
    * WETH is a special case, it's deposited from deployer's balance
-   * @param token
+   * @param token symbol
    * @param to
    * @param amount
    */
@@ -98,6 +100,13 @@ export abstract class AbstractScript extends RuntimeEnvironment {
     return tx;
   }
 
+  /**
+   * Mints ERC20 token with known address
+   * @param address Token address
+   * @param to Receipent address
+   * @param amount Token amount
+   * @returns
+   */
   protected async mintTokenByAddress(
     address: string,
     to: string,
@@ -124,6 +133,13 @@ export abstract class AbstractScript extends RuntimeEnvironment {
       addr = tokenDataByNetwork[this.network][symbol];
     }
     return addr;
+  }
+
+  protected get syncer(): string {
+    if (!this._syncer) {
+      throw new Error("syncer not found");
+    }
+    return this._syncer;
   }
 
   protected abstract run(): Promise<void>;

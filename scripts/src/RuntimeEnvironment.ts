@@ -37,7 +37,7 @@ export default class RuntimeEnvironment {
     if (chainId === MAINNET_NETWORK) {
       throw new Error("Switch to test network");
     }
-    // You can't run these scripts on LOCAL_NETWORK (ChainID 1337) bacuse they requires some third-part contracts to exist (WETH, Uniswap)
+    // You can't run these scripts on LOCAL_NETWORK (ChainID 1337) because they requires some third-party contracts to exist (WETH, Uniswap)
     if (
       chainId === LOCAL_NETWORK ||
       !hre.config.networks.hardhat.forking?.url

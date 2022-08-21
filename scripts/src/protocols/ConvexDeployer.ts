@@ -18,7 +18,7 @@ import {
   VirtualBalanceRewardPool__factory,
 } from "../../../types";
 import { BaseRewardPoolInterface } from "../../../types/contracts/convex/ConvexBaseRewardPool.sol/BaseRewardPool";
-import { AbstractDeployer } from "../AbstractDeployer";
+import { AbstractScript } from "../AbstractScript";
 import { DeployedToken } from "../types";
 
 const convexExtraRewardTokens: Record<
@@ -42,7 +42,7 @@ const tokenList: ConvexLPToken[] = [
   "cvxgusd3CRV",
 ];
 
-export class ConvexDeployer extends AbstractDeployer {
+export class ConvexDeployer extends AbstractScript {
   private _convexManager?: ConvexManagerTestnet;
 
   protected async run(): Promise<void> {

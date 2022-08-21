@@ -26,7 +26,7 @@ import {
   CurveSUSDDeposit,
   CurveToken,
 } from "../../../types";
-import { AbstractDeployer } from "../AbstractDeployer";
+import { AbstractScript } from "../AbstractScript";
 import { DeployedToken } from "../types";
 
 const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
@@ -43,7 +43,7 @@ interface SyncedPool {
   ) => Promise<ContractTransaction>;
 }
 
-export class CurveDeployer extends AbstractDeployer {
+export class CurveDeployer extends AbstractScript {
   private _3CrvToken: string | undefined;
   private _3CrvPool: string | undefined;
 

@@ -6,13 +6,13 @@ import {
 } from "@gearbox-protocol/sdk";
 
 import { ChainlinkPriceFeed, ChainlinkPriceFeed__factory } from "../../types";
-import { AbstractDeployer } from "./AbstractDeployer";
+import { AbstractScript } from "./AbstractScript";
 import { ChainlinkProgressKey, ChainlinkSuffix } from "./types";
 
 /**
  * This script deploys chainlink price feed that will be synced with mainnet
  */
-export class PriceFeedsDeployer extends AbstractDeployer {
+export class PriceFeedsDeployer extends AbstractScript {
   protected async run(): Promise<void> {
     for (const [sym, pf] of Object.entries(priceFeedsByNetwork)) {
       await this.maybeDeployPF(sym as SupportedToken, pf, "priceFeedETH");

@@ -1,7 +1,7 @@
 import { TradingBot } from "../../types";
-import { AbstractDeployer } from "./AbstractDeployer";
+import { AbstractScript } from "./AbstractScript";
 
-export class TradingBotDeployer extends AbstractDeployer {
+export class TradingBotDeployer extends AbstractScript {
   protected async run(): Promise<void> {
     const needed = await this.progress.isDeployNeeded("tradingBot", "address");
 
