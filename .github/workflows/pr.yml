@@ -1,0 +1,27 @@
+name: Check
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+env:
+  HUSKY: 0
+  CI: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          cache: "yarn"
+          node-version-file: ".nvmrc"
+      - name: Perform checks
+        run: |
+          yarn install --frozen-lockfile
+          yarn build
+          yarn typecheck:ci
+          yarn lint:ci
+          yarn prettier:ci

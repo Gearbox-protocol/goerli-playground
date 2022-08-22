@@ -2,7 +2,6 @@ import { Verifier } from "@gearbox-protocol/devops";
 import {
   GOERLI_NETWORK,
   HARDHAT_NETWORK,
-  KOVAN_NETWORK,
   LOCAL_NETWORK,
   MAINNET_NETWORK,
   NetworkType,
@@ -56,9 +55,6 @@ export default class RuntimeEnvironment {
       originChainId = originNetwork.chainId;
     }
     switch (originChainId) {
-      case KOVAN_NETWORK:
-        instance.network = "Kovan";
-        break;
       case GOERLI_NETWORK:
         instance.network = "Goerli";
         break;
