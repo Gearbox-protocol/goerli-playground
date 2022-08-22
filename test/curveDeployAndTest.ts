@@ -62,7 +62,7 @@ describe("Curve mocks tests", async function () {
     deployer = accounts[0];
   });
 
-  it.only("Curve 3CRV mock test", async () => {
+  it("Curve 3CRV mock test", async () => {
     const dai = await deployToken("DAI", 18);
     const usdc = await deployToken("USDC", 6);
     const usdt = await deployToken("USDT", 6);
