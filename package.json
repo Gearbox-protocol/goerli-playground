@@ -1,5 +1,5 @@
 {
-  "name": "@gearbox-protocol/testnet-playground",
+  "name": "@gearbox-protocol/goerli-playground",
   "version": "1.0.0",
   "scripts": {
     "build": "yarn clean && yarn compile --no-typechain && yarn abifix && yarn typegen",
@@ -18,7 +18,7 @@
   "dependencies": {
     "@chainlink/contracts": "^0.4.2",
     "@gearbox-protocol/devops": "^1.0.0-next.1",
-    "@gearbox-protocol/sdk": "^0.0.109",
+    "@gearbox-protocol/sdk": "^1.0.1-next.1",
     "@openzeppelin/contracts": "^4.7.3",
     "add": "^2.0.6",
     "fs-extra": "^10.1.0",

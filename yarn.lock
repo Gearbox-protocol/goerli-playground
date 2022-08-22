@@ -600,13 +600,13 @@
   resolved "https://registry.yarnpkg.com/@gearbox-protocol/prettier-config/-/prettier-config-1.4.0.tgz#93ca5c1d2f830f25c2fa379f19575977254fae78"
   integrity sha512-XsFw012/vWQdjm347YoX1+yCi8zVOLZBgiGcTq/5ArOaAAJcytdR7/gNys83qf16faEKQidWUXQCpcjKBASHgA==
 
-"@gearbox-protocol/sdk@^0.0.109":
-  version "0.0.109"
-  resolved "https://registry.yarnpkg.com/@gearbox-protocol/sdk/-/sdk-0.0.109.tgz#61f7b9fc3af63e53f853977817c0460189e0fcaa"
-  integrity sha512-dt6gtDyYcWaixpDYTaiaf63XZ0aiNS3BcY7E70zjKwJzmN3LYAcW7mEd7QGmD7w1irsSEOtXpkwaz8/8YYAd1w==
+"@gearbox-protocol/sdk@^1.0.1-next.1":
+  version "1.0.1-next.1"
+  resolved "https://registry.yarnpkg.com/@gearbox-protocol/sdk/-/sdk-1.0.1-next.1.tgz#8a538890ff8658c54aad24285080086fe77c50e6"
+  integrity sha512-RyYz+pKtI7ZSJZjFLb9Av16q9sQUff2gl0P79z7MVg9IaVb1V/2tF/F7Tc/1UNU25q9hp4GVLWCcLu3I1Yvx6Q==
   dependencies:
     decimal.js-light "^2.5.1"
-    moment "^2.29.1"
+    moment "^2.29.4"
 
 "@humanwhocodes/config-array@^0.10.4":
   version "0.10.4"
@@ -7294,7 +7294,7 @@ mock-fs@^4.1.0:
   resolved "https://registry.yarnpkg.com/mock-fs/-/mock-fs-4.14.0.tgz#ce5124d2c601421255985e6e94da80a7357b1b18"
   integrity sha512-qYvlv/exQ4+svI3UOvPUpLDF0OMX5euvUH0Ny4N5QyRyhNdgAgUrVH3iUINSzEPLvx0kbo/Bp28GJKIqvE7URw==
 
-moment@^2.29.1:
+moment@^2.29.4:
   version "2.29.4"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
   integrity sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==
