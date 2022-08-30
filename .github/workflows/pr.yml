@@ -25,4 +25,3 @@ jobs:
           yarn typecheck:ci
           yarn lint:ci
           yarn prettier:ci
-          yarn test
