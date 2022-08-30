@@ -1,10 +1,13 @@
 import { TransactionReceipt } from "@ethersproject/providers";
-import { deploy, waitForTransaction } from "@gearbox-protocol/devops";
 import {
+  deployWithOptions,
+  waitForTransaction,
+} from "@gearbox-protocol/devops";
+import {
+  IWETH__factory,
   MAX_INT,
   SupportedToken,
   tokenDataByNetwork,
-  WETHMock__factory,
 } from "@gearbox-protocol/sdk";
 import { BigNumber, BigNumberish, Contract } from "ethers";
 
@@ -36,7 +39,7 @@ export abstract class AbstractScript extends RuntimeEnvironment {
     name: string,
     ...args: any[]
   ): Promise<T> {
-    return deploy(
+    return deployWithOptions(
       name,
       {
         logger: this.log,
@@ -89,7 +92,7 @@ export abstract class AbstractScript extends RuntimeEnvironment {
         tx = await waitForTransaction(cvxContract.transfer(to, amount));
       }
     } else if (token === "WETH") {
-      const weth = WETHMock__factory.connect(tokenAddr, this.deployer);
+      const weth = IWETH__factory.connect(tokenAddr, this.deployer);
       tx = await waitForTransaction(weth.deposit({ value: amount }));
       if (to !== this.deployer.address) {
         tx = await waitForTransaction(weth.transfer(to, amount));

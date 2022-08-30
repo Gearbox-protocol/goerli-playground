@@ -52,7 +52,7 @@ describe("Curve mocks tests", async function () {
   const deployToken = async function (name: string, decimals: number) {
     return await deploy<ERC20Testnet>(
       "ERC20Testnet",
-      { logger },
+      log,
       name,
       name,
       decimals,
@@ -83,7 +83,7 @@ describe("Curve mocks tests", async function () {
 
     const _3pool_token = await deploy<CurveToken>(
       "CurveToken",
-      { logger },
+      log,
       ...tokenConstructorArgs,
     );
 
@@ -99,7 +99,7 @@ describe("Curve mocks tests", async function () {
 
     const _3pool = await deploy<Curve3PoolMock>(
       "Curve3PoolMock",
-      { logger },
+      log,
       ...poolConstructorArgs,
     );
 
@@ -232,7 +232,7 @@ describe("Curve mocks tests", async function () {
 
     const _3pool_token = await deploy<CurveToken>(
       "CurveToken",
-      { logger },
+      log,
       ...tokenConstructorArgs,
     );
 
@@ -248,7 +248,7 @@ describe("Curve mocks tests", async function () {
 
     const _3pool = await deploy<Curve3PoolMock>(
       "Curve3PoolMock",
-      { logger },
+      log,
       ...poolConstructorArgs,
     );
 
@@ -279,7 +279,7 @@ describe("Curve mocks tests", async function () {
 
     const gusd3crv_token = await deploy<CurveToken>(
       "CurveToken",
-      { logger },
+      log,
       ...tokenConstructorArgs,
     );
 
@@ -296,7 +296,7 @@ describe("Curve mocks tests", async function () {
 
     const gusd3crv = await deploy<CurveGUSDMock>(
       "CurveGUSDMock",
-      { logger },
+      log,
       ...poolConstructorArgs,
     );
 
@@ -442,7 +442,7 @@ describe("Curve mocks tests", async function () {
 
     const _3pool_token = await deploy<CurveToken>(
       "CurveToken",
-      { logger },
+      log,
       ...tokenConstructorArgs,
     );
 
@@ -458,7 +458,7 @@ describe("Curve mocks tests", async function () {
 
     const _3pool = await deploy<Curve3PoolMock>(
       "Curve3PoolMock",
-      { logger },
+      log,
       ...poolConstructorArgs,
     );
 
@@ -500,7 +500,7 @@ describe("Curve mocks tests", async function () {
 
     const frax3crv = await deploy<CurveMetapoolMock>(
       "CurveMetapoolMock",
-      { logger },
+      log,
       ...poolConstructorArgs,
     );
 
@@ -647,7 +647,7 @@ describe("Curve mocks tests", async function () {
 
     const steCRV_token = await deploy<CurveToken>(
       "CurveToken",
-      { logger },
+      log,
       ...tokenConstructorArgs,
     );
 
@@ -663,7 +663,7 @@ describe("Curve mocks tests", async function () {
 
     const steCRV = await deploy<CurveStETHMock>(
       "CurveStETHMock",
-      { logger },
+      log,
       ...poolConstructorArgs,
     );
 
@@ -702,15 +702,17 @@ describe("Curve mocks tests", async function () {
 
     console.log("Performing exchange");
 
-    let eth_balance_before = await deployer.provider.getBalance(steCRV.address);
+    let eth_balance_before = await deployer.provider?.getBalance(
+      steCRV.address,
+    );
     let steth_balance_before = await steth.balanceOf(deployer.address);
 
     await steCRV.exchange(0, 1, WAD, WAD.mul(9).div(10), { value: WAD });
 
-    let eth_balance_after = await deployer.provider.getBalance(steCRV.address);
+    let eth_balance_after = await deployer.provider?.getBalance(steCRV.address);
     let steth_balance_after = await steth.balanceOf(deployer.address);
 
-    expect(eth_balance_after.sub(eth_balance_before)).to.be.eq(WAD);
+    expect(eth_balance_after?.sub(eth_balance_before!)).to.be.eq(WAD);
     expect(steth_balance_after.sub(steth_balance_before)).to.be.gt(
       WAD.mul(9).div(10),
     );
@@ -718,16 +720,16 @@ describe("Curve mocks tests", async function () {
     console.log("Removing liquidity");
 
     let steCRV_balance_before = await steCRV_token.balanceOf(deployer.address);
-    eth_balance_before = await deployer.provider.getBalance(steCRV.address);
+    eth_balance_before = await deployer.provider?.getBalance(steCRV.address);
     steth_balance_before = await steth.balanceOf(deployer.address);
 
     await steCRV.remove_liquidity(WAD.div(100), [WAD.div(110), WAD.div(110)]);
 
     let steCRV_balance_after = await steCRV_token.balanceOf(deployer.address);
-    eth_balance_after = await deployer.provider.getBalance(steCRV.address);
+    eth_balance_after = await deployer.provider?.getBalance(steCRV.address);
     steth_balance_after = await steth.balanceOf(deployer.address);
 
-    expect(eth_balance_before.sub(eth_balance_after)).to.be.gt(WAD.div(110));
+    expect(eth_balance_before?.sub(eth_balance_after!)).to.be.gt(WAD.div(110));
     expect(steth_balance_after.sub(steth_balance_before)).to.be.gt(
       WAD.div(110),
     );
@@ -738,7 +740,7 @@ describe("Curve mocks tests", async function () {
     console.log("Removing liquidity imbalanced");
 
     steCRV_balance_before = await steCRV_token.balanceOf(deployer.address);
-    eth_balance_before = await deployer.provider.getBalance(steCRV.address);
+    eth_balance_before = await deployer.provider?.getBalance(steCRV.address);
     steth_balance_before = await steth.balanceOf(deployer.address);
 
     await steCRV.remove_liquidity_imbalance(
@@ -747,10 +749,10 @@ describe("Curve mocks tests", async function () {
     );
 
     steCRV_balance_after = await steCRV_token.balanceOf(deployer.address);
-    eth_balance_after = await deployer.provider.getBalance(steCRV.address);
+    eth_balance_after = await deployer.provider?.getBalance(steCRV.address);
     steth_balance_after = await steth.balanceOf(deployer.address);
 
-    expect(eth_balance_before.sub(eth_balance_after)).to.be.eq(WAD.div(20));
+    expect(eth_balance_before?.sub(eth_balance_after!)).to.be.eq(WAD.div(20));
     expect(steth_balance_after.sub(steth_balance_before)).to.be.eq(WAD.div(10));
     expect(steCRV_balance_before.sub(steCRV_balance_after)).to.be.lt(
       WAD.mul(8).div(100),
@@ -759,14 +761,14 @@ describe("Curve mocks tests", async function () {
     console.log("Removing liquidity one coin");
 
     steCRV_balance_before = await steCRV_token.balanceOf(deployer.address);
-    eth_balance_before = await deployer.provider.getBalance(steCRV.address);
+    eth_balance_before = await deployer.provider?.getBalance(steCRV.address);
 
     await steCRV.remove_liquidity_one_coin(WAD.div(100), 0, WAD.div(110));
 
     steCRV_balance_after = await steCRV_token.balanceOf(deployer.address);
-    eth_balance_after = await deployer.provider.getBalance(steCRV.address);
+    eth_balance_after = await deployer.provider?.getBalance(steCRV.address);
 
-    expect(eth_balance_before.sub(eth_balance_after)).to.be.gt(WAD.div(110));
+    expect(eth_balance_before?.sub(eth_balance_after!)).to.be.gt(WAD.div(110));
     expect(steCRV_balance_before.sub(steCRV_balance_after)).to.be.eq(
       WAD.div(100),
     );
@@ -788,7 +790,7 @@ describe("Curve mocks tests", async function () {
 
     const sCRV_token = await deploy<CurveToken>(
       "CurveToken",
-      { logger },
+      log,
       ...tokenConstructorArgs,
     );
 
@@ -803,13 +805,13 @@ describe("Curve mocks tests", async function () {
 
     const sCRV = await deploy<CurveSUSDMock>(
       "CurveSUSDMock",
-      { logger },
+      log,
       ...poolConstructorArgs,
     );
 
     const sCRV_deposit = await deploy<CurveSUSDDeposit>(
       "CurveSUSDDeposit",
-      { logger },
+      log,
       coins,
       coins,
       sCRV.address,

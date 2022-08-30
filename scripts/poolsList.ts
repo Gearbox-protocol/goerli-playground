@@ -1,19 +1,19 @@
 import {
-  AddressProvider__factory,
-  DataCompressor__factory,
-  ERC20__factory,
+  IAddressProvider__factory,
+  IDataCompressor__factory,
+  IERC20Metadata__factory,
 } from "@gearbox-protocol/sdk";
 
 import { AbstractScript } from "./src";
 
 export class ListPools extends AbstractScript {
   protected async run(): Promise<void> {
-    const addressProvider = AddressProvider__factory.connect(
+    const addressProvider = IAddressProvider__factory.connect(
       process.env.REACT_APP_ADDRESS_PROVIDER || "",
       this.deployer,
     );
 
-    const dc = DataCompressor__factory.connect(
+    const dc = IDataCompressor__factory.connect(
       await addressProvider.getDataCompressor(),
       this.deployer,
     );
@@ -22,7 +22,7 @@ export class ListPools extends AbstractScript {
 
     for (const p of pools) {
       const { addr, underlying, dieselToken } = p;
-      const token = ERC20__factory.connect(underlying, this.deployer);
+      const token = IERC20Metadata__factory.connect(underlying, this.deployer);
       const sym = await token.symbol();
       console.log(`${sym}: `);
       console.log(`addr: ${addr} `);
