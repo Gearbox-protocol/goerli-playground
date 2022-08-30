@@ -1,11 +1,15 @@
 node_modules
 .env
+.env.local
+.progress.*.json
+.verifier.*.json
 coverage
 coverage.json
 typechain
 types
 dist
 node_modules
+*.log
 
 #Hardhat files
 cache

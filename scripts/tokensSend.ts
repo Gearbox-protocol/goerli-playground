@@ -1,76 +1,78 @@
-// @ts-ignore
-import { ethers } from "hardhat";
-import * as dotenv from "dotenv";
-// @ts-ignore
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
-import { BigNumber } from "ethers";
-import { SupportedTokens, tokenDataByNetwork } from "@gearbox-protocol/sdk";
-import { ERC20Kovan__factory } from "../types";
-import { waitForTransaction } from "../utils/transaction";
-import { Logger } from "tslog";
+import { NormalToken, normalTokens } from "@gearbox-protocol/sdk";
+import { BigNumber, BigNumberish } from "ethers";
+import inquirer from "inquirer";
 
-const hre = require("hardhat");
-const log: Logger = new Logger();
+import { ERC20Testnet__factory } from "../types";
+import { AbstractScript } from "./src/AbstractScript";
 
-const tokensToDeploy: Array<SupportedTokens> = [
-  // "1INCH",
-  // "AAVE",
-  // "COMP",
-  // "CRV",
-  // "DAI",
-  // "DPI",
-  // "FEI",
-  // "LINK",
-  // "SNX",
-  // "SUSHI",
-  // "UNI",
-  "USDC",
-  // "USDT",
-  // "WBTC",
-  // // "WETH",
-  // "YFI",
-  // "STETH",
-  // "FTM",
-  // "CVX",
-  // "FRAX",
-  // "FXS",
-  // "LDO",
-  // "SPELL",
-  // "LUSD",
-  // "sUSD",
-  // "GUSD",
-  // "LUNA",
-  // "LQTY",
-];
+interface Answers {
+  address: string;
+  amount: BigNumberish;
+  tokens: NormalToken[];
+}
 
-const addressToSend = "0x8002e5D8cA10e2b0e7d1bd98C367fE08FA555A71";
+export class SendTokens extends AbstractScript {
+  protected async run(): Promise<void> {
+    const opts = await inquirer.prompt<Answers>([
+      {
+        type: "input",
+        name: "address",
+        message: "Address to mint tokens to",
+        validate: value => {
+          if (value.match(/^0x[a-fA-F0-9]{40}$/)) {
+            return true;
+          }
+          return "Please enter a valid address";
+        },
+      },
+      {
+        type: "input",
+        name: "amount",
+        default: "100000000", // 10**8
+        message: "Amount of tokens to mint (without decimals)",
+        validate: value => {
+          try {
+            BigNumber.from(value);
+            return true;
+          } catch {}
+          return "Please enter a valid amount";
+        },
+      },
+      {
+        type: "checkbox",
+        message: "Select tokens",
+        name: "tokens",
+        choices: Object.keys(normalTokens)
+          .filter(n => n !== "WETH")
+          .map(name => ({ name })),
+        validate: answer => {
+          if (answer.length < 1) {
+            return "You must choose at least one token";
+          }
+          return true;
+        },
+      },
+    ]);
 
-async function deployTokens() {
-  dotenv.config({ path: ".env.local" });
-  const log: Logger = new Logger();
+    for (const t of opts.tokens) {
+      const tokenAddr = await this.getSupportedTokenAddress(t);
+      if (!tokenAddr) {
+        this.log.warn(`Token %${t} is not deployed`);
+        continue;
+      }
 
-  const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
-  const deployer = accounts[0];
+      const token = ERC20Testnet__factory.connect(tokenAddr, this.deployer);
+      const decimals = await token.decimals();
 
-  const chainId = await deployer.getChainId();
-  if (chainId !== 42) throw new Error("Switch to Kovan network");
+      this.log.info(`Sending ${t} to ${opts.address}`);
 
-  for (let t of tokensToDeploy) {
-    const tokenAddr = tokenDataByNetwork.Kovan[t];
-
-    const token = ERC20Kovan__factory.connect(tokenAddr, deployer);
-    const decimals = await token.decimals();
-
-    log.info(`Sending ${t} to ${addressToSend}`);
-
-    const tx = await waitForTransaction(
-      token.mint(addressToSend, BigNumber.from(10).pow(decimals).mul(100000))
-    );
-
-    console.log(`https://kovan.etherscan.io/tx/${tx.transactionHash}`)
+      await this.mintToken(
+        t,
+        opts.address,
+        BigNumber.from(10).pow(decimals).mul(opts.amount),
+      );
+    }
   }
 }
 
-deployTokens()
-  .then(() => console.log("Ok"))
-  .catch((e) => console.log(e));
+new SendTokens().exec().catch(console.error);

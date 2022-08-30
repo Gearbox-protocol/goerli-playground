@@ -3,25 +3,25 @@
 // (c) Gearbox Holdings, 2021
 pragma solidity ^0.8.10;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Syncer is Ownable {
-    event SyncerAdded(address indexed);
-    event SyncerRemoved(address indexed);
+  event SyncerAdded(address indexed);
+  event SyncerRemoved(address indexed);
 
-    mapping(address => bool) public isSyncer;
+  mapping(address => bool) public isSyncer;
 
-    constructor() {
-        addSyncer(msg.sender);
-    }
+  constructor() {
+    addSyncer(msg.sender);
+  }
 
-    function addSyncer(address _syncer) public onlyOwner {
-        isSyncer[_syncer] = true;
-        emit SyncerAdded(_syncer);
-    }
+  function addSyncer(address _syncer) public onlyOwner {
+    isSyncer[_syncer] = true;
+    emit SyncerAdded(_syncer);
+  }
 
-    function removeSyncer(address _syncer) external onlyOwner {
-        isSyncer[_syncer] = false;
-        emit SyncerRemoved(_syncer);
-    }
+  function removeSyncer(address _syncer) external onlyOwner {
+    isSyncer[_syncer] = false;
+    emit SyncerRemoved(_syncer);
+  }
 }

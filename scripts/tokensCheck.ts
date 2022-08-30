@@ -1,4 +1,3 @@
-import * as dotenv from "dotenv";
 import {
   MultiCallContract,
   NetworkType,
@@ -6,61 +5,49 @@ import {
   supportedTokens,
   tokenDataByNetwork,
 } from "@gearbox-protocol/sdk";
-import { ethers, providers } from "ethers";
-import { Logger } from "tslog";
+
 import { ERC20__factory } from "../types";
-import { ERC20Interface } from "../types/ERC20";
+import { ERC20Interface } from "../types/@openzeppelin/contracts/token/ERC20/ERC20";
+import { AbstractScript } from "./src/AbstractScript";
 
-async function checkTokens() {
-  dotenv.config({ path: ".env" });
-  const log: Logger = new Logger();
+const mCalls: Array<keyof ERC20Interface["functions"]> = [
+  "symbol()",
+  "decimals()",
+];
 
-  const providersByNetwork: Record<NetworkType, providers.JsonRpcProvider> = {
-    Mainnet: new providers.JsonRpcProvider(process.env.ETH_MAINNET_PROVIDER),
-    Kovan: new providers.JsonRpcProvider(process.env.ETH_KOVAN_PROVIDER),
-  };
+class TokensChecker extends AbstractScript {
+  protected async run(): Promise<void> {
+    for (const t of Object.keys(supportedTokens)) {
+      this.log.info(`Checking ${t}`);
 
-  for (let t of Object.keys(supportedTokens)) {
-    log.info(`Checking ${t}`);
+      const [mainnetData, testnetData] = await Promise.all([
+        this.getTokenData(t as SupportedToken, "Mainnet"),
+        this.getTokenData(t as SupportedToken, this.network),
+      ]);
 
-    const mCalls: Array<keyof ERC20Interface["functions"]> = [
-      // "name()",
-      "symbol()",
-      "decimals()",
-    ];
-
-    const getTokenData = async (
-      t: SupportedToken,
-      networkType: NetworkType
-    ) => {
-      if (tokenDataByNetwork[networkType][t] === "") {
-        log.error(`Empty address for ${networkType}: ${t}`);
-      }
-
-      const tokenMutlicall = new MultiCallContract(
-        tokenDataByNetwork[networkType][t],
-        ERC20__factory.createInterface(),
-        providersByNetwork[networkType]
-      );
-
-      return tokenMutlicall.call(mCalls.map((method) => ({ method })));
-    };
-
-    const [mainnetData, kovanData] = await Promise.all([
-      getTokenData(t as SupportedToken, "Mainnet"),
-      getTokenData(t as SupportedToken, "Kovan"),
-    ]);
-
-    for (let i = 0; i < mCalls.length; i++) {
-      if (mainnetData[i] !== kovanData[i]) {
-        log.error("Mainnet <> Kovan difference");
-        log.error(`Mainnet data: ${mainnetData}`);
-        log.error(`Kovan data: ${kovanData}`);
+      for (let i = 0; i < mCalls.length; i++) {
+        if (mainnetData[i] !== testnetData[i]) {
+          this.log.error("Mainnet <> Testnet difference");
+          this.log.error(`Mainnet data: ${mainnetData}`);
+          this.log.error(`Testnet data: ${testnetData}`);
+        }
       }
     }
   }
+
+  protected async getTokenData(t: SupportedToken, networkType: NetworkType) {
+    if (tokenDataByNetwork[networkType][t] === "") {
+      this.log.error(`Empty address for ${networkType}: ${t}`);
+    }
+
+    const tokenMutlicall = new MultiCallContract(
+      tokenDataByNetwork[networkType][t],
+      ERC20__factory.createInterface(),
+      networkType === "Mainnet" ? this.mainnetProvider : this.testnetProvider,
+    );
+
+    return tokenMutlicall.call(mCalls.map(method => ({ method })));
+  }
 }
 
-checkTokens()
-  .then(() => console.log("Ok"))
-  .catch((e) => console.log(e));
+new TokensChecker().exec().catch(console.error);

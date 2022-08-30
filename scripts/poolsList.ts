@@ -1,50 +1,34 @@
-// @ts-ignore
-import { ethers } from "hardhat";
-import * as dotenv from "dotenv";
-// @ts-ignore
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/root-with-address";
 import {
-  AddressProvider__factory,
-  DataCompressor__factory,
-  ERC20__factory,
-  SupportedTokens,
-  tokenDataByNetwork,
+  IAddressProvider__factory,
+  IDataCompressor__factory,
+  IERC20Metadata__factory,
 } from "@gearbox-protocol/sdk";
-import { Logger } from "tslog";
 
-async function deployTokens() {
-  dotenv.config({ path: ".env.kovan" });
-  const log: Logger = new Logger();
+import { AbstractScript } from "./src";
 
-  const accounts = (await ethers.getSigners()) as Array<SignerWithAddress>;
-  const deployer = accounts[0];
+export class ListPools extends AbstractScript {
+  protected async run(): Promise<void> {
+    const addressProvider = IAddressProvider__factory.connect(
+      process.env.REACT_APP_ADDRESS_PROVIDER || "",
+      this.deployer,
+    );
 
-  const addressProvider = AddressProvider__factory.connect(
-    process.env.REACT_APP_ADDRESS_PROVIDER || "",
-    deployer
-  );
+    const dc = IDataCompressor__factory.connect(
+      await addressProvider.getDataCompressor(),
+      this.deployer,
+    );
 
-  const chainId = await deployer.getChainId();
-  if (chainId !== 42) throw new Error("Switch to Kovan network");
+    const pools = await dc.getPoolsList();
 
-  const dc = DataCompressor__factory.connect(
-    await addressProvider.getDataCompressor(),
-    deployer
-  );
-
-  const pools = await dc.getPoolsList();
-
-  for (let p of pools) {
-    const { addr, underlyingToken, dieselToken } = p;
-    const token = ERC20__factory.connect(underlyingToken, deployer);
-    const sym = await token.symbol();
-    console.log(`${sym}: `);
-    console.log(`addr: ${addr} `);
-    console.log(`diesel: ${dieselToken} `);
-
+    for (const p of pools) {
+      const { addr, underlying, dieselToken } = p;
+      const token = IERC20Metadata__factory.connect(underlying, this.deployer);
+      const sym = await token.symbol();
+      console.log(`${sym}: `);
+      console.log(`addr: ${addr} `);
+      console.log(`diesel: ${dieselToken} `);
+    }
   }
 }
 
-deployTokens()
-  .then(() => console.log("Ok"))
-  .catch((e) => console.log(e));
+new ListPools().exec().catch(console.error);
