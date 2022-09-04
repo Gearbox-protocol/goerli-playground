@@ -24,7 +24,7 @@ contract BaseRewardPool {
   uint256 public constant duration = 7 days;
 
   address public operator;
-  address public manager;
+  address public rewardManager;
 
   uint256 public pid;
   uint256 public periodFinish = 0;
@@ -58,7 +58,7 @@ contract BaseRewardPool {
     stakingToken = IERC20(stakingToken_);
     rewardToken = IERC20(rewardToken_);
     operator = operator_;
-    manager = manager_;
+    rewardManager = manager_;
   }
 
   function totalSupply() public view returns (uint256) {
@@ -74,7 +74,7 @@ contract BaseRewardPool {
   }
 
   function addExtraReward(address _reward) external returns (bool) {
-    require(msg.sender == manager, "!authorized");
+    require(msg.sender == rewardManager, "!authorized");
     require(_reward != address(0), "!reward setting");
 
     extraRewards.push(_reward);
@@ -82,7 +82,7 @@ contract BaseRewardPool {
   }
 
   function clearExtraRewards() external {
-    require(msg.sender == manager, "!authorized");
+    require(msg.sender == rewardManager, "!authorized");
     delete extraRewards;
   }
 
@@ -268,7 +268,7 @@ contract BaseRewardPool {
     uint256 _currentRewards,
     uint256 _historicalRewards
   ) external {
-    require(msg.sender == manager, "!authorized");
+    require(msg.sender == rewardManager, "!authorized");
     periodFinish = _periodFinish;
     rewardRate = _rewardRate;
     lastUpdateTime = _lastUpdateTime;
