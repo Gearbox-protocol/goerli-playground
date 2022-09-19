@@ -185,7 +185,7 @@ contract Booster {
 
     //send to proxy to stake
     address lptoken = pool.lptoken;
-    IERC20(lptoken).safeTransferFrom(msg.sender, staker, _amount);
+    IERC20(lptoken).safeTransferFrom(msg.sender, address(this), _amount);
 
     address token = pool.token;
     if (_stake) {
