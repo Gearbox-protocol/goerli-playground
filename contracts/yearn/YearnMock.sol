@@ -18,21 +18,20 @@ contract YearnMock is SyncerTrait, IYVault, ERC20, Ownable {
   uint256 public override pricePerShare;
   uint8 public _decimals;
 
-  mapping(address => bool) public updaters;
   uint256 public decimalsMul;
 
   constructor(
     address _syncer,
     address _token,
-    string memory symbol
+    string memory _symbol
   )
     SyncerTrait(_syncer)
-    ERC20(string(abi.encodePacked("yearn ", ERC20(_token).name())), symbol)
+    ERC20(string(abi.encodePacked("yearn ", ERC20(_token).name())), _symbol)
   {
     token = _token;
-    decimalsMul = 10**ERC20.decimals();
-    pricePerShare = decimalsMul;
     _decimals = ERC20(_token).decimals();
+    decimalsMul = 10**_decimals;
+    pricePerShare = decimalsMul;
   }
 
   function deposit() public override returns (uint256) {

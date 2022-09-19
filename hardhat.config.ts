@@ -7,7 +7,7 @@ import "hardhat-contract-sizer";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 
-import { MAINNET_NETWORK } from "@gearbox-protocol/sdk";
+import { LOCAL_NETWORK, MAINNET_NETWORK } from "@gearbox-protocol/sdk";
 import { config as dotEnvConfig } from "dotenv";
 import { HardhatUserConfig } from "hardhat/types";
 
@@ -17,7 +17,6 @@ dotEnvConfig();
 const WPK =
   "0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3"; // well known private key
 
-const TESTNET_PRIVATE_KEY = process.env.TESTNET_PRIVATE_KEY ?? WPK;
 const BOXCODE_PRIVATE_KEY = process.env.BOXCODE_PRIVATE_KEY ?? WPK;
 const BVI_PRIVATE_KEY = process.env.BVI_PRIVATE_KEY ?? WPK;
 const KOVAN_PRIVATE_KEY = process.env.KOVAN_PRIVATE_KEY ?? WPK;
@@ -27,7 +26,17 @@ const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   solidity: {
-    compilers: [{ version: "0.8.10", settings: {} }],
+    compilers: [
+      {
+        version: "0.8.10",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 1000000,
+          },
+        },
+      },
+    ],
   },
   vyper: {
     compilers: [
@@ -39,19 +48,12 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      forking: {
-        url: process.env.ETH_TESTNET_PROVIDER!,
-        // pin block number to have stable addresses every time during local development
-        blockNumber: process.env.ETH_TESTNET_BLOCK
-          ? parseInt(process.env.ETH_TESTNET_BLOCK, 10)
-          : undefined,
-      },
-      loggingEnabled: true,
+      chainId: LOCAL_NETWORK,
+      initialBaseFeePerGas: 0,
+      allowUnlimitedContractSize: true,
     },
-
     localhost: {
       timeout: 0,
-      accounts: [TESTNET_PRIVATE_KEY],
     },
 
     mainnet: {
@@ -84,11 +86,6 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: false,
     },
   },
-  etherscan: {
-    // Your API key for Etherscan
-    // Obtain one at https://etherscan.io/
-    apiKey: ETHERSCAN_API_KEY,
-  },
   gasReporter: {
     enabled: false,
     currency: "USD",
@@ -104,5 +101,13 @@ const config: HardhatUserConfig = {
     runOnCompile: true,
   },
 };
+
+if (ETHERSCAN_API_KEY) {
+  config.etherscan = {
+    // Your API key for Etherscan
+    // Obtain one at https://etherscan.io/
+    apiKey: ETHERSCAN_API_KEY,
+  };
+}
 
 export default config;
