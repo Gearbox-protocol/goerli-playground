@@ -2,11 +2,14 @@ import { waitForTransaction } from "@gearbox-protocol/devops";
 import {
   AdapterInterface,
   contractParams,
+  formatBN,
   MAX_INT,
   WAD,
 } from "@gearbox-protocol/sdk";
+import { BigNumber } from "ethers";
 
 import {
+  Curve3PoolMock__factory,
   CurveGUSDMock__factory,
   CurveMetapoolMock__factory,
   CurveStETHMock__factory,
@@ -16,6 +19,9 @@ import {
   Lido__factory,
 } from "../../types";
 import { AbstractScript } from "./AbstractScript";
+
+const USD_AMOUNT = BigNumber.from(10 ** 7);
+const ETH_AMOUNT = 100;
 
 /**
  * This script adds liquidity to Curve pools deployed on previous step
@@ -73,6 +79,34 @@ export class CurveAddLiquidity extends AbstractScript {
     );
 
     //
+    // Adding liquidity to 3crv pool
+    //
+    const _3crvPool = Curve3PoolMock__factory.connect(
+      await this.progress.getOrThrow("curve", "CURVE_3CRV_POOL"),
+      this.deployer,
+    );
+
+    await waitForTransaction(dai.approve(_3crvPool.address, MAX_INT));
+    await waitForTransaction(usdc.approve(_3crvPool.address, MAX_INT));
+    await waitForTransaction(usdt.approve(_3crvPool.address, MAX_INT));
+    await waitForTransaction(
+      _3crvPool.add_liquidity(
+        [USD_AMOUNT.mul(WAD), USD_AMOUNT.mul(10 ** 6), USD_AMOUNT.mul(10 ** 6)],
+        0,
+      ),
+    );
+    this.log.info(`
+      DAI  balance: ${formatBN(await _3crvPool.balances(0), 18)},
+      USDC balance: ${formatBN(await _3crvPool.balances(1), 6)},
+      USDT balance: ${formatBN(await _3crvPool.balances(2), 6)},
+      
+      Deployer's 3CRV balance: ${formatBN(
+        await _3crv.balanceOf(this.deployer.address),
+        18,
+      )},
+    `);
+
+    //
     // Adding liquidity to steCRV
     //
 
@@ -95,20 +129,22 @@ export class CurveAddLiquidity extends AbstractScript {
     );
 
     this.log.info("Approving stETH");
-
     await waitForTransaction(steth.approve(steCRVPoolAddr, MAX_INT));
-    await waitForTransaction(steth.mint(this.deployer.address, WAD));
+    await waitForTransaction(
+      steth.mint(this.deployer.address, WAD.mul(ETH_AMOUNT)),
+    );
 
     this.log.info("Adding liquidity to steCRV");
 
     await waitForTransaction(
-      steCRV.add_liquidity([WAD, WAD], 0, { value: WAD }),
+      steCRV.add_liquidity([WAD.mul(ETH_AMOUNT), WAD.mul(ETH_AMOUNT)], 0, {
+        value: WAD.mul(ETH_AMOUNT),
+      }),
     );
 
     this.log.info(
-      `ETH balance: ${await steCRV.balances(
-        0,
-      )}, stETH balance: ${await steCRV.balances(1)}`,
+      `ETH balance: ${formatBN(await steCRV.balances(0), 18)},
+       stETH balance: ${formatBN(await steCRV.balances(1), 18)}`,
     );
 
     //
@@ -134,14 +170,22 @@ export class CurveAddLiquidity extends AbstractScript {
     const sCRV = CurveSUSDMock__factory.connect(sCRVAddress, this.deployer);
 
     await waitForTransaction(
-      sCRV.add_liquidity([WAD, 10 ** 6, 10 ** 6, WAD], 0),
+      sCRV.add_liquidity(
+        [
+          USD_AMOUNT.mul(WAD), // DAI
+          USD_AMOUNT.mul(10 ** 6), // USDC
+          USD_AMOUNT.mul(10 ** 6), // USDT
+          USD_AMOUNT.mul(WAD), // SUSD
+        ],
+        0,
+      ),
     );
 
     this.log.info(`
-      DAI  balance: ${await sCRV.balances(0)},
-      USDC balance: ${await sCRV.balances(1)},
-      USDT balance: ${await sCRV.balances(2)},
-      SUSD balance: ${await sCRV.balances(3)}
+      DAI  balance: ${formatBN(await sCRV.balances(0), 18)},
+      USDC balance: ${formatBN(await sCRV.balances(1), 6)},
+      USDT balance: ${formatBN(await sCRV.balances(2), 6)},
+      SUSD balance: ${formatBN(await sCRV.balances(3), 18)}
     `);
 
     //
@@ -166,11 +210,13 @@ export class CurveAddLiquidity extends AbstractScript {
 
     const gusdPool = CurveGUSDMock__factory.connect(gusdAddress, this.deployer);
 
-    await waitForTransaction(gusdPool.add_liquidity([10 ** 2, WAD], 0));
+    await waitForTransaction(
+      gusdPool.add_liquidity([USD_AMOUNT.mul(10 ** 2), USD_AMOUNT.mul(WAD)], 0),
+    );
 
     this.log.info(`
-      GUSD balance: ${await gusdPool.balances(0)},
-      3CRV balance: ${await gusdPool.balances(1)}
+      GUSD balance: ${formatBN(await gusdPool.balances(0), 2)},
+      3CRV balance: ${formatBN(await gusdPool.balances(1), 18)}
     `);
 
     //
@@ -196,12 +242,15 @@ export class CurveAddLiquidity extends AbstractScript {
     );
 
     await waitForTransaction(
-      frax3crv["add_liquidity(uint256[2],uint256)"]([WAD, WAD], 0),
+      frax3crv["add_liquidity(uint256[2],uint256)"](
+        [USD_AMOUNT.mul(WAD), USD_AMOUNT.mul(WAD)],
+        0,
+      ),
     );
 
     this.log.info(`
-      FRAX balance: ${await frax3crv.balances(0)},
-      3CRV balance: ${await frax3crv.balances(1)}
+      FRAX balance: ${formatBN(await frax3crv.balances(0), 18)},
+      3CRV balance: ${formatBN(await frax3crv.balances(1), 18)}
     `);
 
     //
@@ -227,12 +276,15 @@ export class CurveAddLiquidity extends AbstractScript {
     );
 
     await waitForTransaction(
-      lusd3crv["add_liquidity(uint256[2],uint256)"]([WAD, WAD], 0),
+      lusd3crv["add_liquidity(uint256[2],uint256)"](
+        [USD_AMOUNT.mul(WAD), USD_AMOUNT.mul(WAD)],
+        0,
+      ),
     );
 
     this.log.info(`
-      LUSD balance: ${await lusd3crv.balances(0)},
-      3CRV balance: ${await lusd3crv.balances(1)}
+      LUSD balance: ${formatBN(await lusd3crv.balances(0), 18)},
+      3CRV balance: ${formatBN(await lusd3crv.balances(1), 18)}
     `);
   }
 }
