@@ -13,11 +13,12 @@
     "prettier:ci": "npx prettier --check .",
     "lint": "eslint \"**/*.ts\" --fix",
     "lint:ci": "eslint \"**/*.ts\"",
-    "typecheck:ci": "tsc --noEmit"
+    "typecheck:ci": "tsc --noEmit",
+    "verify": "npx hardhat run node_modules/@gearbox-protocol/devops/lib/verifier/verify.js"
   },
   "dependencies": {
     "@chainlink/contracts": "^0.4.2",
-    "@gearbox-protocol/devops": "^1.0.0",
+    "@gearbox-protocol/devops": "^1.1.0",
     "@gearbox-protocol/sdk": "^1.2.0",
     "@openzeppelin/contracts": "^4.7.3",
     "add": "^2.0.6",

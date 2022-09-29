@@ -575,10 +575,10 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-"@gearbox-protocol/devops@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@gearbox-protocol/devops/-/devops-1.0.0.tgz#f36108ed7691b43286b8e4de10777fae059b6257"
-  integrity sha512-G4dVeE5BKOwLF2wk2wQ+mJE9VeGaTec0xXYB5Q5GcD06HlsDXjeLuphMDjsio2LPDuGGHF0psOIQ5BppkygbfQ==
+"@gearbox-protocol/devops@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@gearbox-protocol/devops/-/devops-1.1.0.tgz#f0a39c695902f37d998aa47b21b8012082f79139"
+  integrity sha512-anHdX86RZ3a+mHVEYsgvX2fq/sVbz3J2wA4DREZdLWhUqOO+UbDyYtBGqn2M2GpKt7+AHkJ/Nz7UV/4xCkVHmA==
   dependencies:
     axios "^0.27.2"
     chai "^4.3.6"
