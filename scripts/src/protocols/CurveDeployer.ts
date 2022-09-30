@@ -21,6 +21,7 @@ import {
 import {
   Curve3PoolMock,
   Curve3PoolMock__factory,
+  CurveFraxUsdcMock__factory,
   CurveMetapoolMock,
   CurveStETHMock__factory,
   CurveSUSDDeposit,
@@ -69,6 +70,11 @@ export class CurveDeployer extends AbstractScript {
     // CURVE GUSD3CRV DEPLOYMENT
     if (await this.progress.isDeployNeeded("curve", "gusd3CRV")) {
       await this.deployGUSD3CRV();
+    }
+
+    // CURVE crvFRAX DEPLOYMENT
+    if (await this.progress.isDeployNeeded("curve", "crvFRAX")) {
+      await this.deployFraxUSDC();
     }
 
     // CURVE FRAX3CRV DEPLOYMENT
@@ -175,6 +181,54 @@ export class CurveDeployer extends AbstractScript {
       poolAgrsFn,
       seedFn,
       mainnetSteCRV_address,
+    );
+  }
+
+  private async deployFraxUSDC(): Promise<void> {
+    const coins = await Promise.all([
+      this.progress.getOrThrow("normalTokens", "FRAX"),
+      this.progress.getOrThrow("normalTokens", "USDC"),
+    ]);
+
+    const poolAgrsFn = (lpToken: string) => [
+      this.syncer, // mock syncer
+      this.deployer.address, // Contract owner address
+      coins, // Addresses of ERC20 conracts of coins
+      lpToken, // Address of the token representing LP share
+      1500, // Amplification coefficient multiplied by n * (n - 1)
+      4000000, // Fee to charge for exchanges
+      5000000000, // Admin fee
+    ];
+
+    const seedFn = async (pool: string) => {
+      this.log.debug("Minting tokens to FRAX_USDC pool");
+      const fraxUsdcPool = CurveFraxUsdcMock__factory.connect(
+        pool,
+        this.deployer,
+      );
+
+      await this.mintToken("FRAX", this.deployer.address, 10 ** 9);
+      await this.mintToken("USDC", this.deployer.address, 10 ** 9);
+      await this.approve("FRAX", pool);
+      await this.approve("USDC", pool);
+
+      await waitForTransaction(
+        fraxUsdcPool.add_liquidity(
+          [WAD.mul(10 ** 9), USDC_UNIT.mul(10 ** 9)],
+          0,
+        ),
+      );
+
+      this.log.info("Added liquidity to FRAX_USDC pool");
+    };
+
+    await this.deployCurvePool(
+      "crvFRAX",
+      "CurveFraxUsdcMock",
+      "CURVE_FRAX_USDC_POOL",
+      poolAgrsFn,
+      seedFn,
+      contractsByNetwork.Mainnet.CURVE_FRAX_USDC_POOL,
     );
   }
 

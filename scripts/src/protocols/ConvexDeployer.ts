@@ -31,6 +31,7 @@ const convexExtraRewardTokens: Record<
   CONVEX_STECRV_POOL: ["LDO"],
   CONVEX_FRAX3CRV_POOL: ["FXS"],
   CONVEX_LUSD3CRV_POOL: ["LQTY"],
+  CONVEX_FRAX_USDC_POOL: [],
 };
 
 const tokenList: ConvexLPToken[] = [
@@ -40,6 +41,7 @@ const tokenList: ConvexLPToken[] = [
   "cvxFRAX3CRV",
   "cvxLUSD3CRV",
   "cvxgusd3CRV",
+  "cvxcrvFRAX",
 ];
 
 export class ConvexDeployer extends AbstractScript {
