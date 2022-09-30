@@ -54,6 +54,10 @@ contract SafeWETH {
     }
   }
 
+  function setRevertOnWithdraw(bool _revertNeeded) external ownerOnly {
+    revertOnWithdraw = _revertNeeded;
+  }
+
   function mint(address to, uint256 amount) external ownerOnly {
     balanceOf[to] += amount;
     emit Deposit(to, amount);
