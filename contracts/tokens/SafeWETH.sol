@@ -22,6 +22,7 @@ contract SafeWETH {
 
   mapping(address => uint256) public balanceOf;
   mapping(address => mapping(address => uint256)) public allowance;
+  uint256 totalSupply;
 
   mapping(address => bool) public isWithdrawer;
   address public owner;
@@ -60,11 +61,13 @@ contract SafeWETH {
 
   function mint(address to, uint256 amount) external ownerOnly {
     balanceOf[to] += amount;
+    totalSupply += amount;
     emit Deposit(to, amount);
   }
 
   function burn(address to, uint256 amount) external ownerOnly {
     balanceOf[to] -= amount;
+    totalSupply -= amount;
     emit Withdrawal(to, amount);
   }
 
@@ -74,12 +77,14 @@ contract SafeWETH {
 
   function deposit() public payable {
     balanceOf[msg.sender] += msg.value;
+    totalSupply += msg.value;
     emit Deposit(msg.sender, msg.value);
   }
 
   function withdraw(uint256 wad) public {
     require(balanceOf[msg.sender] >= wad);
     balanceOf[msg.sender] -= wad;
+    totalSupply -= wad;
     if (isWithdrawer[msg.sender]) {
       payable(msg.sender).transfer(wad);
       emit Withdrawal(msg.sender, wad);
@@ -87,10 +92,6 @@ contract SafeWETH {
       if (revertOnWithdraw) revert RevertOnWithdrawException();
       emit EmptyETHWithdrawal(msg.sender, wad);
     }
-  }
-
-  function totalSupply() public view returns (uint256) {
-    return address(this).balance;
   }
 
   function approve(address guy, uint256 wad) public returns (bool) {
