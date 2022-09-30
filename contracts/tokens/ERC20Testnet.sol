@@ -7,26 +7,26 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract ERC20Testnet is ERC20, Ownable {
-  uint8 public immutable _decimals;
+    uint8 public immutable _decimals;
 
-  constructor(
-    string memory _name,
-    string memory _symbol,
-    uint8 _dec
-  ) ERC20(_name, _symbol) {
-    _mint(msg.sender, 1e24);
-    _decimals = _dec;
-  }
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        uint8 _dec
+    ) ERC20(_name, _symbol) {
+        _mint(msg.sender, 1e24);
+        _decimals = _dec;
+    }
 
-  function mint(address to, uint256 amount) external onlyOwner {
-    _mint(to, amount);
-  }
+    function mint(address to, uint256 amount) external onlyOwner {
+        _mint(to, amount);
+    }
 
-  function burn(address from, uint256 amount) external onlyOwner {
-    _burn(from, amount);
-  }
+    function burn(address from, uint256 amount) external onlyOwner {
+        _burn(from, amount);
+    }
 
-  function decimals() public view override returns (uint8) {
-    return _decimals;
-  }
+    function decimals() public view override returns (uint8) {
+        return _decimals;
+    }
 }
