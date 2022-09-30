@@ -52,6 +52,9 @@ const config: HardhatUserConfig = {
       chainId: LOCAL_NETWORK,
       initialBaseFeePerGas: 0,
       allowUnlimitedContractSize: true,
+      forking: {
+        url: process.env.ETH_MAINNET_PROVIDER || "",
+      },
     },
     localhost: {
       timeout: 0,
