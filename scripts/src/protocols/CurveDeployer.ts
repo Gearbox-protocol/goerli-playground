@@ -381,15 +381,15 @@ export class CurveDeployer extends AbstractScript {
     pool: SyncedPool,
     symbol: string,
   ): Promise<void> {
-    const mainnetSteCRV = ICurvePool__factory.connect(
+    const mainnetPool = ICurvePool__factory.connect(
       address,
       this.mainnetProvider,
     );
 
-    const virtualPrice = await mainnetSteCRV.get_virtual_price();
-    const a = await mainnetSteCRV.A();
+    const virtualPrice = await mainnetPool.get_virtual_price();
+    const a = await mainnetPool.A();
 
-    this.log.debug(`Syncing steCRV virtual price: ${virtualPrice}, a: ${a}`);
+    this.log.debug(`Syncing ${symbol} virtual price: ${virtualPrice}, a: ${a}`);
 
     await waitForTransaction(pool.sync_pool(virtualPrice, a));
 
