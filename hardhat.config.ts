@@ -40,6 +40,7 @@ const config: HardhatUserConfig = {
   },
   vyper: {
     compilers: [
+      { version: "0.3.1" },
       { version: "0.3.0" },
       { version: "0.2.4" },
       { version: "0.2.8" },
@@ -51,6 +52,9 @@ const config: HardhatUserConfig = {
       chainId: LOCAL_NETWORK,
       initialBaseFeePerGas: 0,
       allowUnlimitedContractSize: true,
+      forking: {
+        url: process.env.ETH_MAINNET_PROVIDER || "",
+      },
     },
     localhost: {
       timeout: 0,

@@ -99,6 +99,7 @@ balances: public(uint256[N_COINS])
 fee: public(uint256)  # fee * 1e10
 admin_fee: public(uint256)  # admin_fee * 1e10
 
+syncer: public(address)
 owner: public(address)
 lp_token: public(address)
 
@@ -251,6 +252,15 @@ def _get_D_mem(_balances: uint256[N_COINS], _amp: uint256) -> uint256:
 
 
 @view
+@internal
+def get_virtual_price_internal() -> uint256:
+    D: uint256 = self._get_D(self._xp(), self._A())
+    # D is in the units similar to DAI (e.g. converted to precision 1e18)
+    # When balanced, D = n * x_u - total virtual value of the portfolio
+    token_supply: uint256 = ERC20(self.lp_token).totalSupply()
+    return D * PRECISION / token_supply
+
+@view
 @external
 def get_virtual_price() -> uint256:
     """
@@ -259,16 +269,6 @@ def get_virtual_price() -> uint256:
     @return LP token virtual price normalized to 1e18
     """
     return self.get_virtual_price_internal()
-
-
-@view
-@internal
-def get_virtual_price_internal() -> uint256:
-    D: uint256 = self._get_D(self._xp(), self._A())
-    # D is in the units similar to DAI (e.g. converted to precision 1e18)
-    # When balanced, D = n * x_u - total virtual value of the portfolio
-    token_supply: uint256 = ERC20(self.lp_token).totalSupply()
-    return D * PRECISION / token_supply
 
 @view
 @external
@@ -882,7 +882,7 @@ def withdraw_admin_fees():
 def sync_pool(new_mainnet_virtual_price: uint256, _a: uint256):
     assert Syncer(self.syncer).isSyncer(msg.sender)
 
-    token_supply: uint256 = self.token.totalSupply()
+    token_supply: uint256 = ERC20(self.lp_token).totalSupply()
 
     if token_supply > 0:
         old_virtual_price: uint256 = self.get_virtual_price_internal()
