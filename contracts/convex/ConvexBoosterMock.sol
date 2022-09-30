@@ -3,7 +3,7 @@
 // (c) Gearbox Holdings, 2021
 pragma solidity ^0.8.10;
 
-import "../ERC20Testnet.sol";
+import "../tokens/ERC20Testnet.sol";
 import "./interfaces/Interfaces.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
