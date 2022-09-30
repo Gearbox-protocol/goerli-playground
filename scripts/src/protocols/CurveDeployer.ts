@@ -389,7 +389,7 @@ export class CurveDeployer extends AbstractScript {
     const virtualPrice = await mainnetSteCRV.get_virtual_price();
     const a = await mainnetSteCRV.A();
 
-    this.log.debug("Syncing steCRV virtual price");
+    this.log.debug(`Syncing steCRV virtual price: ${virtualPrice}, a: ${a}`);
 
     await waitForTransaction(pool.sync_pool(virtualPrice, a));
 
