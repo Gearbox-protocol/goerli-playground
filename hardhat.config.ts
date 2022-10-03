@@ -19,7 +19,6 @@ const WPK =
 
 const BOXCODE_PRIVATE_KEY = process.env.BOXCODE_PRIVATE_KEY ?? WPK;
 const BVI_PRIVATE_KEY = process.env.BVI_PRIVATE_KEY ?? WPK;
-const KOVAN_PRIVATE_KEY = process.env.KOVAN_PRIVATE_KEY ?? WPK;
 const GOERLI_PRIVATE_KEY = process.env.GOERLI_PRIVATE_KEY ?? WPK;
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 
@@ -70,20 +69,10 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: false,
     },
 
-    kovan: {
-      url: `${process.env.ETH_KOVAN_PROVIDER}`,
-      accounts: [KOVAN_PRIVATE_KEY],
-      gasPrice: 2e9,
-      gasMultiplier: 1.5,
-      minGasPrice: 1e9,
-      timeout: 0,
-      allowUnlimitedContractSize: false,
-    },
-
     goerli: {
       url: `${process.env.ETH_GOERLI_PROVIDER}`,
       accounts: [GOERLI_PRIVATE_KEY],
-      gasPrice: 2e9,
+      gasPrice: 20e9,
       gasMultiplier: 1.5,
       minGasPrice: 1e9,
       timeout: 0,

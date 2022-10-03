@@ -14,6 +14,8 @@ contract SafeWETH {
   event Transfer(address indexed src, address indexed dst, uint256 wad);
   event Deposit(address indexed dst, uint256 wad);
   event Withdrawal(address indexed src, uint256 wad);
+  event Mint(address indexed dst, uint256 wad);
+  event Burn(address indexed src, uint256 wad);
 
   event EmptyETHWithdrawal(address indexed src, uint256 wad);
 
@@ -62,13 +64,13 @@ contract SafeWETH {
   function mint(address to, uint256 amount) external ownerOnly {
     balanceOf[to] += amount;
     totalSupply += amount;
-    emit Deposit(to, amount);
+    emit Mint(to, amount);
   }
 
   function burn(address to, uint256 amount) external ownerOnly {
     balanceOf[to] -= amount;
     totalSupply -= amount;
-    emit Withdrawal(to, amount);
+    emit Burn(to, amount);
   }
 
   receive() external payable {
@@ -85,6 +87,7 @@ contract SafeWETH {
     require(balanceOf[msg.sender] >= wad);
     balanceOf[msg.sender] -= wad;
     totalSupply -= wad;
+
     if (isWithdrawer[msg.sender]) {
       payable(msg.sender).transfer(wad);
       emit Withdrawal(msg.sender, wad);
