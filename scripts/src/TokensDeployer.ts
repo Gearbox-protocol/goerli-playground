@@ -14,7 +14,6 @@ const tokensToDeploy: Array<DeployedToken> = [
   "FEI",
   "LINK",
   "SNX",
-  "SUSHI",
   "UNI",
   "USDT",
   "USDC",
@@ -24,16 +23,13 @@ const tokensToDeploy: Array<DeployedToken> = [
   "YFI",
   /// UPDATE
   // "STETH", -- Not needed here, deployed in LidoDeployer
-  "FTM",
   // "CVX",  -- Not needed here, deployed in ConvexDeployer
   "FRAX",
   "FXS",
   "LDO",
-  "SPELL",
   "LUSD",
   "sUSD",
   "GUSD",
-  "LUNA",
   "LQTY",
 ];
 

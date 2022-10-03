@@ -891,8 +891,8 @@ def sync_pool(new_mainnet_virtual_price: uint256, _a: uint256):
 
     self.last_mainnet_virtual_price = new_mainnet_virtual_price
 
-    self.initial_A = _a
-    self.future_A = _a
+    self.initial_A = _a * A_PRECISION
+    self.future_A = _a * A_PRECISION
 
 
 @external

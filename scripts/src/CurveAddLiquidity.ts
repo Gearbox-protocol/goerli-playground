@@ -10,6 +10,7 @@ import { BigNumber } from "ethers";
 
 import {
   Curve3PoolMock__factory,
+  CurveFraxUsdcMock__factory,
   CurveGUSDMock__factory,
   CurveMetapoolMock__factory,
   CurveStETHMock__factory,
@@ -70,6 +71,11 @@ export class CurveAddLiquidity extends AbstractScript {
 
     const _3crv = CurveToken__factory.connect(
       await this.progress.getOrThrow("curve", "3Crv"),
+      this.deployer,
+    );
+
+    const crvFRAX = CurveToken__factory.connect(
+      await this.progress.getOrThrow("curve", "crvFRAX"),
       this.deployer,
     );
 
@@ -146,6 +152,32 @@ export class CurveAddLiquidity extends AbstractScript {
       `ETH balance: ${formatBN(await steCRV.balances(0), 18)},
        stETH balance: ${formatBN(await steCRV.balances(1), 18)}`,
     );
+
+    //
+    // Adding liquidity to crvFRAX pool
+    //
+    const crvFRAXPool = CurveFraxUsdcMock__factory.connect(
+      await this.progress.getOrThrow("curve", "CURVE_FRAX_USDC_POOL"),
+      this.deployer,
+    );
+
+    await waitForTransaction(frax.approve(crvFRAXPool.address, MAX_INT));
+    await waitForTransaction(usdc.approve(crvFRAXPool.address, MAX_INT));
+    await waitForTransaction(
+      crvFRAXPool.add_liquidity(
+        [USD_AMOUNT.mul(WAD), USD_AMOUNT.mul(10 ** 6)],
+        0,
+      ),
+    );
+    this.log.info(`
+      FRAX  balance: ${formatBN(await crvFRAXPool.balances(0), 18)},
+      USDC balance: ${formatBN(await crvFRAXPool.balances(1), 6)},
+      
+      Deployer's crvFRAX balance: ${formatBN(
+        await crvFRAX.balanceOf(this.deployer.address),
+        18,
+      )},
+    `);
 
     //
     // Seeding SUSD
