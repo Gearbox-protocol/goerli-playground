@@ -4,7 +4,9 @@ import {
   CurveLPToken,
   CurvePoolContract,
   NormalToken,
+  normalTokens,
   SupportedToken,
+  tokenDataByNetwork,
   YearnLPToken,
 } from "@gearbox-protocol/sdk";
 
@@ -14,6 +16,11 @@ export type CurveProgressKey =
   | "CURVE_STECRV_POOL";
 
 export type DeployedToken = Exclude<NormalToken, "WETH" | "STETH" | "CVX">;
+export const DEPLOYED_TOKENS: DeployedToken[] = (
+  Object.keys(normalTokens) as NormalToken[]
+).filter(
+  (t: NormalToken): t is DeployedToken => !["WETH", "STETH", "CVX"].includes(t),
+);
 
 export type ConvexExtraRewardPool =
   `${ConvexPoolContract}_EXTRA_${DeployedToken}`;

@@ -65,7 +65,9 @@ export class ConvexDeployer extends AbstractScript {
 
     await this.deployPools();
 
-    await this.deployClaimZap();
+    if (await this.progress.isDeployNeeded("convex", "CONVEX_CLAIM_ZAP")) {
+      await this.deployClaimZap();
+    }
   }
 
   private async deployManager(): Promise<void> {
